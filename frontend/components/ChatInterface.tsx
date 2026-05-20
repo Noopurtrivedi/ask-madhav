@@ -36,6 +36,19 @@ export default function ChatInterface() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Listen for prefill events fired by PopularVerses / ChapterBrowser
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const question = (e as CustomEvent<{ question: string }>).detail?.question
+      if (question) {
+        setInput(question)
+        setTimeout(() => inputRef.current?.focus(), 300)
+      }
+    }
+    window.addEventListener('madhav:prefill', handler)
+    return () => window.removeEventListener('madhav:prefill', handler)
+  }, [])
+
   const handleSend = async (question?: string) => {
     const q = (question || input).trim()
     if (!q || loading) return

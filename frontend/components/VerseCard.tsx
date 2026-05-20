@@ -61,14 +61,19 @@ export default function VerseCard({ verse, compact = false }: Props) {
             <p className="text-cream/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end items-center gap-4 mt-3">
-            <SaveVerseButton
-              reference={verse.reference}
-              englishMeaning={verse.english_meaning}
-              themes={verse.themes}
-            />
-            <ShareVerse reference={verse.reference} meaning={verse.english_meaning} compact />
+          {/* Actions + source attribution */}
+          <div className="flex justify-between items-center mt-3">
+            <span className="text-cream/20 text-xs italic">
+              Gita Press, Gorakhpur
+            </span>
+            <div className="flex items-center gap-4">
+              <SaveVerseButton
+                reference={verse.reference}
+                englishMeaning={verse.english_meaning}
+                themes={verse.themes}
+              />
+              <ShareVerse reference={verse.reference} meaning={verse.english_meaning} compact />
+            </div>
           </div>
         </>
       )}
