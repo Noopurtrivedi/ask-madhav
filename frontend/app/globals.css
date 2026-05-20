@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navy: #0A0F2E;
+  --saffron: #E8A620;
+  --gold: #D4A017;
+  --cream: #FFF8E7;
+}
+
+body {
+  background-color: var(--navy);
+  color: var(--cream);
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Crimson Text', serif;
+}
+
+@keyframes lotus-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.lotus-pulse { animation: lotus-pulse 3s ease-in-out infinite; }
+.spin-slow { animation: spin-slow 4s linear infinite; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0A0F2E; }
+::-webkit-scrollbar-thumb { background: #E8A620; border-radius: 3px; }
+
+/* Prose spacing for chat messages */
+.chat-answer p {
+  margin-bottom: 0.5rem;
+}

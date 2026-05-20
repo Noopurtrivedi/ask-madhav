@@ -1,0 +1,102 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { getStories } from '@/lib/api'
+import type { Story } from '@/types'
+
+const STORY_BG = [
+  '#0F0A2E',
+  '#0A1530',
+  '#0A2010',
+  '#2A1000',
+  '#0A2020',
+]
+
+const STORY_ICONS = ['⚔️', '🏹', '👑', '🌺', '🪷']
+
+export default function StoryCards() {
+  const [stories, setStories] = useState<Story[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    getStories()
+      .then((r) => setStories(r.stories))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  return (
+    <section id="stories" className="py-20 px-6" style={{ background: '#111827' }}>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Mahabharata</p>
+          <h2
+            className="text-4xl font-bold text-cream"
+            style={{ fontFamily: 'Crimson Text, serif' }}
+          >
+            Stories from the Great War
+          </h2>
+          <p className="text-cream/50 mt-3 max-w-xl mx-auto text-sm">
+            The Bhagavad Gita arose from this epic moment — a battlefield, a dilemma, and a divine
+            conversation that changed the course of history.
+          </p>
+        </div>
+
+        {loading && (
+          <div className="flex justify-center py-12">
+            <span className="text-4xl lotus-pulse">🪷</span>
+          </div>
+        )}
+
+        {/* Story grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {stories.map((story, i) => (
+            <div
+              key={story.id}
+              className="border border-saffron/20 rounded-2xl p-6 hover:border-saffron/50
+                         transition-all hover:-translate-y-1 cursor-default"
+              style={{ background: STORY_BG[i % STORY_BG.length] }}
+            >
+              {/* Icon */}
+              <div className="text-4xl mb-4 select-none">{STORY_ICONS[i % STORY_ICONS.length]}</div>
+
+              {/* Chapter badge */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="px-2 py-0.5 bg-saffron/20 text-saffron text-xs rounded-full">
+                  Ch. {story.chapter_reference}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h3
+                className="text-cream text-xl font-semibold mb-3 leading-snug"
+                style={{ fontFamily: 'Crimson Text, serif' }}
+              >
+                {story.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-cream/60 text-sm leading-relaxed mb-4">{story.description}</p>
+
+              {/* Lesson */}
+              <div className="border-t border-white/10 pt-4">
+                <p className="text-saffron/60 text-xs uppercase tracking-wider mb-1">Lesson</p>
+                <p className="text-cream/80 text-sm leading-relaxed">{story.moral}</p>
+              </div>
+
+              {/* Characters */}
+              <div className="mt-3 flex flex-wrap gap-x-2 gap-y-1">
+                {story.characters.map((c) => (
+                  <span key={c} className="text-cream/25 text-xs">
+                    #{c}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
