@@ -5,5 +5,10 @@ export const runtime = 'nodejs'
 export const revalidate = 86400
 
 export async function GET() {
-  return NextResponse.json({ stories: STORIES })
+  try {
+    return NextResponse.json({ stories: STORIES })
+  } catch (err) {
+    console.error('stories error', err)
+    return NextResponse.json({ stories: [] })
+  }
 }

@@ -12,12 +12,17 @@ export const maxDuration = 60
  * Bearer token automatically when the env var is set.
  */
 export async function GET(req: NextRequest) {
+  // Require CRON_SECRET so the send endpoint can never be triggered
+  // unguarded (which would let anyone spam subscribers / burn email quota).
   const secret = process.env.CRON_SECRET
-  if (secret) {
-    const auth = req.headers.get('authorization')
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!secret) {
+    return NextResponse.json(
+      { error: 'Daily Ritual requires CRON_SECRET to be configured.' },
+      { status: 503 },
+    )
+  }
+  if (req.headers.get('authorization') !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const supabase = getAdminClient()
