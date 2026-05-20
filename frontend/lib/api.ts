@@ -1,12 +1,23 @@
 import type { AskResponse, DailyVerseResponse, StoriesResponse } from '@/types'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+// The verse engine now runs inside Next.js API routes (same origin), so no
+// external backend URL is needed. NEXT_PUBLIC_API_URL is still honored if set,
+// for anyone who wants to point at a standalone backend.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || ''
 
-export async function askQuestion(question: string): Promise<AskResponse> {
-  const res = await fetch(`${API_URL}/ask`, {
+export interface ChatTurn {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+export async function askQuestion(
+  question: string,
+  history: ChatTurn[] = [],
+): Promise<AskResponse> {
+  const res = await fetch(`${API_BASE}/api/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, history }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
@@ -16,13 +27,13 @@ export async function askQuestion(question: string): Promise<AskResponse> {
 }
 
 export async function getDailyVerse(): Promise<DailyVerseResponse> {
-  const res = await fetch(`${API_URL}/daily-verse`)
+  const res = await fetch(`${API_BASE}/api/daily-verse`)
   if (!res.ok) throw new Error('Failed to fetch daily verse')
   return res.json()
 }
 
 export async function getStories(): Promise<StoriesResponse> {
-  const res = await fetch(`${API_URL}/stories`)
+  const res = await fetch(`${API_BASE}/api/stories`)
   if (!res.ok) throw new Error('Failed to fetch stories')
   return res.json()
 }

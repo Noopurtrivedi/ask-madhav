@@ -3,6 +3,7 @@ import Hero from '@/components/Hero'
 import DailyVerse from '@/components/DailyVerse'
 import ChatInterface from '@/components/ChatInterface'
 import StoryCards from '@/components/StoryCards'
+import SubscribeRitual from '@/components/SubscribeRitual'
 
 const STATS = [
   {
@@ -51,6 +52,7 @@ export default function Home() {
       <DailyVerse />
       <ChatInterface />
       <StoryCards />
+      <SubscribeRitual />
 
       {/* Footer */}
       <footer

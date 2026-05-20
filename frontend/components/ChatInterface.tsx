@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { askQuestion } from '@/lib/api'
+import { askQuestion, type ChatTurn } from '@/lib/api'
 import type { ChatMessage, VerseCard } from '@/types'
 import VerseCardComponent from './VerseCard'
 
@@ -46,18 +46,25 @@ export default function ChatInterface() {
       content: q,
       timestamp: new Date(),
     }
+    // Build conversation history (exclude verse cards/disclaimers — text only)
+    // so Madhav can follow the thread of the conversation.
+    const history: ChatTurn[] = messages
+      .filter((m) => m.content?.trim())
+      .map((m) => ({ role: m.role, content: m.content }))
+
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setLoading(true)
 
     try {
-      const response = await askQuestion(q)
+      const response = await askQuestion(q, history)
       const assistantMsg: ChatMessage = {
         id: generateId(),
         role: 'assistant',
         content: response.answer,
         verses: response.verses,
         disclaimer: response.disclaimer,
+        source: response.source,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMsg])
@@ -68,7 +75,7 @@ export default function ChatInterface() {
           id: generateId(),
           role: 'assistant',
           content:
-            'Madhav is momentarily unavailable. Please ensure the backend server is running at localhost:8000 and try again.',
+            'Madhav is momentarily unavailable. Please check your connection and try again in a moment.',
           timestamp: new Date(),
         },
       ])
@@ -151,6 +158,13 @@ export default function ChatInterface() {
                           </p>
                         ))}
                       </div>
+
+                      {/* Source badge */}
+                      {msg.source === 'ai' && (
+                        <p className="text-saffron/40 text-[10px] tracking-wider uppercase px-1 flex items-center gap-1">
+                          <span className="select-none">✦</span> Guided by Madhav, grounded in the verses below
+                        </p>
+                      )}
 
                       {/* Verse cards */}
                       {msg.verses && msg.verses.length > 0 && (

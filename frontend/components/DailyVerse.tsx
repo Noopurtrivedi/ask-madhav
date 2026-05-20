@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { getDailyVerse } from '@/lib/api'
 import type { Verse } from '@/types'
+import VerseAudio from './VerseAudio'
+import ShareVerse from './ShareVerse'
 
 export default function DailyVerse() {
   const [verse, setVerse] = useState<Verse | null>(null)
@@ -38,7 +40,7 @@ export default function DailyVerse() {
           <div className="border border-saffron/20 rounded-2xl p-8 text-center">
             <span className="text-3xl mb-3 block">🪷</span>
             <p className="text-cream/50 mb-2">Could not load today&apos;s verse.</p>
-            <p className="text-cream/30 text-sm">Please ensure the backend is running at localhost:8000</p>
+            <p className="text-cream/30 text-sm">Please refresh the page in a moment.</p>
           </div>
         )}
 
@@ -68,10 +70,10 @@ export default function DailyVerse() {
               {verse.sanskrit_text}
             </p>
 
-            {/* Transliteration */}
-            <p className="text-cream/40 text-sm italic text-center mb-8">
-              {verse.transliteration}
-            </p>
+            {/* Transliteration — recite & meditate */}
+            <div className="flex flex-col items-center gap-3 mb-8">
+              <VerseAudio text={verse.transliteration} meditation />
+            </div>
 
             {/* Meanings grid */}
             <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -91,6 +93,11 @@ export default function DailyVerse() {
             <div className="border-t border-saffron/10 pt-6">
               <p className="text-saffron/60 text-xs tracking-wider uppercase mb-2">Practical Step</p>
               <p className="text-cream/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+            </div>
+
+            {/* Share */}
+            <div className="flex justify-center mt-6">
+              <ShareVerse reference={verse.reference} meaning={verse.english_meaning} />
             </div>
           </div>
         )}

@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "title": "Arjuna's Crisis on the Battlefield",
+    "description": "Standing between two armies on the field of Kurukshetra, Arjuna saw his teachers, uncles, cousins, and beloved friends arrayed as enemies. His bow slipped from his hands, his body trembled, and he collapsed in his chariot — overwhelmed by grief, unable to fight. It was in this moment of total collapse that Krishna began the Bhagavad Gita.",
+    "characters": ["Arjuna", "Krishna", "Dronacharya", "Bhishma", "Duryodhana"],
+    "moral": "Even the greatest warriors face moments of complete doubt and collapse. The Gita teaches us that it is precisely in our darkest moments that divine wisdom becomes available to us. Seek guidance rather than give up.",
+    "chapter_reference": 1,
+    "image_placeholder": "battlefield"
+  },
+  {
+    "id": 2,
+    "title": "Draupadi's Humiliation and the Call for Justice",
+    "description": "After the Pandavas lost everything in a rigged game of dice, Duryodhana ordered Draupadi — their queen and wife — to be dragged into the royal court and dishonored. When she called out to Krishna in complete surrender, divine protection arrived. This event set the Mahabharata's great war in motion and stands as one of history's most powerful lessons in both injustice and divine protection.",
+    "characters": ["Draupadi", "Krishna", "Duryodhana", "Duhshasana", "Yudhishthira", "Bhima"],
+    "moral": "When human systems fail and injustice prevails, sincere surrender to the divine never goes unheard. Draupadi's complete letting go — 'I cannot protect myself, only You can' — invites a force beyond human calculation.",
+    "chapter_reference": 2,
+    "image_placeholder": "court"
+  },
+  {
+    "id": 3,
+    "title": "Karna's Loyalty and the Tragedy of Birth",
+    "description": "Karna was the greatest archer of his era — arguably superior even to Arjuna — yet he was dismissed as a charioteer's son and denied his rightful place. Befriended by Duryodhana when no one else would accept him, Karna chose loyalty over righteousness and fought on the wrong side. He knew the truth of his birth but kept his promises to the end.",
+    "characters": ["Karna", "Duryodhana", "Kunti", "Arjuna", "Krishna", "Indra"],
+    "moral": "Karna's life asks us: what do we do when loyalty and righteousness conflict? And when circumstances of birth or social injustice deny us our true potential, do we let bitterness define us, or do we choose dignity? Your circumstances do not define your character — your choices do.",
+    "chapter_reference": 8,
+    "image_placeholder": "chariot"
+  },
+  {
+    "id": 4,
+    "title": "Bhishma's Vow and the Prison of Promises",
+    "description": "Devavrata — later called Bhishma, the Terrible — made a vow of lifelong celibacy and renunciation of the throne to secure his father's happiness in marriage. He honored this promise his entire life, even as it meant watching injustice unfold around him, including the humiliation of Draupadi. Bhishma lay on a bed of arrows for 58 days after the battle, waiting for the auspicious moment to die.",
+    "characters": ["Bhishma", "Satyavati", "Shantanu", "Yudhishthira", "Krishna"],
+    "moral": "Bhishma's tragedy shows us that even noble vows, held too rigidly, can become cages that trap us and those we love. True dharma sometimes requires the courage to adapt, not merely the strength to endure. Promises made with love can sometimes serve love better when reconsidered.",
+    "chapter_reference": 6,
+    "image_placeholder": "arrows"
+  },
+  {
+    "id": 5,
+    "title": "Krishna as Charioteer — Wisdom in Service",
+    "description": "Krishna — the divine avatar, the supreme Lord, the one before whom the universe bows — chose to serve Arjuna as a charioteer and advisor rather than as a warrior king. When offered the choice of Krishna alone versus Krishna's entire army, Arjuna chose Krishna. In this simple act of service, the supreme divine became the guide, the companion, and the voice of truth for one lost soul.",
+    "characters": ["Krishna", "Arjuna", "Duryodhana"],
+    "moral": "True greatness expresses itself through service, not power. Krishna, who could have won the war alone, chose to be a guide. In your own life, the most powerful thing you can offer is not your strength or resources — it is your wisdom, your presence, and your willingness to truly serve another person.",
+    "chapter_reference": 11,
+    "image_placeholder": "charioteer"
+  }
+]

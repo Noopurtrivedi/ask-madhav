@@ -31,13 +31,17 @@ export interface VerseCard {
   hindi_meaning: string
   english_meaning: string
   practical_guidance: string
+  themes?: string[]
 }
+
+export type AnswerSource = 'ai' | 'template'
 
 export interface AskResponse {
   question: string
   answer: string
   verses: VerseCard[]
   disclaimer: string
+  source?: AnswerSource
 }
 
 export type MessageRole = 'user' | 'assistant'
@@ -48,6 +52,7 @@ export interface ChatMessage {
   content: string
   verses?: VerseCard[]
   disclaimer?: string
+  source?: AnswerSource
   timestamp: Date
 }
 

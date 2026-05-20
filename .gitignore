@@ -24,6 +24,8 @@ backend/media/
 
 # Node / Next.js
 node_modules/
+frontend/next-env.d.ts
+*.tsbuildinfo
 frontend/.next/
 frontend/out/
 frontend/.vercel/

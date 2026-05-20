@@ -21,14 +21,15 @@ export default function Navbar() {
 
         {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-8 text-cream/70 text-sm">
-          <a href="#daily-verse" className="hover:text-saffron transition-colors">Daily Verse</a>
-          <a href="#chat" className="hover:text-saffron transition-colors">Ask a Question</a>
-          <a href="#stories" className="hover:text-saffron transition-colors">Stories</a>
+          <a href="/#daily-verse" className="hover:text-saffron transition-colors">Daily Verse</a>
+          <a href="/#chat" className="hover:text-saffron transition-colors">Ask a Question</a>
+          <a href="/#stories" className="hover:text-saffron transition-colors">Stories</a>
+          <a href="/journal" className="hover:text-saffron transition-colors">Journal</a>
         </div>
 
         {/* CTA */}
         <a
-          href="#chat"
+          href="/#chat"
           className="hidden md:inline-block px-4 py-2 bg-saffron text-navy text-sm font-medium rounded-full hover:bg-saffron-light transition-colors"
         >
           Ask Now
@@ -53,10 +54,11 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-saffron/10 bg-navy-dark/95 px-6 py-4 flex flex-col gap-4 text-sm text-cream/70">
-          <a href="#daily-verse" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Daily Verse</a>
-          <a href="#chat" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Ask a Question</a>
-          <a href="#stories" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Stories</a>
-          <a href="#chat" onClick={() => setMenuOpen(false)} className="px-4 py-2 bg-saffron text-navy font-medium rounded-full text-center hover:bg-saffron-light transition-colors">Ask Now</a>
+          <a href="/#daily-verse" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Daily Verse</a>
+          <a href="/#chat" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Ask a Question</a>
+          <a href="/#stories" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Stories</a>
+          <a href="/journal" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Journal</a>
+          <a href="/#chat" onClick={() => setMenuOpen(false)} className="px-4 py-2 bg-saffron text-navy font-medium rounded-full text-center hover:bg-saffron-light transition-colors">Ask Now</a>
         </div>
       )}
     </nav>

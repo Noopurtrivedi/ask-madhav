@@ -1,4 +1,7 @@
 import type { VerseCard as VerseCardType } from '@/types'
+import VerseAudio from './VerseAudio'
+import ShareVerse from './ShareVerse'
+import SaveVerseButton from './SaveVerseButton'
 
 interface Props {
   verse: VerseCardType
@@ -25,8 +28,10 @@ export default function VerseCard({ verse, compact = false }: Props) {
         {verse.sanskrit}
       </p>
 
-      {/* Transliteration */}
-      <p className="text-cream/40 text-sm italic mb-4">{verse.transliteration}</p>
+      {/* Transliteration — recitable with live word highlighting */}
+      <div className="mb-4">
+        <VerseAudio text={verse.transliteration} />
+      </div>
 
       {!compact && (
         <>
@@ -54,6 +59,16 @@ export default function VerseCard({ verse, compact = false }: Props) {
               Practical Step
             </p>
             <p className="text-cream/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end items-center gap-4 mt-3">
+            <SaveVerseButton
+              reference={verse.reference}
+              englishMeaning={verse.english_meaning}
+              themes={verse.themes}
+            />
+            <ShareVerse reference={verse.reference} meaning={verse.english_meaning} compact />
           </div>
         </>
       )}
