@@ -143,7 +143,7 @@ export default function PopularVerses() {
 
               {/* Snippet */}
               <p className="text-cream/60 text-sm leading-relaxed line-clamp-3">
-                "{v.snippet}"
+                &ldquo;{v.snippet}&rdquo;
               </p>
 
               {/* CTA */}

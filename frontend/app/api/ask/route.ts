@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { scoreVerses, buildTemplateAnswer, disclaimer } from '@/lib/verseEngine'
 import { generateGuidance, type ChatTurn } from '@/lib/gemini'
+import { checkRateLimit } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
 
@@ -21,6 +22,15 @@ export async function POST(req: NextRequest) {
     let question = typeof body.question === 'string' ? body.question.trim() : ''
     if (question.length < 3) {
       return NextResponse.json({ detail: 'Please ask a meaningful question.' }, { status: 400 })
+    }
+
+    // Throttle per client IP before doing any expensive (LLM) work.
+    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'anon'
+    if (!(await checkRateLimit(ip))) {
+      return NextResponse.json(
+        { detail: 'You are asking very quickly. Please pause a moment, then try again.' },
+        { status: 429 },
+      )
     }
     if (question.length > MAX_QUESTION) question = question.slice(0, MAX_QUESTION)
 
