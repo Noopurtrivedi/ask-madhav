@@ -3,7 +3,7 @@ builder = "NIXPACKS"
 buildCommand = "pip install -r requirements.txt"
 
 [deploy]
-startCommand = "python manage.py migrate --noinput && python manage.py seed_data && python manage.py collectstatic --noinput && gunicorn askmadhav.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+startCommand = "mkdir -p data && curl -sL -o data/verses.json https://raw.githubusercontent.com/Noopurtrivedi/ask-madhav/main/data/verses.json && curl -sL -o data/stories.json https://raw.githubusercontent.com/Noopurtrivedi/ask-madhav/main/data/stories.json && python manage.py migrate --noinput && python manage.py seed_data && python manage.py collectstatic --noinput && gunicorn askmadhav.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
