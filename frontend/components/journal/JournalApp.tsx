@@ -101,7 +101,7 @@ export default function JournalApp() {
   if (!configured) {
     return (
       <Shell>
-        <p className="text-cream/60 text-center">
+        <p className="text-ink/60 text-center">
           The Sankalpa Journal is coming soon. (It activates once Supabase is configured.)
         </p>
         <div className="text-center mt-4">
@@ -123,10 +123,10 @@ export default function JournalApp() {
   if (!user) {
     return (
       <Shell>
-        <h1 className="text-3xl font-bold text-cream text-center mb-2" style={{ fontFamily: 'Crimson Text, serif' }}>
+        <h1 className="text-3xl font-bold text-ink text-center mb-2" style={{ fontFamily: 'Crimson Text, serif' }}>
           Your Sankalpa Journal
         </h1>
-        <p className="text-cream/50 text-sm text-center mb-8 max-w-md mx-auto">
+        <p className="text-ink/50 text-sm text-center mb-8 max-w-md mx-auto">
           Save verses, set a daily intention, and watch your reflection streak grow. Sign in with a
           magic link — no password.
         </p>
@@ -140,7 +140,7 @@ export default function JournalApp() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="flex-1 bg-white/5 border border-saffron/20 rounded-xl px-4 py-3 text-cream placeholder:text-cream/30 focus:outline-none focus:border-saffron/60 text-sm"
+              className="flex-1 bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink placeholder:text-ink/30 focus:outline-none focus:border-saffron/60 text-sm"
             />
             <button type="submit" className="px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm">
               Send magic link
@@ -162,14 +162,14 @@ export default function JournalApp() {
     <Shell wide>
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-cream" style={{ fontFamily: 'Crimson Text, serif' }}>
+          <h1 className="text-3xl font-bold text-ink" style={{ fontFamily: 'Crimson Text, serif' }}>
             Namaste 🙏
           </h1>
-          <p className="text-cream/40 text-sm">{user.email}</p>
+          <p className="text-ink/40 text-sm">{user.email}</p>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/" className="text-saffron/70 hover:text-saffron text-sm">← Home</Link>
-          <button onClick={signOut} className="text-cream/40 hover:text-cream/70 text-sm">Sign out</button>
+          <button onClick={signOut} className="text-ink/40 hover:text-ink/70 text-sm">Sign out</button>
         </div>
       </div>
 
@@ -181,7 +181,7 @@ export default function JournalApp() {
       </div>
 
       {insights.length > 0 && (
-        <p className="text-cream/60 text-sm mb-10 border border-saffron/15 rounded-xl p-4 bg-white/[0.02]">
+        <p className="text-ink/60 text-sm mb-10 border border-saffron/15 rounded-xl p-4 bg-saffron/[0.04]">
           ✦ You keep returning to <span className="text-saffron capitalize">{insights[0].theme}</span>
           {insights[1] && <> and <span className="text-saffron capitalize">{insights[1].theme}</span></>}.
           The Gita has much more to say here — ask Madhav about it on the{' '}
@@ -190,11 +190,11 @@ export default function JournalApp() {
       )}
 
       {/* Today's Sankalpa */}
-      <section className="border border-saffron/20 rounded-2xl p-6 mb-10" style={{ background: '#0D1225' }}>
-        <h2 className="text-xl font-semibold text-cream mb-1" style={{ fontFamily: 'Crimson Text, serif' }}>
+      <section className="border border-saffron/20 rounded-2xl p-6 mb-10" style={{ background: '#FFFFFF' }}>
+        <h2 className="text-xl font-semibold text-ink mb-1" style={{ fontFamily: 'Crimson Text, serif' }}>
           Today&apos;s Sankalpa
         </h2>
-        <p className="text-cream/40 text-xs mb-5">A sankalpa is a heartfelt intention. Set one for today.</p>
+        <p className="text-ink/40 text-xs mb-5">A sankalpa is a heartfelt intention. Set one for today.</p>
 
         <p className="text-saffron/60 text-xs uppercase tracking-wider mb-2">How is your heart?</p>
         <div className="flex flex-wrap gap-2 mb-5">
@@ -203,7 +203,7 @@ export default function JournalApp() {
               key={m}
               onClick={() => setMood(m)}
               className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
-                mood === m ? 'border-saffron/60 text-saffron bg-saffron/10' : 'border-saffron/20 text-cream/50 hover:border-saffron/40'
+                mood === m ? 'border-saffron/60 text-saffron bg-saffron/10' : 'border-saffron/20 text-ink/50 hover:border-saffron/40'
               }`}
             >
               {m}
@@ -215,14 +215,14 @@ export default function JournalApp() {
           value={intention}
           onChange={(e) => setIntention(e.target.value)}
           placeholder="My intention for today is…"
-          className="w-full bg-white/5 border border-saffron/20 rounded-xl px-4 py-3 text-cream placeholder:text-cream/30 focus:outline-none focus:border-saffron/60 text-sm mb-3"
+          className="w-full bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink placeholder:text-ink/30 focus:outline-none focus:border-saffron/60 text-sm mb-3"
         />
         <textarea
           value={reflection}
           onChange={(e) => setReflection(e.target.value)}
           placeholder="A short reflection… (optional)"
           rows={3}
-          className="w-full bg-white/5 border border-saffron/20 rounded-xl px-4 py-3 text-cream placeholder:text-cream/30 focus:outline-none focus:border-saffron/60 text-sm mb-4 resize-none"
+          className="w-full bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink placeholder:text-ink/30 focus:outline-none focus:border-saffron/60 text-sm mb-4 resize-none"
         />
         <div className="flex items-center gap-3">
           <button onClick={saveEntry} className="px-6 py-2.5 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm">
@@ -234,24 +234,24 @@ export default function JournalApp() {
 
       {/* Saved verses */}
       <section>
-        <h2 className="text-xl font-semibold text-cream mb-4" style={{ fontFamily: 'Crimson Text, serif' }}>
+        <h2 className="text-xl font-semibold text-ink mb-4" style={{ fontFamily: 'Crimson Text, serif' }}>
           Saved Verses
         </h2>
         {saved.length === 0 ? (
-          <p className="text-cream/40 text-sm">
+          <p className="text-ink/40 text-sm">
             No saved verses yet. Tap the bookmark on any verse to keep it here.
           </p>
         ) : (
           <div className="space-y-3">
             {saved.map((v) => (
-              <div key={v.id} className="border border-saffron/15 rounded-xl p-4 flex items-start justify-between gap-4" style={{ background: '#0D1225' }}>
+              <div key={v.id} className="border border-saffron/15 rounded-xl p-4 flex items-start justify-between gap-4" style={{ background: '#FFFFFF' }}>
                 <div>
                   <Link href={`/verse/${v.reference}`} className="text-saffron text-sm font-medium hover:underline">
                     Bhagavad Gita {v.reference}
                   </Link>
-                  <p className="text-cream/70 text-sm mt-1 leading-relaxed">{v.english_meaning}</p>
+                  <p className="text-ink/70 text-sm mt-1 leading-relaxed">{v.english_meaning}</p>
                 </div>
-                <button onClick={() => unsave(v.reference)} aria-label="Remove" className="text-cream/30 hover:text-saffron text-xs flex-shrink-0">
+                <button onClick={() => unsave(v.reference)} aria-label="Remove" className="text-ink/30 hover:text-saffron text-xs flex-shrink-0">
                   Remove
                 </button>
               </div>
@@ -265,7 +265,7 @@ export default function JournalApp() {
 
 function Shell({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
   return (
-    <main className="min-h-screen px-6 py-24" style={{ background: '#0A0F2E' }}>
+    <main className="min-h-screen px-6 py-24" style={{ background: '#FFFCF5' }}>
       <div className={wide ? 'max-w-3xl mx-auto' : 'max-w-xl mx-auto'}>{children}</div>
     </main>
   )
@@ -273,9 +273,9 @@ function Shell({ children, wide = false }: { children: React.ReactNode; wide?: b
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border border-saffron/15 rounded-xl p-5 text-center" style={{ background: '#0D1225' }}>
+    <div className="border border-saffron/15 rounded-xl p-5 text-center" style={{ background: '#FFFFFF' }}>
       <p className="text-3xl font-bold text-saffron" style={{ fontFamily: 'Crimson Text, serif' }}>{value}</p>
-      <p className="text-cream/50 text-xs mt-1">{label}</p>
+      <p className="text-ink/50 text-xs mt-1">{label}</p>
     </div>
   )
 }

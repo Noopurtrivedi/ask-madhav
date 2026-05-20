@@ -88,7 +88,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
 
   if (!supported) {
     // Graceful: just show the transliteration with no controls.
-    return <p className="text-cream/40 text-sm italic">{text}</p>
+    return <p className="text-ink/40 text-sm italic">{text}</p>
   }
 
   return (
@@ -118,7 +118,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
               className={
                 i === wordIndex
                   ? 'text-saffron font-medium transition-colors'
-                  : 'text-cream/40 transition-colors'
+                  : 'text-ink/40 transition-colors'
               }
             >
               {w}{' '}
@@ -133,7 +133,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
           className={`text-xs px-3 py-1 rounded-full border transition-colors ${
             loop
               ? 'border-saffron/60 text-saffron bg-saffron/10'
-              : 'border-saffron/20 text-cream/50 hover:border-saffron/40'
+              : 'border-saffron/20 text-ink/50 hover:border-saffron/40'
           }`}
         >
           🧘 {loop ? 'Meditation on · tap to stop' : 'Meditation mode'}

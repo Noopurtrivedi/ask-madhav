@@ -48,7 +48,7 @@ export default function ShareVerse({ reference, meaning, compact = false }: Prop
         onClick={handleShare}
         aria-label="Share this verse"
         title={copied ? 'Link copied' : 'Share this verse'}
-        className="text-cream/40 hover:text-saffron transition-colors text-xs flex items-center gap-1"
+        className="text-ink/40 hover:text-saffron transition-colors text-xs flex items-center gap-1"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
@@ -71,7 +71,7 @@ export default function ShareVerse({ reference, meaning, compact = false }: Prop
         href={cardUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="px-4 py-2 border border-saffron/30 text-cream/70 text-sm rounded-full hover:border-saffron/60 transition-colors"
+        className="px-4 py-2 border border-saffron/30 text-ink/70 text-sm rounded-full hover:border-saffron/60 transition-colors"
       >
         Wisdom card ↗
       </a>

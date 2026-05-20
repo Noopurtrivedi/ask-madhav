@@ -95,7 +95,7 @@ function scrollToChat(question: string) {
 
 export default function PopularVerses() {
   return (
-    <section className="py-20 px-6" style={{ background: '#0A0F2E' }}>
+    <section className="py-20 px-6" style={{ background: '#FFFCF5' }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -103,12 +103,12 @@ export default function PopularVerses() {
             Timeless Wisdom
           </p>
           <h2
-            className="text-3xl md:text-4xl text-cream mb-3"
+            className="text-3xl md:text-4xl text-ink mb-3"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             Popular Verses
           </h2>
-          <p className="text-cream/50 text-sm max-w-md mx-auto">
+          <p className="text-ink/50 text-sm max-w-md mx-auto">
             The shlokas people return to again and again — in moments of doubt, grief, and searching.
           </p>
         </div>
@@ -122,7 +122,7 @@ export default function PopularVerses() {
                 scrollToChat(`Tell me about Bhagavad Gita ${v.reference} — ${v.label}`)
               }
               className="group text-left border border-saffron/15 rounded-xl p-5
-                         bg-white/[0.02] hover:bg-white/[0.05] hover:border-saffron/40
+                         bg-saffron/[0.04] hover:bg-white/[0.05] hover:border-saffron/40
                          transition-all duration-200"
             >
               {/* Badges */}
@@ -130,19 +130,19 @@ export default function PopularVerses() {
                 <span className="px-2 py-0.5 bg-saffron/20 text-saffron text-xs font-medium rounded-full">
                   {v.reference}
                 </span>
-                <span className="text-cream/30 text-xs">{v.yoga}</span>
+                <span className="text-ink/30 text-xs">{v.yoga}</span>
               </div>
 
               {/* Label */}
               <p
-                className="text-cream text-base font-semibold mb-2 group-hover:text-saffron transition-colors"
+                className="text-ink text-base font-semibold mb-2 group-hover:text-saffron transition-colors"
                 style={{ fontFamily: 'Crimson Text, serif' }}
               >
                 {v.label}
               </p>
 
               {/* Snippet */}
-              <p className="text-cream/60 text-sm leading-relaxed line-clamp-3">
+              <p className="text-ink/60 text-sm leading-relaxed line-clamp-3">
                 &ldquo;{v.snippet}&rdquo;
               </p>
 

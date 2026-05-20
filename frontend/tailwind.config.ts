@@ -24,8 +24,13 @@ const config: Config = {
           light: '#E8B830',
         },
         cream: {
-          DEFAULT: '#FFF8E7',
-          muted: '#F5E6C8',
+          DEFAULT: '#FFFCF5',
+          muted: '#FBF4E6',
+        },
+        // Warm dark text for the light theme
+        ink: {
+          DEFAULT: '#3A2A18',
+          light: '#6B5840',
         },
       },
       fontFamily: {

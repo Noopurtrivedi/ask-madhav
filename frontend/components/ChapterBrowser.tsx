@@ -29,7 +29,7 @@ function scrollToChat(question: string) {
 
 export default function ChapterBrowser() {
   return (
-    <section className="py-20 px-6" style={{ background: '#050A1E' }}>
+    <section className="py-20 px-6" style={{ background: '#F3E7CD' }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -37,12 +37,12 @@ export default function ChapterBrowser() {
             18 Chapters · 700 Verses
           </p>
           <h2
-            className="text-3xl md:text-4xl text-cream mb-3"
+            className="text-3xl md:text-4xl text-ink mb-3"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             The Yogas of the Bhagavad Gita
           </h2>
-          <p className="text-cream/50 text-sm max-w-md mx-auto">
+          <p className="text-ink/50 text-sm max-w-md mx-auto">
             Each chapter is a complete yoga — a path. Click any chapter to ask Madhav about it.
           </p>
         </div>
@@ -70,19 +70,19 @@ export default function ChapterBrowser() {
                 >
                   {ch.n}
                 </span>
-                <span className="text-cream/25 text-xs mt-1">{ch.verses} verses</span>
+                <span className="text-ink/25 text-xs mt-1">{ch.verses} verses</span>
               </div>
 
               {/* Yoga name */}
               <p
-                className="text-cream/90 text-sm font-semibold mb-0.5 group-hover:text-saffron transition-colors leading-snug"
+                className="text-ink/90 text-sm font-semibold mb-0.5 group-hover:text-saffron transition-colors leading-snug"
                 style={{ fontFamily: 'Crimson Text, serif' }}
               >
                 {ch.yoga}
               </p>
 
               {/* Short description */}
-              <p className="text-cream/40 text-xs">{ch.short}</p>
+              <p className="text-ink/40 text-xs">{ch.short}</p>
             </button>
           ))}
         </div>
