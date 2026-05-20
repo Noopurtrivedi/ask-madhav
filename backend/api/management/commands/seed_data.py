@@ -13,7 +13,7 @@ from django.conf import settings
 from api.models import Chapter, Verse, Story
 
 CHAPTERS = [
-    (1,  'अर्जुनविषादयोग',         'अर्जुन विषाद योग',       'Arjuna Vishada Yoga',          'Arjuna's grief and moral crisis on the Kurukshetra battlefield.',       47),
+    (1,  'अर्जुनविषादयोग',         'अर्जुन विषाद योग',       'Arjuna Vishada Yoga',          "Arjuna's grief and moral crisis on the Kurukshetra battlefield.",       47),
     (2,  'साङ्ख्ययोग',              'सांख्य योग',              'Sankhya Yoga',                 'Krishna teaches the immortality of the soul and the path of knowledge.',  72),
     (3,  'कर्मयोग',                 'कर्म योग',                'Karma Yoga',                   'The path of selfless action without attachment to results.',               43),
     (4,  'ज्ञानकर्मसन्न्यासयोग',   'ज्ञान-कर्म-संन्यास योग', 'Jnana Karma Sanyasa Yoga',     'The synthesis of knowledge, action, and renunciation.',                   42),
