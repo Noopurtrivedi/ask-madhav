@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { askQuestion } from '@/lib/api'
+import { askQuestion, type ChatTurn } from '@/lib/api'
 import type { ChatMessage, VerseCard } from '@/types'
 import VerseCardComponent from './VerseCard'
 
@@ -31,10 +31,29 @@ export default function ChatInterface() {
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const didMount = useRef(false)
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Skip the initial mount so the homepage opens on the hero, not the chat.
+    if (!didMount.current) {
+      didMount.current = true
+      return
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [messages])
+
+  // Listen for prefill events fired by PopularVerses / ChapterBrowser
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const question = (e as CustomEvent<{ question: string }>).detail?.question
+      if (question) {
+        setInput(question)
+        setTimeout(() => inputRef.current?.focus(), 300)
+      }
+    }
+    window.addEventListener('madhav:prefill', handler)
+    return () => window.removeEventListener('madhav:prefill', handler)
+  }, [])
 
   const handleSend = async (question?: string) => {
     const q = (question || input).trim()
@@ -46,18 +65,25 @@ export default function ChatInterface() {
       content: q,
       timestamp: new Date(),
     }
+    // Build conversation history (exclude verse cards/disclaimers — text only)
+    // so Madhav can follow the thread of the conversation.
+    const history: ChatTurn[] = messages
+      .filter((m) => m.content?.trim())
+      .map((m) => ({ role: m.role, content: m.content }))
+
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setLoading(true)
 
     try {
-      const response = await askQuestion(q)
+      const response = await askQuestion(q, history)
       const assistantMsg: ChatMessage = {
         id: generateId(),
         role: 'assistant',
         content: response.answer,
         verses: response.verses,
         disclaimer: response.disclaimer,
+        source: response.source,
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMsg])
@@ -68,7 +94,7 @@ export default function ChatInterface() {
           id: generateId(),
           role: 'assistant',
           content:
-            'Madhav is momentarily unavailable. Please ensure the backend server is running at localhost:8000 and try again.',
+            'Madhav is momentarily unavailable. Please check your connection and try again in a moment.',
           timestamp: new Date(),
         },
       ])
@@ -86,18 +112,18 @@ export default function ChatInterface() {
   }
 
   return (
-    <section id="chat" className="py-20 px-6" style={{ background: '#0A0F2E' }}>
+    <section id="chat" className="py-20 px-6" style={{ background: '#FFFCF5' }}>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
           <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Gita Guidance</p>
           <h2
-            className="text-4xl font-bold text-cream"
+            className="text-4xl font-bold text-ink"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             Ask Your Question
           </h2>
-          <p className="text-cream/50 mt-3 text-sm">
+          <p className="text-ink/50 mt-3 text-sm">
             Every answer is grounded in a real verse from the Bhagavad Gita
           </p>
         </div>
@@ -109,8 +135,8 @@ export default function ChatInterface() {
               key={q}
               onClick={() => handleSend(q)}
               disabled={loading}
-              className="px-3 py-1.5 border border-saffron/20 text-cream/60 text-xs rounded-full
-                         hover:border-saffron/50 hover:text-cream/90 transition-all disabled:opacity-40"
+              className="px-3 py-1.5 border border-saffron/20 text-ink/60 text-xs rounded-full
+                         hover:border-saffron/50 hover:text-ink/90 transition-all disabled:opacity-40"
             >
               {q}
             </button>
@@ -120,7 +146,7 @@ export default function ChatInterface() {
         {/* Chat window */}
         <div
           className="border border-saffron/20 rounded-2xl overflow-hidden"
-          style={{ background: '#0D1225' }}
+          style={{ background: '#FFFFFF' }}
         >
           {/* Messages area */}
           <div className="h-[520px] overflow-y-auto p-6 space-y-6">
@@ -144,13 +170,20 @@ export default function ChatInterface() {
                   ) : (
                     <>
                       {/* Answer text — preserve newlines */}
-                      <div className="bg-white/5 rounded-2xl rounded-tl-sm px-4 py-3 text-cream/90 text-sm leading-relaxed">
+                      <div className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3 text-ink/90 text-sm leading-relaxed">
                         {msg.content.split('\n\n').map((para, i) => (
                           <p key={i} className={i > 0 ? 'mt-3' : ''}>
                             {para}
                           </p>
                         ))}
                       </div>
+
+                      {/* Source badge */}
+                      {msg.source === 'ai' && (
+                        <p className="text-saffron/40 text-[10px] tracking-wider uppercase px-1 flex items-center gap-1">
+                          <span className="select-none">✦</span> Guided by Madhav, grounded in the verses below
+                        </p>
+                      )}
 
                       {/* Verse cards */}
                       {msg.verses && msg.verses.length > 0 && (
@@ -163,7 +196,7 @@ export default function ChatInterface() {
 
                       {/* Disclaimer */}
                       {msg.disclaimer && (
-                        <p className="text-cream/25 text-xs px-1 leading-relaxed">
+                        <p className="text-ink/25 text-xs px-1 leading-relaxed">
                           {msg.disclaimer}
                         </p>
                       )}
@@ -179,7 +212,7 @@ export default function ChatInterface() {
                 <div className="w-8 h-8 rounded-full bg-saffron/20 flex items-center justify-center mr-3 flex-shrink-0">
                   <span className="text-sm lotus-pulse select-none">🪷</span>
                 </div>
-                <div className="bg-white/5 rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3">
                   <div className="flex gap-1.5 items-center h-5">
                     <span
                       className="w-2 h-2 rounded-full bg-saffron/50 animate-bounce"
@@ -212,8 +245,8 @@ export default function ChatInterface() {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a life question..."
                 disabled={loading}
-                className="flex-1 bg-white/5 border border-saffron/20 rounded-xl px-4 py-3 text-cream
-                           placeholder:text-cream/30 focus:outline-none focus:border-saffron/60
+                className="flex-1 bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink
+                           placeholder:text-ink/30 focus:outline-none focus:border-saffron/60
                            transition-colors disabled:opacity-50 text-sm"
               />
               <button
@@ -226,7 +259,7 @@ export default function ChatInterface() {
                 Ask
               </button>
             </div>
-            <p className="text-cream/20 text-xs mt-2 text-center">
+            <p className="text-ink/20 text-xs mt-2 text-center">
               Press Enter to send
             </p>
           </div>

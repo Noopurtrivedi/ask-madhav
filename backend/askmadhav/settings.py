@@ -97,4 +97,4 @@ REST_FRAMEWORK = {
 }
 
 # Data directory (for seed JSON files)
-DATA_DIR = BASE_DIR.parent / 'data'
+DATA_DIR = BASE_DIR / 'data'
