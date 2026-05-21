@@ -1,7 +1,12 @@
 import { ImageResponse } from 'next/og'
 import verses from '@/data/verses.json'
 
-export const runtime = 'edge'
+// Node runtime (not edge): this route statically imports the full 701-verse
+// dataset (~2 MB), which exceeds the Hobby plan's 1 MB Edge Function limit.
+// next/og's ImageResponse runs fine on Node, where the size limit is 250 MB.
+export const runtime = 'nodejs'
+// Always rendered on demand (reads ?ref from the request URL); skip static prerender.
+export const dynamic = 'force-dynamic'
 
 interface OgVerse {
   reference: string
