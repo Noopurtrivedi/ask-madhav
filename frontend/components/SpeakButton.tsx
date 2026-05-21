@@ -23,6 +23,24 @@ function bcp47(language: AnswerLanguage = 'english'): string {
   return language === 'hindi' ? 'hi-IN' : 'en-IN'
 }
 
+// Known male voice names across platforms, so Madhav sounds male and calm.
+// (Female voices like "Google हिन्दी" / "Samantha" are the common defaults.)
+const MALE_HINTS = [
+  'hemant', 'madhur', 'ravi', 'rishi', 'arjun', 'prabhat', // Hindi / Indian male
+  'google uk english male', 'daniel', 'aaron', 'fred', 'male',
+]
+
+function pickVoice(voices: SpeechSynthesisVoice[], lang: string): SpeechSynthesisVoice | null {
+  const two = lang.slice(0, 2)
+  const inLang = voices.filter((v) => v.lang === lang || v.lang?.toLowerCase().startsWith(two))
+  const pool = inLang.length ? inLang : voices
+  const male = pool.find((v) => {
+    const n = v.name.toLowerCase()
+    return MALE_HINTS.some((h) => n.includes(h)) && !n.includes('female')
+  })
+  return male || pool[0] || null
+}
+
 export default function SpeakButton({ text, language = 'english', autoPlay = false }: Props) {
   const [supported, setSupported] = useState(true)
   const [playing, setPlaying] = useState(false)
@@ -51,16 +69,20 @@ export default function SpeakButton({ text, language = 'english', autoPlay = fal
     const lang = bcp47(language)
     const u = new SpeechSynthesisUtterance(text)
     u.lang = lang
-    u.rate = 0.92
-    u.pitch = 1
-    const match =
-      voicesRef.current.find((v) => v.lang === lang) ||
-      voicesRef.current.find((v) => v.lang?.toLowerCase().startsWith(lang.slice(0, 2)))
+    u.rate = 0.8 // slow, calm, unhurried
+    u.pitch = 0.9 // slightly lower → warmer, more male
+    const match = pickVoice(voicesRef.current, lang)
     if (match) u.voice = match
     u.onend = () => setPlaying(false)
     u.onerror = () => setPlaying(false)
     window.speechSynthesis.speak(u)
     setPlaying(true)
+
+    // Chrome silently pauses long utterances after ~15s — nudge it to continue.
+    const keepAlive = setInterval(() => {
+      if (window.speechSynthesis.speaking) window.speechSynthesis.resume()
+      else clearInterval(keepAlive)
+    }, 12000)
   }
 
   const toggle = () => {

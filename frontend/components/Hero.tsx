@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import HeroVerse from './HeroVerse'
-import { SunRays, PeacockFeather, FloatingPetals } from './SacredArt'
+import { SunRays, FloatingPetals } from './SacredArt'
 
 export default function Hero() {
   const scrollToChat = () => {
@@ -26,10 +26,6 @@ export default function Hero() {
       {/* Radiant sun behind everything */}
       <SunRays className="absolute top-[22%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[680px] opacity-50 pointer-events-none spin-slow" />
 
-      {/* Peacock feathers framing the hero (hidden on small screens) */}
-      <PeacockFeather className="hidden lg:block absolute left-[5%] top-1/2 -translate-y-1/2 w-24 h-64 opacity-70 float-y" />
-      <PeacockFeather className="hidden lg:block absolute right-[5%] top-1/2 -translate-y-1/2 w-24 h-64 opacity-70 float-y -scale-x-100" />
-
       {/* Drifting lotus petals */}
       <FloatingPetals />
 
@@ -47,18 +43,24 @@ export default function Hero() {
         </h1>
 
         {/* The moment of the Gita — Krishna (Madhav) guiding Arjuna at Kurukshetra */}
-        <div className="relative mx-auto mb-8 max-w-2xl rounded-3xl overflow-hidden border border-saffron/30 shadow-2xl shadow-saffron/20">
-          <Image
-            src="/art/scene-2.png"
-            alt="Krishna, as the charioteer Madhav, delivers the Bhagavad Gita to the warrior Arjuna on the battlefield of Kurukshetra at dawn"
-            width={1536}
-            height={1024}
-            priority
-            sizes="(max-width: 768px) 100vw, 672px"
-            className="w-full h-auto"
-          />
-          {/* Soft gold vignette to blend the image into the page */}
-          <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-3xl" />
+        <div className="relative mx-auto mb-8 max-w-2xl group">
+          {/* Breathing golden aura behind the frame */}
+          <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-r from-saffron/30 via-gold/20 to-saffron/30 blur-2xl lotus-pulse pointer-events-none" />
+          <div className="relative rounded-3xl overflow-hidden border border-saffron/30 shadow-2xl shadow-saffron/20
+                          transition-transform duration-700 ease-out group-hover:scale-[1.02]">
+            <Image
+              src="/art/scene-2.png"
+              alt="Krishna, as the charioteer Madhav, delivers the Bhagavad Gita to the warrior Arjuna on the battlefield of Kurukshetra at dawn"
+              width={1536}
+              height={1024}
+              priority
+              sizes="(max-width: 768px) 100vw, 672px"
+              className="w-full h-auto"
+            />
+            {/* Soft gold vignette to blend the image into the page */}
+            <div className="absolute inset-0 pointer-events-none rounded-3xl bg-gradient-to-t from-black/15 via-transparent to-transparent" />
+            <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-3xl" />
+          </div>
         </div>
 
         <p className="text-ink/70 text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">

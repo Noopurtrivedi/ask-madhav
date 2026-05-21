@@ -317,7 +317,7 @@ export function buildTemplateAnswer(question: string, verses: RawVerse[]): AskRe
     }
   }
 
-  const middle = `In Chapter ${verse.chapter_number}, verse ${verse.verse_number}, Krishna teaches: "${verse.english_meaning}"`
+  const middle = `This verse from the Gita meets you exactly there — let its words and meaning, shown just below, settle in your heart.`
   const closing = 'Sit with this wisdom today. Let it guide your next small step forward.'
 
   return {

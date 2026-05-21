@@ -25,6 +25,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 |---|---|
 | `api/ask/route.ts` | **Core RAG endpoint.** Rate limit → bounded input → retrieval → template answer → optional Gemini overlay. Never hard-fails. `runtime=nodejs`. |
 | `api/daily-verse/route.ts` | Returns the day-of-year rotating verse; cached for the day. |
+| `api/verse/route.ts` | Returns one verse (`?ref=`) or many (`?refs=a,b,c`) by reference via `findVerse`; powers the Popular Verses cards. `runtime=nodejs`. |
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
 | `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `runtime=edge`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
@@ -50,10 +51,10 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/HeroVerse.tsx` | Rotating hero shloka; opens with Gita 4.7 ("Yada yada hi dharmasya"), cross-fades through iconic verses. |
 | `components/Navbar.tsx` | Top navigation bar. |
 | `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen; calls `/api/ask`. |
-| `components/DailyVerse.tsx` | Verse-of-the-day display. |
+| `components/DailyVerse.tsx` | Verse-of-the-day — two-column card with `scene-1` image, breathing aura, reveal-on-tap practical step. |
 | `components/VerseCard.tsx` | Reusable verse renderer (Sanskrit/transliteration/Hindi/English); `compact` mode. |
-| `components/PopularVerses.tsx` | Curated grid of most-loved verses — no API call. |
-| `components/ChapterBrowser.tsx` | Browse verses by chapter. |
+| `components/PopularVerses.tsx` | Curated grid; shows Sanskrit, expands (via `/api/verse`) to Hindi+English meaning; AI ("Reflect with Madhav") is optional. |
+| `components/ChapterBrowser.tsx` | 18 chapter cards; expand to read each chapter's essence; AI ("Explore with Madhav") is optional. |
 | `components/StoryCards.tsx` | Mahabharata story cards from `/api/stories`. |
 | `components/VerseAudio.tsx` | Browser SpeechSynthesis recitation w/ word highlighting + meditation loop. |
 | `components/SpeakButton.tsx` | Reads an answer aloud (SpeechSynthesis), language-aware; `autoPlay` for hands-free/accessible use. |

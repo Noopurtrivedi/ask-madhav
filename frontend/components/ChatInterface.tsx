@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { askQuestion, type ChatTurn } from '@/lib/api'
 import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } from '@/types'
 import VerseCardComponent from './VerseCard'
@@ -59,7 +60,7 @@ export default function ChatInterface() {
       id: generateId(),
       role: 'assistant',
       content:
-        'Namaste. I am here to share the wisdom of the Bhagavad Gita with you. What is weighing on your heart today?',
+        'Hari Om, Parth. I am Madhav. Whatever weighs on your heart, speak it freely — and we shall look at it together in the light of the Gita.',
       timestamp: new Date(),
     },
   ])
@@ -95,6 +96,10 @@ export default function ChatInterface() {
   const toggleAutoRead = () => {
     setAutoRead((prev) => {
       const next = !prev
+      // Turning it OFF must immediately silence any answer being read aloud.
+      if (!next && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
       try {
         window.localStorage.setItem(AUTOREAD_KEY, next ? '1' : '0')
       } catch {
@@ -193,12 +198,25 @@ export default function ChatInterface() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
+          {/* Krishna & Arjuna at Kurukshetra — Madhav, ready to counsel */}
+          <div className="relative mx-auto mb-6 w-28 h-28 group">
+            <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-saffron/30 to-gold/20 blur-xl lotus-pulse pointer-events-none" />
+            <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-saffron/40 shadow-lg shadow-saffron/20">
+              <Image
+                src="/art/scene-3.png"
+                alt="Krishna (Madhav) and Arjuna in dialogue on the field of Kurukshetra"
+                fill
+                sizes="112px"
+                className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
+              />
+            </div>
+          </div>
           <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Gita Guidance</p>
           <h2
             className="text-4xl font-bold text-ink"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
-            Ask Your Question
+            Ask Madhav
           </h2>
           <p className="text-ink/50 mt-3 text-sm">
             Every answer is grounded in a real verse from the Bhagavad Gita
