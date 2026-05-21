@@ -21,17 +21,30 @@ export default function VerseAudio({ text, meditation = false }: Props) {
   const [wordIndex, setWordIndex] = useState(-1)
   const [loop, setLoop] = useState(false)
   const loopRef = useRef(false)
+  // Hindi (Indian) voice so the recitation sounds familiar rather than
+  // English-accented. Falls back to the default voice if none is installed.
+  const hindiVoiceRef = useRef<SpeechSynthesisVoice | null>(null)
 
   const words = text.split(/\s+/).filter(Boolean)
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       setSupported(false)
+      return
     }
+    const loadHindiVoice = () => {
+      const voices = window.speechSynthesis.getVoices()
+      hindiVoiceRef.current =
+        voices.find((v) => v.lang === 'hi-IN') ||
+        voices.find((v) => v.lang?.toLowerCase().startsWith('hi')) ||
+        null
+    }
+    loadHindiVoice()
+    // Voices populate asynchronously on most browsers.
+    window.speechSynthesis.addEventListener?.('voiceschanged', loadHindiVoice)
     return () => {
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
+      window.speechSynthesis.removeEventListener?.('voiceschanged', loadHindiVoice)
+      window.speechSynthesis.cancel()
     }
   }, [])
 
@@ -48,6 +61,9 @@ export default function VerseAudio({ text, meditation = false }: Props) {
     const u = new SpeechSynthesisUtterance(text)
     u.rate = 0.78 // slow, reverent pace
     u.pitch = 1
+    // Recite with an Indian/Hindi accent so the shloka sounds familiar.
+    u.lang = 'hi-IN'
+    if (hindiVoiceRef.current) u.voice = hindiVoiceRef.current
 
     u.onboundary = (e) => {
       // Map character offset → word index for live highlighting.

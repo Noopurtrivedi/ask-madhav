@@ -19,7 +19,17 @@ export default function VerseCard({ verse, compact = false }: Props) {
         <span className="text-ink/30 text-xs font-mono">{verse.reference}</span>
       </div>
 
-      {/* Sanskrit */}
+      {/* Practical step FIRST — speak to the moment before the scripture. */}
+      {!compact && (
+        <div className="mb-4 border-l-2 border-saffron/40 pl-3">
+          <p className="text-saffron/70 text-xs font-medium uppercase tracking-wider mb-1">
+            Practical Step
+          </p>
+          <p className="text-ink/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+        </div>
+      )}
+
+      {/* Sanskrit shloka */}
       <p
         className="text-ink text-lg leading-relaxed mb-2"
         style={{ fontFamily: 'serif' }}
@@ -53,16 +63,8 @@ export default function VerseCard({ verse, compact = false }: Props) {
             <p className="text-ink/80 text-sm leading-relaxed">{verse.english_meaning}</p>
           </div>
 
-          {/* Practical guidance */}
-          <div className="border-t border-saffron/10 pt-4">
-            <p className="text-saffron/70 text-xs font-medium uppercase tracking-wider mb-1">
-              Practical Step
-            </p>
-            <p className="text-ink/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
-          </div>
-
           {/* Actions + source attribution */}
-          <div className="flex justify-between items-center mt-3">
+          <div className="flex justify-between items-center border-t border-saffron/10 pt-4">
             <span className="text-ink/20 text-xs italic">
               Gita Press, Gorakhpur
             </span>

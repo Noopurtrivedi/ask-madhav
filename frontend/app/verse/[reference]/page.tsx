@@ -53,6 +53,12 @@ export default function VersePage({ params }: Props) {
           ))}
         </div>
 
+        {/* Practical step FIRST — guidance for the moment, then the scripture. */}
+        <div className="mb-6 border-l-2 border-saffron/40 pl-4">
+          <p className="text-saffron/60 text-xs tracking-wider uppercase mb-2">Practical Step</p>
+          <p className="text-ink/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+        </div>
+
         <p className="text-ink text-2xl leading-relaxed mb-4 text-center" style={{ fontFamily: 'serif' }} lang="sa">
           {verse.sanskrit_text}
         </p>
@@ -72,12 +78,7 @@ export default function VersePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="border-t border-saffron/10 pt-6 mb-6">
-          <p className="text-saffron/60 text-xs tracking-wider uppercase mb-2">Practical Step</p>
-          <p className="text-ink/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-4 flex-wrap border-t border-saffron/10 pt-6">
           <div className="flex items-center gap-4">
             <ShareVerse reference={verse.reference} meaning={verse.english_meaning} />
             <SaveVerseButton
