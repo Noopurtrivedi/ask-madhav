@@ -35,24 +35,28 @@ const FEMALE_HINTS = [
   'samantha', 'aditi', 'raveena', 'neerja', 'priya', 'kishori', 'zira', 'susan',
 ]
 
-// Score each voice for "calm Indian male". Highest score wins, so even when no
-// named male voice exists we still land on the best Indian-locale option.
+// Pick a calm Indian male voice — but ONLY among voices that actually speak the
+// target language. An English voice cannot pronounce Devanagari (it goes
+// silent), so we never cross languages: we restrict to the same language first,
+// prefer a male / Indian voice within it, and otherwise return null so the
+// engine falls back to its own default for that language.
 function pickVoice(voices: SpeechSynthesisVoice[], lang: string): SpeechSynthesisVoice | null {
   if (!voices.length) return null
   const two = lang.slice(0, 2) // 'hi' or 'en'
-  const scored = voices.map((v) => {
+  const sameLang = voices.filter((v) => (v.lang || '').toLowerCase().startsWith(two))
+  if (!sameLang.length) return null
+  const scored = sameLang.map((v) => {
     const name = v.name.toLowerCase()
     const vlang = (v.lang || '').toLowerCase()
     let score = 0
-    if (vlang === lang.toLowerCase()) score += 5 // exact hi-IN / en-IN
-    else if (vlang.startsWith(two)) score += 2
-    if (vlang.endsWith('-in') || vlang.includes('_in')) score += 3 // any Indian locale
+    if (vlang === lang.toLowerCase()) score += 3 // exact hi-IN / en-IN
+    if (vlang.endsWith('-in') || vlang.includes('_in')) score += 2 // Indian locale
     if (MALE_HINTS.some((h) => name.includes(h))) score += 4
-    if (FEMALE_HINTS.some((h) => name.includes(h))) score -= 5
+    if (FEMALE_HINTS.some((h) => name.includes(h))) score -= 4
     return { v, score }
   })
   scored.sort((a, b) => b.score - a.score)
-  return scored[0].score > 0 ? scored[0].v : voices[0]
+  return scored[0].v
 }
 
 export default function SpeakButton({ text, language = 'english', autoPlay = false }: Props) {
@@ -86,7 +90,10 @@ export default function SpeakButton({ text, language = 'english', autoPlay = fal
     u.rate = 0.8 // slow, calm, unhurried
     u.pitch = 0.9 // slightly lower → warmer, more male
     const match = pickVoice(voicesRef.current, lang)
-    if (match) u.voice = match
+    if (match) {
+      u.voice = match
+      u.lang = match.lang // keep voice + lang consistent (some engines need this)
+    }
     u.onend = () => setPlaying(false)
     u.onerror = () => setPlaying(false)
     window.speechSynthesis.speak(u)

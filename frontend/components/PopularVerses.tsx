@@ -7,15 +7,15 @@ import type { Verse } from '@/types'
 // Curated from the most-loved Gita verses. The Sanskrit + meanings are fetched
 // from the verse engine; this list only carries the editorial framing.
 const POPULAR_VERSES = [
-  { reference: '2.47', yoga: 'Karma Yoga', label: 'The Most Famous Verse' },
-  { reference: '2.20', yoga: 'Sankhya Yoga', label: 'The Eternal Soul' },
-  { reference: '4.7', yoga: 'Jnana Karma Sanyasa Yoga', label: 'Avatar Vani' },
-  { reference: '18.66', yoga: 'Moksha Sanyasa Yoga', label: 'The Final Teaching' },
-  { reference: '2.14', yoga: 'Sankhya Yoga', label: 'On Pleasure & Pain' },
-  { reference: '6.5', yoga: 'Dhyana Yoga', label: 'Elevate Yourself' },
-  { reference: '9.22', yoga: 'Raja Vidya Yoga', label: 'The Promise' },
-  { reference: '3.21', yoga: 'Karma Yoga', label: 'Lead By Example' },
-  { reference: '12.13', yoga: 'Bhakti Yoga', label: 'The True Devotee' },
+  { reference: '2.47', yoga: 'Karm Yog', label: 'The Most Famous Verse' },
+  { reference: '2.20', yoga: 'Sankhya Yog', label: 'The Eternal Soul' },
+  { reference: '4.7', yoga: 'Jnan Karm Sanyas Yog', label: 'Avatar Vani' },
+  { reference: '18.66', yoga: 'Moksh Sanyas Yog', label: 'The Final Teaching' },
+  { reference: '2.14', yoga: 'Sankhya Yog', label: 'On Pleasure & Pain' },
+  { reference: '6.5', yoga: 'Dhyan Yog', label: 'Elevate Yourself' },
+  { reference: '9.22', yoga: 'Raj Vidya Yog', label: 'The Promise' },
+  { reference: '3.21', yoga: 'Karm Yog', label: 'Lead By Example' },
+  { reference: '12.13', yoga: 'Bhakti Yog', label: 'The True Devotee' },
 ]
 
 function askMadhav(question: string) {
