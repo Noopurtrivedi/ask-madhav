@@ -109,6 +109,47 @@ function buildKeywordIndex(verses: RawVerse[]): KeywordIndex {
 // Built once per server instance.
 const KEYWORD_INDEX = buildKeywordIndex(VERSES)
 const VERSE_MAP = new Map(VERSES.map((v) => [v.id, v]))
+const VERSE_BY_REF = new Map(VERSES.map((v) => [v.reference, v]))
+
+/**
+ * Detect explicit verse/chapter references in the question — the keyword index
+ * can't see these because tokenize() strips digits. This is what makes the
+ * "Tell me about Bhagavad Gita 2.47" / "Chapter 3" buttons (PopularVerses,
+ * ChapterBrowser) actually retrieve the verse the user clicked.
+ */
+function referenceMatches(question: string): { verses: RawVerse[]; labels: string[] } {
+  const verses: RawVerse[] = []
+  const labels: string[] = []
+  const seen = new Set<number>()
+  const push = (v: RawVerse | undefined, label: string) => {
+    if (v && !seen.has(v.id)) {
+      seen.add(v.id)
+      verses.push(v)
+      labels.push(label)
+    }
+  }
+
+  // "2.47", "2:47", "chapter 2 verse 47", "chapter 2, verse 47"
+  const cvRe = /(?:chapter\s*)?(\d{1,2})\s*(?:[.:]|,?\s*verse\s*)\s*(\d{1,3})/gi
+  let m: RegExpExecArray | null
+  while ((m = cvRe.exec(question))) {
+    push(VERSE_BY_REF.get(`${parseInt(m[1], 10)}.${parseInt(m[2], 10)}`), `${parseInt(m[1], 10)}.${parseInt(m[2], 10)}`)
+  }
+
+  // Bare "chapter 3" (no verse) — surface the bundled verses from that chapter.
+  const chRe = /chapter\s+(\d{1,2})(?!\s*(?:[.:]|,?\s*verse))/gi
+  while ((m = chRe.exec(question))) {
+    const ch = parseInt(m[1], 10)
+    for (const v of VERSES) {
+      if (v.chapter_number === ch) {
+        push(v, `chapter ${ch}`)
+        if (verses.length >= 3) break
+      }
+    }
+  }
+
+  return { verses: verses.slice(0, 3), labels: Array.from(new Set(labels)).slice(0, 5) }
+}
 
 function tokenize(text: string): Set<string> {
   const matches = text.toLowerCase().match(/\b[a-z]{3,}\b/g) || []
@@ -131,14 +172,35 @@ function expandTokens(tokens: Set<string>): Set<string> {
   return expanded
 }
 
-export function scoreVerses(question: string): RawVerse[] {
+export type RetrievalConfidence = 'high' | 'medium' | 'low'
+
+export interface RetrievalResult {
+  verses: RawVerse[]
+  /** Query terms/themes that actually hit the verse index — for "why this verse" transparency. */
+  matched: string[]
+  /** Score of the top-ranked verse (0 when nothing matched and we fell back). */
+  topScore: number
+  confidence: RetrievalConfidence
+}
+
+/**
+ * Retrieve the best-matching verses for a question *with* the metadata that
+ * explains the match (which terms hit, how strong the top score is). Powers the
+ * "why this verse" chips in the UI and lets the LLM know when retrieval is weak.
+ */
+export function retrieve(question: string): RetrievalResult {
   const tokens = expandTokens(tokenize(question))
   const scores = new Map<number, number>()
+  const matched = new Set<string>()
   const bump = (id: number, by: number) => scores.set(id, (scores.get(id) || 0) + by)
 
   for (const token of tokens) {
-    // Exact match
-    for (const id of KEYWORD_INDEX.get(token) || []) bump(id, 3)
+    // Exact match — a confident, human-meaningful hit, so record the term.
+    const exact = KEYWORD_INDEX.get(token)
+    if (exact) {
+      matched.add(token)
+      for (const id of exact) bump(id, 3)
+    }
     // Prefix match (e.g. "anxi" matches "anxiety")
     if (token.length >= 4) {
       for (const [kw, ids] of KEYWORD_INDEX) {
@@ -153,17 +215,50 @@ export function scoreVerses(question: string): RawVerse[] {
     .filter(([, score]) => score > 0)
     .sort((a, b) => b[1] - a[1])
 
-  const result: RawVerse[] = []
+  // Explicit verse/chapter references win the top slots — when someone asks
+  // about "2.47" they mean that verse, not whatever keywords happen to score.
+  const refs = referenceMatches(question)
+  const verses: RawVerse[] = []
+  const seen = new Set<number>()
+  for (const v of refs.verses) {
+    if (!seen.has(v.id)) {
+      seen.add(v.id)
+      verses.push(v)
+    }
+  }
   for (const [id] of ranked) {
-    result.push(VERSE_MAP.get(id)!)
-    if (result.length >= 3) break
+    if (verses.length >= 3) break
+    if (!seen.has(id)) {
+      seen.add(id)
+      verses.push(VERSE_MAP.get(id)!)
+    }
   }
 
-  // Fallback: day-of-year verse so the response is never empty
-  if (result.length === 0 && VERSES.length) {
-    result.push(VERSES[dayOfYear() % VERSES.length])
+  const topScore = ranked.length ? ranked[0][1] : 0
+
+  // Fallback: day-of-year verse so the response is never empty.
+  if (verses.length === 0 && VERSES.length) {
+    verses.push(VERSES[dayOfYear() % VERSES.length])
   }
-  return result
+
+  // A direct reference hit is the most confident signal there is. Otherwise:
+  // a strong exact keyword hit (>=6 ≈ two matched terms) reads as high, a single
+  // exact hit is medium, and a pure fallback is low.
+  const confidence: RetrievalConfidence = refs.verses.length
+    ? 'high'
+    : topScore >= 6
+      ? 'high'
+      : topScore >= 3
+        ? 'medium'
+        : 'low'
+
+  const matchedTerms = Array.from(new Set([...refs.labels, ...matched])).slice(0, 5)
+  return { verses, matched: matchedTerms, topScore, confidence }
+}
+
+/** Backwards-compatible thin wrapper — returns only the ranked verses. */
+export function scoreVerses(question: string): RawVerse[] {
+  return retrieve(question).verses
 }
 
 export function verseCard(verse: RawVerse): VerseCard {
@@ -195,6 +290,9 @@ export interface AskResponse {
   answer: string
   verses: VerseCard[]
   disclaimer: string
+  /** Terms that drove retrieval, surfaced as "why this verse" chips. */
+  matched?: string[]
+  confidence?: RetrievalConfidence
 }
 
 /** Template answer used when no LLM key is configured (faithful to the Python original). */

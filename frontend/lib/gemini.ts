@@ -4,7 +4,7 @@
  * configured, generateGuidance() returns null and the caller falls back to the
  * deterministic template engine, so the app always works.
  */
-import type { RawVerse } from '@/lib/verseEngine'
+import type { RawVerse, RetrievalConfidence } from '@/lib/verseEngine'
 
 export interface ChatTurn {
   role: 'user' | 'assistant'
@@ -68,24 +68,40 @@ export async function generateGuidance(
   question: string,
   verses: RawVerse[],
   history: ChatTurn[] = [],
+  confidence: RetrievalConfidence = 'high',
 ): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY
   if (!key) return null
 
   const context = buildContext(verses)
+  // When retrieval is weak, the verses may not fit the person's situation —
+  // tell Madhav to gently clarify rather than over-commit to a shaky match.
+  const confidenceNote =
+    confidence === 'low'
+      ? '\n\nNOTE: Verse retrieval confidence is LOW — these verses may not match the person\'s situation. Open with ONE gentle clarifying question before leaning on the verse.'
+      : ''
 
-  // Map prior turns, then append the current question with retrieved context.
-  const contents = [
-    ...history.slice(-8).map((t) => ({
+  // Map prior turns. Gemini requires `contents` to begin with a `user` turn, so
+  // drop any leading model turns (e.g. the UI's synthetic opening greeting) —
+  // otherwise the request 400s and every first message silently falls back to
+  // the template instead of reaching Madhav.
+  const priorTurns = history
+    .slice(-8)
+    .map((t) => ({
       role: t.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: t.content }],
-    })),
+    }))
+  while (priorTurns.length && priorTurns[0].role === 'model') priorTurns.shift()
+
+  // Append the current question with retrieved context.
+  const contents = [
+    ...priorTurns,
     {
       role: 'user',
       parts: [
         {
           text:
-            `Retrieved Gita verses to ground your reply:\n\n${context}\n\n` +
+            `Retrieved Gita verses to ground your reply:\n\n${context}${confidenceNote}\n\n` +
             `The person says: "${question}"\n\n` +
             `Respond as Madhav — warm and personal like a sarthi/friend. When you quote a verse, show it in this format: chapter/verse reference, then Sanskrit, Transliteration, Hindi, English each on their own labelled line. Then speak to the person in plain heartfelt prose.`,
         },
@@ -105,7 +121,13 @@ export async function generateGuidance(
         contents,
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 600,
+          // gemini-2.5-flash is a reasoning model with thinking ON by default;
+          // thinking tokens are drawn from maxOutputTokens. At 600 the budget
+          // was consumed before the reply finished (MAX_TOKENS → empty/truncated
+          // text → null → template). Disable thinking and give the multilingual
+          // verse block + 3–5 paragraphs room to complete.
+          thinkingConfig: { thinkingBudget: 0 },
+          maxOutputTokens: 1200,
           topP: 0.95,
         },
         safetySettings: [

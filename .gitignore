@@ -57,3 +57,8 @@ Thumbs.db
 # Uploads / PDFs (large files — not for VCS)
 uploads/
 *.pdf
+
+# Verse-build intermediates (build_verses.py). The committed dataset is
+# frontend/data/verses.json; these are a resumable scrape cache + a redundant copy.
+.shloka_cache.json
+verses_clean.json

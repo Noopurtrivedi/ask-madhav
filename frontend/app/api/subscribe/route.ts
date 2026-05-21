@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit } from '@/lib/ratelimit'
 
 export const runtime = 'nodejs'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(req: NextRequest) {
+  // Throttle per IP — this writes to the DB and seeds the email list, so an
+  // unbounded endpoint invites enumeration and quota-burn abuse.
+  const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'anon'
+  if (!(await checkRateLimit(`subscribe:${ip}`))) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Please pause a moment, then try again.' },
+      { status: 429 },
+    )
+  }
+
   let body: { email?: string }
   try {
     body = await req.json()

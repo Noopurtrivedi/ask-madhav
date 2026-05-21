@@ -61,12 +61,12 @@ const POPULAR_VERSES = [
     snippet: 'To those who worship Me with devotion, meditating on My transcendental form, I carry what they lack and preserve what they have.',
   },
   {
-    reference: '3.16',
+    reference: '3.21',
     yoga: 'Karma Yoga',
     chapter: 3,
-    verse: 16,
-    label: 'The Wheel of Duty',
-    snippet: 'One who does not follow this established cycle of sacrifice is certainly living in vain.',
+    verse: 21,
+    label: 'Lead By Example',
+    snippet: 'Whatever action a great person performs, common people follow. Whatever standards they set, the world pursues.',
   },
   {
     reference: '12.13',

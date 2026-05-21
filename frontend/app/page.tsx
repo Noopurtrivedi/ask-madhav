@@ -76,6 +76,7 @@ export default function Home() {
             Sanskrit & Hindi Bhavartha: Swami Ramsukhdas,{' '}
             <span className="italic">Sadhak-Sanjivani</span>
             {' '}(Gita Press, Gorakhpur) · English: Swami Gambhirananda
+            {' '}· Digitized by IIT Kanpur Gita Supersite
           </p>
 
           <p className="text-ink/30 text-xs mt-4 max-w-lg mx-auto leading-relaxed">
