@@ -23,22 +23,36 @@ function bcp47(language: AnswerLanguage = 'english'): string {
   return language === 'hindi' ? 'hi-IN' : 'en-IN'
 }
 
-// Known male voice names across platforms, so Madhav sounds male and calm.
-// (Female voices like "Google हिन्दी" / "Samantha" are the common defaults.)
+// Known INDIAN male voice names across platforms — so Madhav sounds like a
+// calm Indian man. Female voices ("Google हिन्दी", "Samantha", "Heera"…) are
+// the common defaults, so we score them down.
 const MALE_HINTS = [
-  'hemant', 'madhur', 'ravi', 'rishi', 'arjun', 'prabhat', // Hindi / Indian male
+  'hemant', 'madhur', 'prabhat', 'ravi', 'rishi', 'kabir', 'arjun', // Indian male
   'google uk english male', 'daniel', 'aaron', 'fred', 'male',
 ]
+const FEMALE_HINTS = [
+  'female', 'google हिन्दी', 'heera', 'kalpana', 'swara', 'veena', 'lekha',
+  'samantha', 'aditi', 'raveena', 'neerja', 'priya', 'kishori', 'zira', 'susan',
+]
 
+// Score each voice for "calm Indian male". Highest score wins, so even when no
+// named male voice exists we still land on the best Indian-locale option.
 function pickVoice(voices: SpeechSynthesisVoice[], lang: string): SpeechSynthesisVoice | null {
-  const two = lang.slice(0, 2)
-  const inLang = voices.filter((v) => v.lang === lang || v.lang?.toLowerCase().startsWith(two))
-  const pool = inLang.length ? inLang : voices
-  const male = pool.find((v) => {
-    const n = v.name.toLowerCase()
-    return MALE_HINTS.some((h) => n.includes(h)) && !n.includes('female')
+  if (!voices.length) return null
+  const two = lang.slice(0, 2) // 'hi' or 'en'
+  const scored = voices.map((v) => {
+    const name = v.name.toLowerCase()
+    const vlang = (v.lang || '').toLowerCase()
+    let score = 0
+    if (vlang === lang.toLowerCase()) score += 5 // exact hi-IN / en-IN
+    else if (vlang.startsWith(two)) score += 2
+    if (vlang.endsWith('-in') || vlang.includes('_in')) score += 3 // any Indian locale
+    if (MALE_HINTS.some((h) => name.includes(h))) score += 4
+    if (FEMALE_HINTS.some((h) => name.includes(h))) score -= 5
+    return { v, score }
   })
-  return male || pool[0] || null
+  scored.sort((a, b) => b.score - a.score)
+  return scored[0].score > 0 ? scored[0].v : voices[0]
 }
 
 export default function SpeakButton({ text, language = 'english', autoPlay = false }: Props) {
