@@ -46,20 +46,23 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
-| `components/Hero.tsx` | Landing hero section. |
+| `components/Hero.tsx` | Landing hero — Kurukshetra image (`public/art/scene-2.png`), rotating shloka, CTAs. |
+| `components/HeroVerse.tsx` | Rotating hero shloka; opens with Gita 4.7 ("Yada yada hi dharmasya"), cross-fades through iconic verses. |
 | `components/Navbar.tsx` | Top navigation bar. |
-| `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; calls `/api/ask`, keeps history. |
+| `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen; calls `/api/ask`. |
 | `components/DailyVerse.tsx` | Verse-of-the-day display. |
 | `components/VerseCard.tsx` | Reusable verse renderer (Sanskrit/transliteration/Hindi/English); `compact` mode. |
 | `components/PopularVerses.tsx` | Curated grid of most-loved verses — no API call. |
 | `components/ChapterBrowser.tsx` | Browse verses by chapter. |
 | `components/StoryCards.tsx` | Mahabharata story cards from `/api/stories`. |
 | `components/VerseAudio.tsx` | Browser SpeechSynthesis recitation w/ word highlighting + meditation loop. |
+| `components/SpeakButton.tsx` | Reads an answer aloud (SpeechSynthesis), language-aware; `autoPlay` for hands-free/accessible use. |
+| `components/MicButton.tsx` | Voice question input via Web Speech API (SpeechRecognition); language-aware; hidden where unsupported. |
 | `components/ShareVerse.tsx` | Share controls (links to the OG Wisdom Card). |
 | `components/SaveVerseButton.tsx` | Save a verse to the journal (Supabase, auth-gated). |
 | `components/SubscribeRitual.tsx` | Daily Ritual email sign-up form → `/api/subscribe`. |
-| `components/KrishnaAvatar.tsx` | Decorative Krishna avatar. |
-| `components/SacredArt.tsx` | Decorative sacred art / motifs. |
+| `components/SacredArt.tsx` | Decorative sacred art / motifs (sun rays, peacock feather, lotus, petals). |
+| `public/art/scene-1..3.png` | Krishna & Arjuna at Kurukshetra (AI-generated); `scene-2` is the hero image. |
 | `components/ScrollReveal.tsx` | Scroll-triggered reveal animation wrapper. |
 | `components/journal/JournalApp.tsx` | Full journal experience (saved verses, daily intention, streak, themes). |
 

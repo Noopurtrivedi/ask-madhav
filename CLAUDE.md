@@ -31,7 +31,7 @@ No test framework is configured. The app runs fully with **zero env vars** — e
 
 This fallback discipline is the core design principle: **`/api/ask` must never hard-fail.** The route layers defenses — rate limit → bounded input → retrieval (always succeeds) → template answer → optional LLM overlay → top-level try/catch returning a friendly message.
 
-**Madhav's persona** is defined entirely in the `SYSTEM_INSTRUCTION` prompt in `lib/gemini.ts`: addresses the user as "Parth", speaks as a *sarthi* (not as divine Krishna), gives practical advice **first** then the verse in a fixed multilingual block (Sanskrit / Transliteration / Hindi / English), then a small actionable step. Editing tone/format means editing that prompt.
+**Madhav's persona** is defined entirely in the `SYSTEM_INSTRUCTION` prompt in `lib/gemini.ts`. Madhav **is** Krishna (the name Arjuna called him) — the persona speaks *as* Krishna, the eternal consciousness, addressing the user as "Parth". The signature move is ONE vivid metaphor (rivers/sky/fire/light/mirrors/battlefields) carrying a Gita truth, then a practical step and a reflective closing line. It does **not** paste the full multilingual verse block (the UI's `VerseCard` shows that beside the reply) — it references the verse in prose. Replies are tuned per seeker: `ANALOGY_WORLD` fits analogies to a self-declared age band, and `LANGUAGE_DIRECTIVE` answers in English / Hindi / Hinglish. Editing tone/format means editing that prompt.
 
 ### API routes (`app/api/`)
 - `POST /api/ask` — the RAG endpoint above. `runtime = 'nodejs'`. Rate-limited; bounds question to 1000 chars and history to 12 turns.
@@ -92,4 +92,4 @@ Push to GitHub → import on Vercel with **Root Directory = `frontend/`**. `fron
 
 ## Safety constraint
 
-The app provides guidance *inspired by* the Gita. The `disclaimer()` in `verseEngine.ts` and the persona prompt both enforce: not medical/legal/financial advice, does not claim to be the divine Krishna, and crisis messages should gently redirect to professionals. Preserve these guardrails when editing prompts or responses.
+The app provides guidance *inspired by* the Gita. Madhav speaks immersively *as* Krishna, but the practical guardrails are non-negotiable and enforced by both the `disclaimer()` in `verseEngine.ts` and the persona prompt: **not** medical/legal/financial advice; never foster dependency, demand worship, encourage blind belief, or create fear; awaken the seeker to their *own* consciousness; and crisis messages (self-harm, abuse) gently redirect to a qualified professional or helpline. The Hero footer keeps a brief "inspired by the Gita … not a substitute for professional advice" note. Preserve these guardrails when editing prompts or responses.

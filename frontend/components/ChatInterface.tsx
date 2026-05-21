@@ -4,12 +4,15 @@ import { useState, useRef, useEffect } from 'react'
 import { askQuestion, type ChatTurn } from '@/lib/api'
 import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } from '@/types'
 import VerseCardComponent from './VerseCard'
+import SpeakButton from './SpeakButton'
+import MicButton from './MicButton'
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
 const PROFILE_KEY = 'askmadhav_profile'
+const AUTOREAD_KEY = 'askmadhav_autoread'
 
 // Labels for the inline tuning bar. Age is optional ('' = not disclosed);
 // language always has a value (defaults to English).
@@ -63,13 +66,21 @@ export default function ChatInterface() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [profile, setProfile] = useState<UserProfile>({ language: 'english' })
+  // Auto-read each new answer aloud — hands-free, and accessible for blind /
+  // low-vision seekers who want every reply spoken without tapping "Listen".
+  const [autoRead, setAutoRead] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const didMount = useRef(false)
 
-  // Hydrate the saved profile after mount (avoids SSR/client markup mismatch).
+  // Hydrate saved preferences after mount (avoids SSR/client markup mismatch).
   useEffect(() => {
     setProfile(loadProfile())
+    try {
+      setAutoRead(window.localStorage.getItem(AUTOREAD_KEY) === '1')
+    } catch {
+      /* storage blocked — default off */
+    }
   }, [])
 
   const updateProfile = (next: UserProfile) => {
@@ -79,6 +90,18 @@ export default function ChatInterface() {
     } catch {
       // Storage blocked (private mode) — the in-memory choice still applies.
     }
+  }
+
+  const toggleAutoRead = () => {
+    setAutoRead((prev) => {
+      const next = !prev
+      try {
+        window.localStorage.setItem(AUTOREAD_KEY, next ? '1' : '0')
+      } catch {
+        /* storage blocked — in-memory only */
+      }
+      return next
+    })
   }
 
   useEffect(() => {
@@ -159,6 +182,12 @@ export default function ChatInterface() {
     }
   }
 
+  // The newest assistant reply — the only one auto-read aloud when enabled.
+  const lastAssistantId = messages.reduce<string | null>(
+    (acc, m) => (m.role === 'assistant' ? m.id : acc),
+    null,
+  )
+
   return (
     <section id="chat" className="py-20 px-6" style={{ background: '#FFFCF5' }}>
       <div className="max-w-3xl mx-auto">
@@ -217,8 +246,12 @@ export default function ChatInterface() {
                     </div>
                   ) : (
                     <>
-                      {/* Answer text — preserve newlines */}
-                      <div className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3 text-ink/90 text-sm leading-relaxed">
+                      {/* Answer text — preserve newlines. aria-live so screen
+                          readers announce each new reply automatically. */}
+                      <div
+                        className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3 text-ink/90 text-sm leading-relaxed"
+                        aria-live="polite"
+                      >
                         {msg.content.split('\n\n').map((para, i) => (
                           <p key={i} className={i > 0 ? 'mt-3' : ''}>
                             {para}
@@ -226,12 +259,20 @@ export default function ChatInterface() {
                         ))}
                       </div>
 
-                      {/* Source badge */}
-                      {msg.source === 'ai' && (
-                        <p className="text-saffron/40 text-[10px] tracking-wider uppercase px-1 flex items-center gap-1">
-                          <span className="select-none">✦</span> Guided by Madhav, grounded in the verses below
-                        </p>
-                      )}
+                      {/* Listen control + source badge — every answer can be
+                          heard aloud; the newest is auto-read when enabled. */}
+                      <div className="flex items-center gap-3 px-1 flex-wrap">
+                        <SpeakButton
+                          text={msg.content}
+                          language={profile.language}
+                          autoPlay={autoRead && msg.id === lastAssistantId}
+                        />
+                        {msg.source === 'ai' && (
+                          <p className="text-saffron/40 text-[10px] tracking-wider uppercase flex items-center gap-1">
+                            <span className="select-none">✦</span> Guided by Madhav, grounded in the verses below
+                          </p>
+                        )}
+                      </div>
 
                       {/* Verse cards */}
                       {msg.verses && msg.verses.length > 0 && (
@@ -321,6 +362,19 @@ export default function ChatInterface() {
                   </option>
                 ))}
               </select>
+              {/* Read answers aloud automatically — for hands-free / accessible use. */}
+              <button
+                type="button"
+                onClick={toggleAutoRead}
+                aria-pressed={autoRead}
+                className={`text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
+                  autoRead
+                    ? 'border-saffron/60 text-saffron bg-saffron/10'
+                    : 'border-saffron/20 text-ink/50 hover:border-saffron/40'
+                }`}
+              >
+                🔊 {autoRead ? 'Read aloud: on' : 'Read aloud'}
+              </button>
             </div>
             <div className="flex gap-3">
               <input
@@ -329,11 +383,17 @@ export default function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask a life question..."
+                placeholder="Ask a life question, or tap the mic to speak..."
                 disabled={loading}
                 className="flex-1 bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink
                            placeholder:text-ink/30 focus:outline-none focus:border-saffron/60
                            transition-colors disabled:opacity-50 text-sm"
+              />
+              <MicButton
+                language={profile.language}
+                disabled={loading}
+                onInterim={(t) => setInput(t)}
+                onResult={(t) => handleSend(t)}
               />
               <button
                 onClick={() => handleSend()}
@@ -346,7 +406,7 @@ export default function ChatInterface() {
               </button>
             </div>
             <p className="text-ink/20 text-xs mt-2 text-center">
-              Press Enter to send
+              Press Enter to send · tap the mic to ask by voice
             </p>
           </div>
         </div>
