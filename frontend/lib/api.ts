@@ -1,4 +1,4 @@
-import type { AskResponse, DailyVerseResponse, StoriesResponse } from '@/types'
+import type { AskResponse, DailyVerseResponse, StoriesResponse, UserProfile } from '@/types'
 
 // The verse engine now runs inside Next.js API routes (same origin), so no
 // external backend URL is needed. NEXT_PUBLIC_API_URL is still honored if set,
@@ -13,11 +13,12 @@ export interface ChatTurn {
 export async function askQuestion(
   question: string,
   history: ChatTurn[] = [],
+  profile?: UserProfile,
 ): Promise<AskResponse> {
   const res = await fetch(`${API_BASE}/api/ask`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question, history }),
+    body: JSON.stringify({ question, history, profile }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))

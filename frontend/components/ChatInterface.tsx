@@ -2,11 +2,44 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { askQuestion, type ChatTurn } from '@/lib/api'
-import type { ChatMessage, VerseCard } from '@/types'
+import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } from '@/types'
 import VerseCardComponent from './VerseCard'
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
+}
+
+const PROFILE_KEY = 'askmadhav_profile'
+
+// Labels for the inline tuning bar. Age is optional ('' = not disclosed);
+// language always has a value (defaults to English).
+const AGE_OPTIONS: { value: AgeGroup | ''; label: string }[] = [
+  { value: '', label: 'Your age (optional)' },
+  { value: 'under-18', label: 'Under 18' },
+  { value: '18-25', label: '18–25' },
+  { value: '26-40', label: '26–40' },
+  { value: '41-60', label: '41–60' },
+  { value: '60-plus', label: '60+' },
+]
+
+const LANGUAGE_OPTIONS: { value: AnswerLanguage; label: string }[] = [
+  { value: 'english', label: 'English' },
+  { value: 'hindi', label: 'हिंदी' },
+  { value: 'hinglish', label: 'Hinglish' },
+]
+
+function loadProfile(): UserProfile {
+  if (typeof window === 'undefined') return { language: 'english' }
+  try {
+    const raw = window.localStorage.getItem(PROFILE_KEY)
+    if (raw) {
+      const p = JSON.parse(raw) as Partial<UserProfile>
+      return { language: p.language ?? 'english', ageGroup: p.ageGroup }
+    }
+  } catch {
+    // Corrupt/blocked storage — fall through to the default.
+  }
+  return { language: 'english' }
 }
 
 const SUGGESTED_QUESTIONS = [
@@ -29,9 +62,24 @@ export default function ChatInterface() {
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [profile, setProfile] = useState<UserProfile>({ language: 'english' })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const didMount = useRef(false)
+
+  // Hydrate the saved profile after mount (avoids SSR/client markup mismatch).
+  useEffect(() => {
+    setProfile(loadProfile())
+  }, [])
+
+  const updateProfile = (next: UserProfile) => {
+    setProfile(next)
+    try {
+      window.localStorage.setItem(PROFILE_KEY, JSON.stringify(next))
+    } catch {
+      // Storage blocked (private mode) — the in-memory choice still applies.
+    }
+  }
 
   useEffect(() => {
     // Skip the initial mount so the homepage opens on the hero, not the chat.
@@ -76,7 +124,7 @@ export default function ChatInterface() {
     setLoading(true)
 
     try {
-      const response = await askQuestion(q, history)
+      const response = await askQuestion(q, history, profile)
       const assistantMsg: ChatMessage = {
         id: generateId(),
         role: 'assistant',
@@ -236,6 +284,44 @@ export default function ChatInterface() {
 
           {/* Input bar */}
           <div className="border-t border-saffron/10 p-4">
+            {/* Tuning bar — optional, persisted to localStorage. Lets Madhav fit
+                analogies to the seeker's world and reply in their language. */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="text-ink/30 text-xs select-none">Tune for you:</span>
+              <select
+                aria-label="Your age group (optional)"
+                value={profile.ageGroup ?? ''}
+                onChange={(e) =>
+                  updateProfile({
+                    ...profile,
+                    ageGroup: (e.target.value || undefined) as AgeGroup | undefined,
+                  })
+                }
+                className="bg-saffron/5 border border-saffron/20 rounded-lg px-2.5 py-1.5 text-xs text-ink/70
+                           focus:outline-none focus:border-saffron/60 transition-colors cursor-pointer"
+              >
+                {AGE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                aria-label="Answer language"
+                value={profile.language}
+                onChange={(e) =>
+                  updateProfile({ ...profile, language: e.target.value as AnswerLanguage })
+                }
+                className="bg-saffron/5 border border-saffron/20 rounded-lg px-2.5 py-1.5 text-xs text-ink/70
+                           focus:outline-none focus:border-saffron/60 transition-colors cursor-pointer"
+              >
+                {LANGUAGE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="flex gap-3">
               <input
                 ref={inputRef}

@@ -36,6 +36,18 @@ export interface VerseCard {
 
 export type AnswerSource = 'ai' | 'template'
 
+// ── User profile (Phase 1): age band tunes the analogies; language selects the
+// answer language. Self-declared, stored in localStorage — no PII collected. ──
+export type AgeGroup = 'under-18' | '18-25' | '26-40' | '41-60' | '60-plus'
+export type AnswerLanguage = 'english' | 'hindi' | 'hinglish'
+
+// `ageGroup` is optional — a seeker may pick a language without disclosing age,
+// in which case Madhav answers in that language with untuned (general) analogies.
+export interface UserProfile {
+  ageGroup?: AgeGroup
+  language: AnswerLanguage
+}
+
 export interface AskResponse {
   question: string
   answer: string

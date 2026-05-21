@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { scoreVerses, buildTemplateAnswer, disclaimer } from '@/lib/verseEngine'
 import { generateGuidance, type ChatTurn } from '@/lib/gemini'
 import { checkRateLimit } from '@/lib/ratelimit'
+import type { AgeGroup, AnswerLanguage, UserProfile } from '@/types'
 
 export const runtime = 'nodejs'
 
@@ -10,9 +11,29 @@ const MAX_QUESTION = 1000
 const MAX_HISTORY_TURNS = 12
 const MAX_TURN_CHARS = 2000
 
+const AGE_GROUPS: AgeGroup[] = ['under-18', '18-25', '26-40', '41-60', '60-plus']
+const LANGUAGES: AnswerLanguage[] = ['english', 'hindi', 'hinglish']
+
+// Validate the two fields independently: language drives the answer language,
+// age (optional) tunes the analogies. A bad/absent field is simply dropped —
+// never an error. Returns undefined only when nothing usable was provided.
+function parseProfile(raw: unknown): UserProfile | undefined {
+  if (!raw || typeof raw !== 'object') return undefined
+  const p = raw as Record<string, unknown>
+  const language = LANGUAGES.includes(p.language as AnswerLanguage)
+    ? (p.language as AnswerLanguage)
+    : undefined
+  const ageGroup = AGE_GROUPS.includes(p.ageGroup as AgeGroup)
+    ? (p.ageGroup as AgeGroup)
+    : undefined
+  if (!language && !ageGroup) return undefined
+  // language is required on UserProfile; default to english when only age was given.
+  return { language: language ?? 'english', ageGroup }
+}
+
 export async function POST(req: NextRequest) {
   try {
-    let body: { question?: unknown; history?: unknown }
+    let body: { question?: unknown; history?: unknown; profile?: unknown }
     try {
       body = await req.json()
     } catch {
@@ -47,6 +68,8 @@ export async function POST(req: NextRequest) {
       .slice(-MAX_HISTORY_TURNS)
       .map((t) => ({ role: t.role, content: t.content.slice(0, MAX_TURN_CHARS) }))
 
+    const profile = parseProfile(body.profile)
+
     // Verse retrieval is in-memory and always succeeds (returns a daily verse
     // as a last resort), so the template answer is a guaranteed fallback.
     const matched = scoreVerses(question)
@@ -56,7 +79,7 @@ export async function POST(req: NextRequest) {
     let answer = base.answer
     let usedAi = false
     try {
-      const ai = await generateGuidance(question, matched, history)
+      const ai = await generateGuidance(question, matched, history, profile)
       if (ai) {
         answer = ai
         usedAi = true
