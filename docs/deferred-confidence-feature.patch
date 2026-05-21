@@ -1,0 +1,150 @@
+diff --git a/frontend/app/api/ask/route.ts b/frontend/app/api/ask/route.ts
+index 9fd00a4..5fe2076 100644
+--- a/frontend/app/api/ask/route.ts
++++ b/frontend/app/api/ask/route.ts
+@@ -1,5 +1,5 @@
+ import { NextRequest, NextResponse } from 'next/server'
+-import { scoreVerses, buildTemplateAnswer, disclaimer } from '@/lib/verseEngine'
++import { retrieve, buildTemplateAnswer, disclaimer } from '@/lib/verseEngine'
+ import { generateGuidance, type ChatTurn } from '@/lib/gemini'
+ import { checkRateLimit } from '@/lib/ratelimit'
+ 
+@@ -49,14 +49,16 @@ export async function POST(req: NextRequest) {
+ 
+     // Verse retrieval is in-memory and always succeeds (returns a daily verse
+     // as a last resort), so the template answer is a guaranteed fallback.
+-    const matched = scoreVerses(question)
++    const { verses: matched, matched: matchedTerms, confidence } = retrieve(question)
+     const base = buildTemplateAnswer(question, matched)
+ 
+     // RAG layer: try the LLM, but never let its failure break the response.
++    // Pass retrieval confidence so a weak match nudges Madhav to ask a gentle
++    // clarifying question instead of forcing a poorly-grounded answer.
+     let answer = base.answer
+     let usedAi = false
+     try {
+-      const ai = await generateGuidance(question, matched, history)
++      const ai = await generateGuidance(question, matched, history, confidence)
+       if (ai) {
+         answer = ai
+         usedAi = true
+@@ -65,7 +67,13 @@ export async function POST(req: NextRequest) {
+       console.error('generateGuidance failed', err)
+     }
+ 
+-    return NextResponse.json({ ...base, answer, source: usedAi ? 'ai' : 'template' })
++    return NextResponse.json({
++      ...base,
++      answer,
++      source: usedAi ? 'ai' : 'template',
++      matched: matchedTerms,
++      confidence,
++    })
+   } catch (err) {
+     // Last-resort fallback — the chat should never hard-fail.
+     console.error('ask route error', err)
+diff --git a/frontend/components/ChatInterface.tsx b/frontend/components/ChatInterface.tsx
+index 7d9e547..cb1816e 100644
+--- a/frontend/components/ChatInterface.tsx
++++ b/frontend/components/ChatInterface.tsx
+@@ -84,6 +84,8 @@ export default function ChatInterface() {
+         verses: response.verses,
+         disclaimer: response.disclaimer,
+         source: response.source,
++        matched: response.matched,
++        confidence: response.confidence,
+         timestamp: new Date(),
+       }
+       setMessages((prev) => [...prev, assistantMsg])
+@@ -185,6 +187,38 @@ export default function ChatInterface() {
+                         </p>
+                       )}
+ 
++                      {/* "Why this verse" transparency — matched terms + confidence */}
++                      {msg.verses && msg.verses.length > 0 && msg.confidence && (
++                        <div className="flex flex-wrap items-center gap-1.5 px-1">
++                          <span
++                            className="inline-flex items-center gap-1 text-[10px] tracking-wider uppercase text-ink/35"
++                            title={`Retrieval confidence: ${msg.confidence}`}
++                          >
++                            <span
++                              className={`w-1.5 h-1.5 rounded-full ${
++                                msg.confidence === 'high'
++                                  ? 'bg-emerald-500/70'
++                                  : msg.confidence === 'medium'
++                                    ? 'bg-saffron/70'
++                                    : 'bg-ink/30'
++                              }`}
++                            />
++                            {msg.confidence === 'low' ? 'Loosely matched' : 'Matched on'}
++                          </span>
++                          {(msg.matched && msg.matched.length > 0
++                            ? msg.matched
++                            : ['daily verse']
++                          ).map((term) => (
++                            <span
++                              key={term}
++                              className="px-2 py-0.5 rounded-full bg-saffron/10 border border-saffron/20 text-ink/55 text-[10px]"
++                            >
++                              {term}
++                            </span>
++                          ))}
++                        </div>
++                      )}
++
+                       {/* Verse cards */}
+                       {msg.verses && msg.verses.length > 0 && (
+                         <div className="space-y-3">
+diff --git a/frontend/supabase/schema.sql b/frontend/supabase/schema.sql
+index d5248b1..5b9f77e 100644
+--- a/frontend/supabase/schema.sql
++++ b/frontend/supabase/schema.sql
+@@ -30,10 +30,17 @@ create table if not exists public.journal_entries (
+   mood text,
+   intention text,
+   reflection text,
++  -- Accountability loop: did Parth act on the prior day's Sankalpa? Set by the
++  -- daily-ritual email's one-tap check-in (true / false) or left null.
++  acted_on_intention boolean,
+   created_at timestamptz not null default now(),
+   unique (user_id, entry_date)
+ );
+ 
++-- Backfill for existing deployments (idempotent).
++alter table public.journal_entries
++  add column if not exists acted_on_intention boolean;
++
+ alter table public.journal_entries enable row level security;
+ 
+ create policy "own journal - select" on public.journal_entries
+diff --git a/frontend/types/index.ts b/frontend/types/index.ts
+index 38c4b5c..8905802 100644
+--- a/frontend/types/index.ts
++++ b/frontend/types/index.ts
+@@ -36,12 +36,17 @@ export interface VerseCard {
+ 
+ export type AnswerSource = 'ai' | 'template'
+ 
++export type RetrievalConfidence = 'high' | 'medium' | 'low'
++
+ export interface AskResponse {
+   question: string
+   answer: string
+   verses: VerseCard[]
+   disclaimer: string
+   source?: AnswerSource
++  /** Terms that drove verse retrieval — shown as "why this verse" chips. */
++  matched?: string[]
++  confidence?: RetrievalConfidence
+ }
+ 
+ export type MessageRole = 'user' | 'assistant'
+@@ -53,6 +58,8 @@ export interface ChatMessage {
+   verses?: VerseCard[]
+   disclaimer?: string
+   source?: AnswerSource
++  matched?: string[]
++  confidence?: RetrievalConfidence
+   timestamp: Date
+ }
+ 
