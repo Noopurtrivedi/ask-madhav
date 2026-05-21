@@ -26,6 +26,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `api/ask/route.ts` | **Core RAG endpoint.** Rate limit → bounded input → retrieval → template answer → optional Gemini overlay. Never hard-fails. `runtime=nodejs`. |
 | `api/daily-verse/route.ts` | Returns the day-of-year rotating verse; cached for the day. |
 | `api/verse/route.ts` | Returns one verse (`?ref=`) or many (`?refs=a,b,c`) by reference via `findVerse`; powers the Popular Verses cards. `runtime=nodejs`. |
+| `api/tts/route.ts` | Read-aloud: Gemini TTS (`gemini-2.5-flash-preview-tts`, voice "Charon") → WAV; guaranteed calm male voice (Hindi/English) on `GEMINI_API_KEY`. 503 → client falls back to SpeechSynthesis. |
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
 | `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `runtime=edge`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
@@ -57,7 +58,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/ChapterBrowser.tsx` | 18 chapter cards; expand to read each chapter's essence; AI ("Explore with Madhav") is optional. |
 | `components/StoryCards.tsx` | Mahabharata story cards from `/api/stories`. |
 | `components/VerseAudio.tsx` | Browser SpeechSynthesis recitation w/ word highlighting + meditation loop. |
-| `components/SpeakButton.tsx` | Reads an answer aloud (SpeechSynthesis), language-aware; `autoPlay` for hands-free/accessible use. |
+| `components/SpeakButton.tsx` | Reads an answer aloud — server TTS (`/api/tts`, guaranteed male voice) with SpeechSynthesis fallback; `autoPlay` for hands-free/accessible use. |
 | `components/MicButton.tsx` | Voice question input via Web Speech API (SpeechRecognition); language-aware; hidden where unsupported. |
 | `components/ShareVerse.tsx` | Share controls (links to the OG Wisdom Card). |
 | `components/SaveVerseButton.tsx` | Save a verse to the journal (Supabase, auth-gated). |
