@@ -194,7 +194,7 @@ export default function ChatInterface() {
   )
 
   return (
-    <section id="chat" className="py-20 px-6" style={{ background: '#FFFCF5' }}>
+    <section id="chat" className="py-14 sm:py-20 px-6" style={{ background: '#FFFCF5' }}>
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
@@ -244,7 +244,7 @@ export default function ChatInterface() {
           style={{ background: '#FFFFFF' }}
         >
           {/* Messages area */}
-          <div className="h-[520px] overflow-y-auto p-6 space-y-6">
+          <div className="h-[26rem] sm:h-[520px] overflow-y-auto p-4 sm:p-6 space-y-6">
             {messages.map((msg) => (
               <div
                 key={msg.id}

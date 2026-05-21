@@ -50,7 +50,7 @@ export default function ChapterBrowser() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="py-20 px-6" style={{ background: '#F3E7CD' }}>
+    <section className="py-14 sm:py-20 px-6" style={{ background: '#F3E7CD' }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

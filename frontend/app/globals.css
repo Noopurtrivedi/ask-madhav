@@ -1,7 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Tiro+Devanagari+Hindi&family=Noto+Serif+Devanagari:wght@400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Prevent any decorative aura / absolute element from causing a horizontal
+   scrollbar on small screens. */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
 
 :root {
   --saffron: #E8A620;

@@ -35,7 +35,7 @@ export default function Hero() {
         </p>
 
         <h1
-          className="text-5xl md:text-7xl font-bold text-ink mb-6 leading-tight"
+          className="text-4xl sm:text-5xl md:text-7xl font-bold text-ink mb-6 leading-tight"
           style={{ fontFamily: 'Crimson Text, serif' }}
         >
           Seek Wisdom.<br />

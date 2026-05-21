@@ -22,7 +22,7 @@ export default function DailyVerse() {
   }, [])
 
   return (
-    <section id="daily-verse" className="py-20 px-6" style={{ background: '#FBF4E6' }}>
+    <section id="daily-verse" className="py-14 sm:py-20 px-6" style={{ background: '#FBF4E6' }}>
       <div className="max-w-4xl mx-auto text-center">
         <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Daily Wisdom</p>
         <h2

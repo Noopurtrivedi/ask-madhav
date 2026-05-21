@@ -26,7 +26,7 @@ export default function StoryCards() {
   }, [])
 
   return (
-    <section id="stories" className="py-20 px-6" style={{ background: '#FBF4E6' }}>
+    <section id="stories" className="py-14 sm:py-20 px-6" style={{ background: '#FBF4E6' }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

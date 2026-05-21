@@ -38,7 +38,7 @@ export default function SubscribeRitual() {
   }
 
   return (
-    <section className="py-20 px-6" style={{ background: '#FFFCF5' }}>
+    <section className="py-14 sm:py-20 px-6" style={{ background: '#FFFCF5' }}>
       <div className="max-w-2xl mx-auto text-center">
         <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Daily Ritual</p>
         <h2 className="text-3xl md:text-4xl font-bold text-ink mb-3" style={{ fontFamily: 'Crimson Text, serif' }}>

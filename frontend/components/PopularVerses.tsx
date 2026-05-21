@@ -36,7 +36,7 @@ export default function PopularVerses() {
   }, [])
 
   return (
-    <section className="py-20 px-6" style={{ background: '#FFFCF5' }}>
+    <section className="py-14 sm:py-20 px-6" style={{ background: '#FFFCF5' }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
