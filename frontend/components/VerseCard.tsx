@@ -2,6 +2,7 @@ import type { VerseCard as VerseCardType } from '@/types'
 import VerseAudio from './VerseAudio'
 import ShareVerse from './ShareVerse'
 import SaveVerseButton from './SaveVerseButton'
+import ChapterBridge from './ChapterBridge'
 
 interface Props {
   verse: VerseCardType
@@ -64,10 +65,8 @@ export default function VerseCard({ verse, compact = false }: Props) {
           </div>
 
           {/* Actions + source attribution */}
-          <div className="flex justify-between items-center border-t border-saffron/10 pt-4">
-            <span className="text-ink/20 text-xs italic">
-              Gita Press, Gorakhpur
-            </span>
+          <div className="flex justify-between items-center border-t border-saffron/10 pt-4 flex-wrap gap-3">
+            <ChapterBridge chapter={verse.chapter} />
             <div className="flex items-center gap-4">
               <SaveVerseButton
                 reference={verse.reference}
@@ -77,6 +76,7 @@ export default function VerseCard({ verse, compact = false }: Props) {
               <ShareVerse reference={verse.reference} meaning={verse.english_meaning} compact />
             </div>
           </div>
+          <p className="text-ink/20 text-xs italic mt-3">Gita Press, Gorakhpur</p>
         </>
       )}
     </div>

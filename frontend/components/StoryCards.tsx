@@ -44,8 +44,17 @@ export default function StoryCards() {
         </div>
 
         {loading && (
-          <div className="flex justify-center py-12">
-            <span className="text-4xl lotus-pulse">🪷</span>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="border border-saffron/15 rounded-2xl p-6 space-y-4">
+                <div className="skeleton h-10 w-10 rounded-lg" />
+                <div className="skeleton h-5 w-14 rounded-full" />
+                <div className="skeleton h-6 w-3/4" />
+                <div className="skeleton h-4 w-full" />
+                <div className="skeleton h-4 w-5/6" />
+                <div className="skeleton h-4 w-2/3" />
+              </div>
+            ))}
           </div>
         )}
 

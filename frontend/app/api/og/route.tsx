@@ -30,8 +30,17 @@ function pickVerse(ref: string | null): OgVerse {
   return all[day % all.length]
 }
 
+function clip(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max - 1).trimEnd() + '…' : text
+}
+
 export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url)
+    // A free-form quote (e.g. Madhav's one-line truth from a conversation) gets
+    // its own card; otherwise fall back to the verse card.
+    const quote = searchParams.get('quote')
+    if (quote) return renderQuoteCard(quote, searchParams.get('q'))
     return renderCard(req)
   } catch (err) {
     console.error('og render error', err)
@@ -57,6 +66,56 @@ export async function GET(req: Request) {
       { width: 1200, height: 630 },
     )
   }
+}
+
+// A shareable card carrying a line of guidance — the most viral artifact the
+// app can produce. Optionally shows the question that prompted it.
+function renderQuoteCard(quote: string, question: string | null) {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          padding: '70px',
+          background: 'linear-gradient(160deg, #050A1E 0%, #0A0F2E 55%, #111827 100%)',
+          fontFamily: 'serif',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ fontSize: 44 }}>🪷</div>
+          <div style={{ fontSize: 30, color: '#E8A620', letterSpacing: 2 }}>Ask Madhav</div>
+          {question && (
+            <div
+              style={{
+                marginLeft: 'auto',
+                fontSize: 22,
+                color: 'rgba(255,248,231,0.55)',
+                fontStyle: 'italic',
+                maxWidth: 520,
+                textAlign: 'right',
+              }}
+            >
+              {`“${clip(question, 80)}”`}
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', fontSize: 48, color: '#FFF8E7', lineHeight: 1.35 }}>
+          {`“${clip(quote, 220)}”`}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', fontSize: 24, color: 'rgba(255,248,231,0.4)' }}>
+          <div style={{ display: 'flex' }}>Guidance inspired by the Bhagavad Gita</div>
+          <div style={{ marginLeft: 'auto', color: '#E8A620' }}>Seek wisdom. Find peace.</div>
+        </div>
+      </div>
+    ),
+    { width: 1200, height: 630 },
+  )
 }
 
 function renderCard(req: Request) {

@@ -33,9 +33,20 @@ export default function DailyVerse() {
         </h2>
 
         {loading && (
-          <div className="flex flex-col items-center gap-4 py-12">
-            <span className="text-5xl lotus-pulse">🪷</span>
-            <p className="text-ink/40 text-sm">Loading today&apos;s verse...</p>
+          <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-saffron/25 bg-white shadow-2xl shadow-saffron/10 text-left">
+            <div className="skeleton min-h-[260px] md:min-h-full rounded-none" />
+            <div className="p-8 space-y-4">
+              <div className="flex gap-2">
+                <div className="skeleton h-5 w-16 rounded-full" />
+                <div className="skeleton h-5 w-20 rounded-full" />
+              </div>
+              <div className="skeleton h-7 w-11/12" />
+              <div className="skeleton h-7 w-3/4" />
+              <div className="skeleton h-4 w-full mt-6" />
+              <div className="skeleton h-4 w-5/6" />
+              <div className="skeleton h-4 w-full" />
+              <div className="skeleton h-10 w-56 rounded-full mt-6" />
+            </div>
           </div>
         )}
 

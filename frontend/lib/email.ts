@@ -7,7 +7,18 @@ export function isEmailEnabled(): boolean {
   return Boolean(process.env.RESEND_API_KEY)
 }
 
-function verseEmailHtml(verse: RawVerse, unsubscribeUrl: string): string {
+// A short reflective question to carry the verse from reading into the day.
+// Tuned to the verse's leading theme when present; otherwise a gentle default.
+function reflectionPrompt(verse: RawVerse): string {
+  const theme = verse.themes?.[0]?.toLowerCase()
+  if (theme) {
+    return `Where in your life today does ${theme} ask something of you — and what is one small step you can take?`
+  }
+  return 'Where in your life today does this verse ask something of you — and what is one small step you can take?'
+}
+
+function verseEmailHtml(verse: RawVerse, unsubscribeUrl: string, siteUrl: string): string {
+  const journalUrl = siteUrl ? `${siteUrl}/journal` : ''
   return `
   <div style="background:#0A0F2E;padding:32px;font-family:Georgia,serif;color:#FFF8E7">
     <div style="max-width:560px;margin:0 auto;border:1px solid rgba(232,166,32,0.25);border-radius:16px;padding:28px">
@@ -22,6 +33,15 @@ function verseEmailHtml(verse: RawVerse, unsubscribeUrl: string): string {
         <p style="font-size:12px;color:#E8A620;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px">Practical Step</p>
         <p style="font-size:14px;line-height:1.6;margin:0">${verse.practical_guidance}</p>
       </div>
+      <div style="border-top:1px solid rgba(232,166,32,0.15);padding-top:16px;margin-top:18px">
+        <p style="font-size:12px;color:#E8A620;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px">Today's Reflection</p>
+        <p style="font-size:14px;line-height:1.6;margin:0 0 16px;color:rgba(255,248,231,0.85)">${reflectionPrompt(verse)}</p>
+        ${
+          journalUrl
+            ? `<a href="${journalUrl}" style="display:inline-block;background:#E8A620;color:#0A0F2E;text-decoration:none;font-size:14px;font-weight:bold;padding:10px 22px;border-radius:999px">Set today's intention & keep your streak →</a>`
+            : ''
+        }
+      </div>
       <p style="font-size:11px;color:rgba(255,248,231,0.3);margin:24px 0 0;text-align:center">
         You receive this because you subscribed to the Daily Ritual.
         <a href="${unsubscribeUrl}" style="color:rgba(232,166,32,0.6)">Unsubscribe</a>
@@ -34,6 +54,7 @@ export async function sendDailyVerse(
   to: string,
   verse: RawVerse,
   unsubscribeUrl: string,
+  siteUrl = '',
 ): Promise<boolean> {
   const key = process.env.RESEND_API_KEY
   if (!key) return false
@@ -43,7 +64,7 @@ export async function sendDailyVerse(
       from: FROM,
       to,
       subject: `🪷 Today's Gita verse — ${verse.reference}`,
-      html: verseEmailHtml(verse, unsubscribeUrl),
+      html: verseEmailHtml(verse, unsubscribeUrl, siteUrl),
     })
     if (error) {
       console.error('Resend error', error)
