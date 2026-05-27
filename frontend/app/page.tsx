@@ -7,6 +7,8 @@ import PopularVerses from '@/components/PopularVerses'
 import ChapterBrowser from '@/components/ChapterBrowser'
 import SubscribeRitual from '@/components/SubscribeRitual'
 import ScrollReveal from '@/components/ScrollReveal'
+import BackToTop from '@/components/BackToTop'
+import GuidedPaths from '@/components/GuidedPaths'
 
 const STATS = [
   {
@@ -55,6 +57,7 @@ export default function Home() {
 
       <div data-reveal><DailyVerse /></div>
       <div data-reveal><ChatInterface /></div>
+      <div data-reveal><GuidedPaths /></div>
       <div data-reveal><PopularVerses /></div>
       <div data-reveal><ChapterBrowser /></div>
       <div data-reveal><StoryCards /></div>
@@ -70,6 +73,15 @@ export default function Home() {
           <p className="text-ink/60 mt-3 text-sm font-medium">
             Ask Madhav — Bhagavad Gita Guidance
           </p>
+
+          {/* Channels */}
+          <div className="flex items-center justify-center gap-5 mt-4 text-sm">
+            <a href="/#chat" className="text-saffron/80 hover:text-saffron transition-colors">Ask a Question</a>
+            <a href="/journal" className="text-saffron/80 hover:text-saffron transition-colors">Journal</a>
+            {process.env.NEXT_PUBLIC_WHATSAPP_NUMBER && (
+              <a href="/whatsapp" className="text-saffron/80 hover:text-saffron transition-colors">WhatsApp</a>
+            )}
+          </div>
 
           {/* Gita Press attribution — the credibility line */}
           <p className="text-ink/55 text-xs mt-3 font-medium">
@@ -89,6 +101,8 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <BackToTop />
     </main>
   )
 }

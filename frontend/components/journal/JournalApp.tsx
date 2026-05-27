@@ -16,6 +16,9 @@ import {
   type JournalEntry,
 } from '@/lib/journal'
 
+// Handoff key written by the chat's "Make this my intention" action.
+const PENDING_INTENTION_KEY = 'askmadhav_pending_intention'
+
 export default function JournalApp() {
   const configured = isSupabaseConfigured()
   const supabase = getBrowserClient()
@@ -48,6 +51,9 @@ export default function JournalApp() {
     return () => sub.subscription.unsubscribe()
   }, [supabase])
 
+  // Set when a seeker arrives from a chat answer via "Make this my intention".
+  const [intentionFromChat, setIntentionFromChat] = useState(false)
+
   const loadData = useCallback(async () => {
     const [s, j] = await Promise.all([fetchSavedVerses(), fetchJournal()])
     setSaved(s)
@@ -58,6 +64,18 @@ export default function JournalApp() {
       setMood(todayEntry.mood || '')
       setIntention(todayEntry.intention || '')
       setReflection(todayEntry.reflection || '')
+    }
+    // A guidance step carried over from the chat takes precedence — it's what
+    // the seeker just chose to commit to. Consume it once, then forget it.
+    try {
+      const pending = window.localStorage.getItem(PENDING_INTENTION_KEY)
+      if (pending) {
+        setIntention(pending)
+        setIntentionFromChat(true)
+        window.localStorage.removeItem(PENDING_INTENTION_KEY)
+      }
+    } catch {
+      /* storage blocked — nothing to carry over */
     }
   }, [])
 
@@ -195,6 +213,12 @@ export default function JournalApp() {
           Today&apos;s Sankalpa
         </h2>
         <p className="text-ink/40 text-xs mb-5">A sankalpa is a heartfelt intention. Set one for today.</p>
+
+        {intentionFromChat && (
+          <p className="text-saffron/80 text-xs border border-saffron/20 bg-saffron/[0.05] rounded-lg px-3 py-2 mb-4">
+            ✦ Carried over from your conversation with Madhav. Make it your own, then save.
+          </p>
+        )}
 
         <p className="text-saffron/60 text-xs uppercase tracking-wider mb-2">How is your heart?</p>
         <div className="flex flex-wrap gap-2 mb-5">

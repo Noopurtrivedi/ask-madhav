@@ -5,6 +5,7 @@ import { findVerse } from '@/lib/verseEngine'
 import VerseAudio from '@/components/VerseAudio'
 import ShareVerse from '@/components/ShareVerse'
 import SaveVerseButton from '@/components/SaveVerseButton'
+import ChapterBridge from '@/components/ChapterBridge'
 
 interface Props {
   params: { reference: string }
@@ -86,6 +87,7 @@ export default function VersePage({ params }: Props) {
               englishMeaning={verse.english_meaning}
               themes={verse.themes}
             />
+            <ChapterBridge chapter={verse.chapter_number} />
           </div>
           <Link href="/" className="text-saffron/70 hover:text-saffron text-sm transition-colors">
             ← Ask your own question

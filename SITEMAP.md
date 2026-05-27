@@ -19,16 +19,18 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `app/icon.svg` | App favicon / icon. |
 | `app/journal/page.tsx` | `/journal` route — renders the Sankalpa Journal (auth-gated). |
 | `app/verse/[reference]/page.tsx` | `/verse/2.47` deep-link page; `generateMetadata` produces share/OG tags per verse. |
+| `app/whatsapp/page.tsx` | `/whatsapp` — QR code + "Open WhatsApp chat" deep link (`wa.me`) to chat with Madhav in WhatsApp. Gated on `NEXT_PUBLIC_WHATSAPP_NUMBER`. |
 
 ### `frontend/app/api/` — server routes (verse engine + integrations)
 | File | Description |
 |---|---|
-| `api/ask/route.ts` | **Core RAG endpoint.** Rate limit → bounded input → retrieval → template answer → optional Gemini overlay. Never hard-fails. `runtime=nodejs`. |
+| `api/ask/route.ts` | **Core RAG endpoint.** Rate limit → bounded input → `answerQuestion()` (shared pipeline). Never hard-fails. `runtime=nodejs`. |
+| `api/whatsapp/route.ts` | **WhatsApp webhook** (Meta Cloud API). GET = verification handshake; POST = inbound messages → dedup → command/greeting → `answerQuestion()` → reply + grounding verse. Always 200s. `runtime=nodejs`. |
 | `api/daily-verse/route.ts` | Returns the day-of-year rotating verse; cached for the day. |
 | `api/verse/route.ts` | Returns one verse (`?ref=`) or many (`?refs=a,b,c`) by reference via `findVerse`; powers the Popular Verses cards. `runtime=nodejs`. |
 | `api/tts/route.ts` | Read-aloud: Gemini TTS (`gemini-2.5-flash-preview-tts`, voice "Charon") → WAV; guaranteed calm male voice (Hindi/English) on `GEMINI_API_KEY`. 503 → client falls back to SpeechSynthesis. |
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
-| `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `runtime=edge`. |
+| `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). `runtime=nodejs`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
 | `api/unsubscribe/route.ts` | Daily Ritual unsubscribe (GET link from email). |
 | `api/cron/daily-ritual/route.ts` | Sends the daily verse email to subscribers; guarded by `CRON_SECRET`. Vercel Cron @ 13:00 UTC. |
@@ -38,9 +40,12 @@ The live application is everything under `frontend/`. The repo root holds data-g
 |---|---|
 | `lib/verseEngine.ts` | **Keyword/theme retrieval engine** (TS port of the Python original). In-memory index, scoring, template answer, daily/lookup helpers, disclaimer. |
 | `lib/gemini.ts` | Gemini RAG layer — `SYSTEM_INSTRUCTION` (Madhav persona), context builder, `generateGuidance()`. Returns null when no key / on failure. |
+| `lib/guidance.ts` | **Shared guidance pipeline** — `answerQuestion()`: retrieval → template answer → optional Gemini overlay. Used by both `/api/ask` and the WhatsApp webhook so channels never drift. |
+| `lib/whatsapp/client.ts` | Meta WhatsApp Cloud API client — `sendWhatsAppText()` (chunks long replies), `isWhatsAppConfigured()`, `verifySignature()` (X-Hub-Signature-256). |
+| `lib/whatsapp/memory.ts` | Per-phone conversation memory + message-id dedup over Upstash Redis (fail-open; stateless without it). Roadmap: migrate to Supabase at scale. |
 | `lib/ratelimit.ts` | Two-layer fail-open rate limiter: Upstash Redis → in-memory sliding window (20/60s). |
 | `lib/api.ts` | Client-side fetch wrappers for the API routes (`askQuestion`, `getDailyVerse`, …). |
-| `lib/email.ts` | Resend email helpers + `isEmailEnabled()` gate for the Daily Ritual. |
+| `lib/email.ts` | Resend email helpers + `isEmailEnabled()` gate for the Daily Ritual. The daily verse email includes a theme-aware reflection prompt + a "set today's intention & keep your streak" Journal CTA. |
 | `lib/journal.ts` | Sankalpa Journal data ops (saved verses, intentions, moods, streaks) over Supabase. |
 | `lib/supabase/client.ts` | Browser Supabase client (anon key, RLS) + `isSupabaseConfigured()`. |
 | `lib/supabase/admin.ts` | Server Supabase client (service-role key) for subscriber writes & cron. |
@@ -51,9 +56,12 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/Hero.tsx` | Landing hero — Kurukshetra image (`public/art/scene-2.png`), rotating shloka, CTAs. |
 | `components/HeroVerse.tsx` | Rotating hero shloka; opens with Gita 4.7 ("Yada yada hi dharmasya"), cross-fades through iconic verses. |
 | `components/Navbar.tsx` | Top navigation bar. |
-| `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen; calls `/api/ask`. |
+| `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen/Copy/Share; **persists the conversation to `localStorage`** (capped 20 turns) with a returning-seeker recap + "Start a new conversation"; rotating suggested prompts; per-answer "Make this my intention" → Journal; always-present crisis helpline line. Calls `/api/ask`. |
+| `components/GuidedPaths.tsx` | "Walk a Path" — 4 curated multi-verse journeys (Letting Go, Facing Fear, Grief, Purpose); steps link to verse pages, CTA prefills the chat. Pure curation, no API. |
+| `components/BackToTop.tsx` | Floating lotus "↑ top" button; appears after ~1 viewport of scroll. |
+| `components/ChapterBridge.tsx` | "Read all of Chapter N" link on a verse card; prefills the chat (or stashes to `sessionStorage` + navigates home when off the home page). |
 | `components/DailyVerse.tsx` | Verse-of-the-day — two-column card with `scene-1` image, breathing aura, reveal-on-tap practical step. |
-| `components/VerseCard.tsx` | Reusable verse renderer (Sanskrit/transliteration/Hindi/English); `compact` mode. |
+| `components/VerseCard.tsx` | Reusable verse renderer (Sanskrit/transliteration/Hindi/English); `compact` mode; full mode shows Save/Share + a `ChapterBridge` "Read all of Chapter N". |
 | `components/PopularVerses.tsx` | Curated grid; shows Sanskrit, expands (via `/api/verse`) to Hindi+English meaning; AI ("Reflect with Madhav") is optional. |
 | `components/ChapterBrowser.tsx` | 18 chapter cards; expand to read each chapter's essence; AI ("Explore with Madhav") is optional. |
 | `components/StoryCards.tsx` | Mahabharata story cards from `/api/stories`. |
@@ -66,7 +74,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/SacredArt.tsx` | Decorative sacred art / motifs (sun rays, peacock feather, lotus, petals). |
 | `public/art/scene-1..3.png` | Krishna & Arjuna at Kurukshetra (AI-generated); `scene-2` is the hero image. |
 | `components/ScrollReveal.tsx` | Scroll-triggered reveal animation wrapper. |
-| `components/journal/JournalApp.tsx` | Full journal experience (saved verses, daily intention, streak, themes). |
+| `components/journal/JournalApp.tsx` | Full journal experience (saved verses, daily intention, streak, themes); consumes a `askmadhav_pending_intention` handoff from the chat to prefill today's intention. |
 
 ### `frontend/` — data, types, config
 | File | Description |

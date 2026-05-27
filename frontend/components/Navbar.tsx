@@ -4,6 +4,9 @@ import { useState } from 'react'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  // Only surface the WhatsApp channel when a number is configured — otherwise
+  // /whatsapp is inert and the link would dead-end.
+  const whatsappEnabled = Boolean(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER)
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-saffron/10">
@@ -25,6 +28,9 @@ export default function Navbar() {
           <a href="/#chat" className="hover:text-saffron transition-colors">Ask a Question</a>
           <a href="/#stories" className="hover:text-saffron transition-colors">Stories</a>
           <a href="/journal" className="hover:text-saffron transition-colors">Journal</a>
+          {whatsappEnabled && (
+            <a href="/whatsapp" className="hover:text-saffron transition-colors">WhatsApp</a>
+          )}
         </div>
 
         {/* CTA */}
@@ -58,6 +64,9 @@ export default function Navbar() {
           <a href="/#chat" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Ask a Question</a>
           <a href="/#stories" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Stories</a>
           <a href="/journal" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">Journal</a>
+          {whatsappEnabled && (
+            <a href="/whatsapp" onClick={() => setMenuOpen(false)} className="hover:text-saffron transition-colors">WhatsApp</a>
+          )}
           <a href="/#chat" onClick={() => setMenuOpen(false)} className="px-4 py-2 bg-saffron text-navy font-medium rounded-full text-center hover:bg-saffron-light transition-colors">Ask Now</a>
         </div>
       )}

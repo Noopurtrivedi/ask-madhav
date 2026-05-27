@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
 
   for (const sub of subscribers || []) {
     const unsubscribeUrl = `${site}/api/unsubscribe?email=${encodeURIComponent(sub.email)}`
-    if (await sendDailyVerse(sub.email, verse, unsubscribeUrl)) sent++
+    if (await sendDailyVerse(sub.email, verse, unsubscribeUrl, site)) sent++
   }
 
   return NextResponse.json({ ok: true, verse: verse.reference, recipients: subscribers?.length || 0, sent })

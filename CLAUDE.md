@@ -33,16 +33,20 @@ This fallback discipline is the core design principle: **`/api/ask` must never h
 
 **Madhav's persona** is defined entirely in the `SYSTEM_INSTRUCTION` prompt in `lib/gemini.ts`. Madhav **is** Krishna (the name Arjuna called him) — the persona speaks *as* Krishna, the eternal consciousness, addressing the user as "Parth". The signature move is ONE vivid metaphor (rivers/sky/fire/light/mirrors/battlefields) carrying a Gita truth, then a practical step and a reflective closing line. It does **not** paste the full multilingual verse block (the UI's `VerseCard` shows that beside the reply) — it references the verse in prose. Replies are tuned per seeker: `ANALOGY_WORLD` fits analogies to a self-declared age band, and `LANGUAGE_DIRECTIVE` answers in English / Hindi / Hinglish. Editing tone/format means editing that prompt.
 
+The `answerQuestion()` helper in `lib/guidance.ts` is the single, shared embodiment of this pipeline (retrieval → template → optional LLM overlay). **Both** `/api/ask` and the WhatsApp webhook call it, so the two channels never drift — change the pipeline there once.
+
 ### API routes (`app/api/`)
 - `POST /api/ask` — the RAG endpoint above. `runtime = 'nodejs'`. Rate-limited; bounds question to 1000 chars and history to 12 turns.
+- `GET/POST /api/whatsapp` — WhatsApp channel webhook (Meta Cloud API). GET = Meta's verification handshake; POST = inbound messages → signature check → message-id dedup → command/greeting handling → `answerQuestion()` → reply + a grounding-verse follow-up. Always returns 200 (so Meta doesn't retry); per-phone rate limited; conversation memory + dedup via Upstash Redis (fail-open → stateless without it). Env-gated by `WHATSAPP_*`. Full setup in [`WHATSAPP_SETUP.md`](./WHATSAPP_SETUP.md). **Memory roadmap:** Upstash Redis now → Supabase Postgres when traffic grows.
 - `GET /api/daily-verse` — day-of-year rotating verse.
 - `GET /api/stories` — Mahabharata stories from `data/stories.json`.
-- `GET /api/og` — shareable Wisdom Card PNG via `next/og`.
+- `GET /api/og` — shareable Wisdom Card PNG via `next/og`. `?ref=` renders a verse card; `?quote=&q=` renders a conversation card (Madhav's line + the prompting question) — used by the chat's per-answer Share action.
 - `POST /api/subscribe` / `/api/unsubscribe` — Daily Ritual email sign-up (Supabase).
 - `GET /api/cron/daily-ritual` — sends the daily verse email; protected by `CRON_SECRET`. Registered as a Vercel Cron at 13:00 UTC in `frontend/vercel.json`.
 
 ### Frontend
-- Next.js 14 App Router. Single-page experience in `app/page.tsx` composing components from `components/` (`Hero`, `ChatInterface`, `DailyVerse`, `StoryCards`, `SubscribeRitual`, etc.). Dynamic routes: `app/verse/[reference]/` and `app/journal/`.
+- Next.js 14 App Router. Single-page experience in `app/page.tsx` composing components from `components/` (`Hero`, `ChatInterface`, `GuidedPaths`, `DailyVerse`, `StoryCards`, `SubscribeRitual`, `BackToTop`, etc.). Dynamic routes: `app/verse/[reference]/` and `app/journal/`.
+- **Chat continuity & cross-feature loops:** `ChatInterface` persists the conversation to `localStorage` (`askmadhav_chat`, capped 20 turns) and greets returning seekers with a theme-aware recap. Each answer offers "Make this my intention," which hands a step to the Journal via `localStorage` (`askmadhav_pending_intention`) and navigates to `/journal`, where `JournalApp` consumes it. Verse cards and Guided Paths route back into the chat via the `madhav:prefill` CustomEvent (or `sessionStorage['madhav:prefill']` when prefilling from another page). The WhatsApp channel and Journal are surfaced in the navbar/footer (WhatsApp gated on `NEXT_PUBLIC_WHATSAPP_NUMBER`).
 - `lib/api.ts` is the client-side fetch layer (same-origin; honors `NEXT_PUBLIC_API_URL` only if you point at a standalone backend).
 - `@/*` path alias resolves to the `frontend/` root (`tsconfig.json`).
 - `types/index.ts` holds shared client types; `lib/verseEngine.ts` re-declares its own server-side `RawVerse`/`VerseCard` interfaces — keep both in sync when changing the verse shape.
@@ -83,7 +87,10 @@ A FastAPI + Django hybrid (`backend/main.py` is FastAPI; `backend/askmadhav/` + 
 | `SUPABASE_SERVICE_ROLE_KEY` | Daily Ritual subscriber writes + cron (server-only). |
 | `RESEND_API_KEY`, `DAILY_RITUAL_FROM_EMAIL` | Daily Ritual email delivery. |
 | `CRON_SECRET` | Protects the daily-ritual cron endpoint. |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Cross-instance rate limiting (else in-memory fallback). |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Cross-instance rate limiting + WhatsApp conversation memory/dedup (else in-memory / stateless fallback). |
+| `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN` | WhatsApp channel (Meta Cloud API). Absent → `/api/whatsapp` inert. |
+| `WHATSAPP_APP_SECRET` | Verify Meta's `X-Hub-Signature-256` (recommended for production). |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | E.164 digits (no `+`) for the `/whatsapp` QR + `wa.me` link. |
 | `NEXT_PUBLIC_SITE_URL` | Absolute share/OG URLs. |
 
 ## Deploy
