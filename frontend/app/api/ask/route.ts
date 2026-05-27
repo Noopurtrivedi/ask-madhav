@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { scoreVerses, buildTemplateAnswer, disclaimer } from '@/lib/verseEngine'
-import { generateGuidance, type ChatTurn } from '@/lib/gemini'
+import { disclaimer } from '@/lib/verseEngine'
+import { answerQuestion, type ChatTurn } from '@/lib/guidance'
 import { checkRateLimit } from '@/lib/ratelimit'
 import type { AgeGroup, AnswerLanguage, UserProfile } from '@/types'
 
@@ -70,25 +70,10 @@ export async function POST(req: NextRequest) {
 
     const profile = parseProfile(body.profile)
 
-    // Verse retrieval is in-memory and always succeeds (returns a daily verse
-    // as a last resort), so the template answer is a guaranteed fallback.
-    const matched = scoreVerses(question)
-    const base = buildTemplateAnswer(question, matched)
-
-    // RAG layer: try the LLM, but never let its failure break the response.
-    let answer = base.answer
-    let usedAi = false
-    try {
-      const ai = await generateGuidance(question, matched, history, profile)
-      if (ai) {
-        answer = ai
-        usedAi = true
-      }
-    } catch (err) {
-      console.error('generateGuidance failed', err)
-    }
-
-    return NextResponse.json({ ...base, answer, source: usedAi ? 'ai' : 'template' })
+    // Shared pipeline: retrieval (always succeeds) → template answer → optional
+    // LLM overlay. Never throws; falls back to the template on any LLM failure.
+    const result = await answerQuestion(question, history, profile)
+    return NextResponse.json(result)
   } catch (err) {
     // Last-resort fallback — the chat should never hard-fail.
     console.error('ask route error', err)
