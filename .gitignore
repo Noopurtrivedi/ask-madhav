@@ -62,3 +62,4 @@ uploads/
 # frontend/data/verses.json; these are a resumable scrape cache + a redundant copy.
 .shloka_cache.json
 verses_clean.json
+.vercel

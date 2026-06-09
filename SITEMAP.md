@@ -111,6 +111,9 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `data/seed.sql` | Legacy DB seed data. |
 | `README.md` | Project overview, features, quick start, deploy guide. |
 | `CLAUDE.md` | Architecture & guidance for Claude Code sessions. |
+| `docs/TTS.md` | Read-aloud architecture + evaluated TTS provider options (Gemini/OpenAI/Google Cloud/ElevenLabs/XTTS-v2), the Hinglish nuance, and the env-gated fallback pattern. Secrets-free (env-var names only). |
+| `WHATSAPP_SETUP.md` | WhatsApp Cloud API channel setup (env-var names + Meta dashboard steps; no real values). |
+| `docs/DEFERRED_CHANGES.md` | Notes on a deferred "retrieval confidence" feature archived as a patch, not shipped. |
 | `push_to_github.sh`, `fix_and_push.sh` | One-off git helper scripts. |
 
 ---
