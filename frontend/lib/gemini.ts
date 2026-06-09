@@ -1,14 +1,17 @@
 /**
  * Madhav Dialogue — multi-turn, context-aware guidance grounded in retrieved
- * Gita verses (RAG). Uses Google Gemini's free tier. If GEMINI_API_KEY is not
- * configured, generateGuidance() returns null and the caller falls back to the
- * deterministic template engine, so the app always works.
+ * Gita verses (RAG). Generation prefers Vertex AI (service-account auth, spends
+ * your Vertex credits) when GOOGLE_VERTEX_* is configured, and otherwise uses
+ * the public Gemini API key. If neither path is configured (or the call
+ * fails/times out), generateGuidance() returns null and the caller falls back
+ * to the deterministic template engine, so the app always works.
  *
  * Phase 1: the reply is tuned to the user's self-declared age group (which world
  * the analogies are drawn from) and answered in their chosen language.
  */
 import type { RawVerse } from '@/lib/verseEngine'
 import type { AgeGroup, AnswerLanguage, UserProfile } from '@/types'
+import { isVertexConfigured, vertexGenerateContent } from '@/lib/vertex'
 
 export interface ChatTurn {
   role: 'user' | 'assistant'
@@ -125,8 +128,7 @@ export async function generateGuidance(
   history: ChatTurn[] = [],
   profile?: UserProfile,
 ): Promise<string | null> {
-  const key = process.env.GEMINI_API_KEY
-  if (!key) return null
+  if (!isAiEnabled()) return null
 
   const context = buildContext(verses)
   const languageDirective =
@@ -162,50 +164,75 @@ export async function generateGuidance(
     },
   ]
 
+  // Same body shape for both transports — Vertex and the public Gemini API
+  // accept identical generateContent payloads.
+  const requestBody = {
+    systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+    contents,
+    generationConfig: {
+      temperature: 0.7,
+      // gemini-2.5-flash is a reasoning model with thinking ON by default;
+      // thinking tokens are drawn from maxOutputTokens. Disable thinking so
+      // the full reply (esp. in Hindi/Hinglish, which use more tokens) has
+      // room to complete instead of truncating to empty.
+      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: 1400,
+      topP: 0.95,
+    },
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+    ],
+  }
+
+  // Prefer Vertex (spends your credits). If it's configured but the call fails,
+  // fall through to the Gemini API key when one is set — then to the template.
+  if (isVertexConfigured()) {
+    const text = extractText(await vertexGenerateContent(MODEL, requestBody))
+    if (text) return text
+  }
+  if (process.env.GEMINI_API_KEY) {
+    return extractText(await geminiApiCall(requestBody))
+  }
+  return null
+}
+
+// Calls the public Gemini API (API key in the query param). Returns the parsed
+// response JSON, or null on any failure/timeout.
+async function geminiApiCall(body: unknown): Promise<unknown | null> {
+  const key = process.env.GEMINI_API_KEY
+  if (!key) return null
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 20000)
   try {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 20000)
     const res = await fetch(ENDPOINT(key), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          // gemini-2.5-flash is a reasoning model with thinking ON by default;
-          // thinking tokens are drawn from maxOutputTokens. Disable thinking so
-          // the full reply (esp. in Hindi/Hinglish, which use more tokens) has
-          // room to complete instead of truncating to empty.
-          thinkingConfig: { thinkingBudget: 0 },
-          maxOutputTokens: 1400,
-          topP: 0.95,
-        },
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-        ],
-      }),
+      body: JSON.stringify(body),
     })
     clearTimeout(timeout)
-
     if (!res.ok) {
       console.error('Gemini error', res.status, await res.text().catch(() => ''))
       return null
     }
-    const data = await res.json()
-    const text: string | undefined = data?.candidates?.[0]?.content?.parts
-      ?.map((p: { text?: string }) => p.text || '')
-      .join('')
-      .trim()
-    return text || null
+    return await res.json()
   } catch (err) {
+    clearTimeout(timeout)
     console.error('Gemini request failed', err)
     return null
   }
 }
 
+// Pull the concatenated text out of a generateContent response (same shape from
+// Vertex and the Gemini API). Returns null if empty/missing.
+function extractText(data: unknown): string | null {
+  const parts = (data as { candidates?: { content?: { parts?: { text?: string }[] } }[] })
+    ?.candidates?.[0]?.content?.parts
+  const text = parts?.map((p) => p.text || '').join('').trim()
+  return text || null
+}
+
 export function isAiEnabled(): boolean {
-  return Boolean(process.env.GEMINI_API_KEY)
+  return isVertexConfigured() || Boolean(process.env.GEMINI_API_KEY)
 }

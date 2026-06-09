@@ -8,7 +8,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 
 ---
 
-## `frontend/` — the live Next.js 14 app (App Router)
+## `frontend/` — the live Next.js 16 app (App Router)
 
 ### `frontend/app/` — routes & pages
 | File | Description |
@@ -39,7 +39,8 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | File | Description |
 |---|---|
 | `lib/verseEngine.ts` | **Keyword/theme retrieval engine** (TS port of the Python original). In-memory index, scoring, template answer, daily/lookup helpers, disclaimer. |
-| `lib/gemini.ts` | Gemini RAG layer — `SYSTEM_INSTRUCTION` (Madhav persona), context builder, `generateGuidance()`. Returns null when no key / on failure. |
+| `lib/gemini.ts` | Gemini RAG layer — `SYSTEM_INSTRUCTION` (Madhav persona), context builder, `generateGuidance()`. Prefers Vertex (via `lib/vertex.ts`) when configured, else the Gemini API key; returns null when neither is set / on failure. |
+| `lib/vertex.ts` | Vertex AI transport — service-account OAuth (`google-auth-library`) + `vertexGenerateContent()` against the aiplatform endpoint. `isVertexConfigured()` gates it; spends GCP Vertex credits. Returns null on failure so chat falls back. |
 | `lib/guidance.ts` | **Shared guidance pipeline** — `answerQuestion()`: retrieval → template answer → optional Gemini overlay. Used by both `/api/ask` and the WhatsApp webhook so channels never drift. |
 | `lib/whatsapp/client.ts` | Meta WhatsApp Cloud API client — `sendWhatsAppText()` (chunks long replies), `isWhatsAppConfigured()`, `verifySignature()` (X-Hub-Signature-256). |
 | `lib/whatsapp/memory.ts` | Per-phone conversation memory + message-id dedup over Upstash Redis (fail-open; stateless without it). Roadmap: migrate to Supabase at scale. |
@@ -89,7 +90,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `tailwind.config.ts` | Tailwind theme/config. |
 | `postcss.config.js` | PostCSS/Tailwind pipeline. |
 | `tsconfig.json` | TS config; `@/*` alias → `frontend/` root. |
-| `.eslintrc.json` | ESLint (eslint-config-next). |
+| `eslint.config.mjs` | ESLint flat config (ESLint 9 + eslint-config-next/core-web-vitals); run via `eslint .`. |
 | `package.json` | Scripts (`dev`/`build`/`start`/`lint`) + deps. |
 | `.vercel/project.json` | Linked Vercel project metadata. |
 

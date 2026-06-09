@@ -17,7 +17,7 @@ cd frontend
 npm install
 npm run dev     # http://localhost:3000
 npm run build   # production build
-npm run lint    # ESLint (eslint-config-next)
+npm run lint    # ESLint CLI flat config (eslint.config.mjs, eslint-config-next)
 ```
 
 No test framework is configured. The app runs fully with **zero env vars** — every external integration is optional and gated by env var presence (see "Optional integrations" below).
@@ -27,7 +27,7 @@ No test framework is configured. The app runs fully with **zero env vars** — e
 **RAG-without-a-database.** A user question flows through two layers, the second of which is best-effort:
 
 1. **Retrieval** (`lib/verseEngine.ts`) — a keyword/theme scoring engine over `data/verses.json`, loaded in-memory at module init (`KEYWORD_INDEX`, `VERSE_MAP` built once per server instance). Tokenizes the question, expands tokens via `THEME_EXPANSIONS` (e.g. "angry"→`anger`), scores verses (exact match = 3, prefix match = 1), returns the top 3. Always returns at least one verse (falls back to a day-of-year verse), so retrieval never fails.
-2. **Generation** (`lib/gemini.ts`) — calls Google Gemini (`gemini-2.5-flash`, free tier) via raw `fetch` to the `generativelanguage.googleapis.com` REST endpoint, grounding the reply in the retrieved verses. If `GEMINI_API_KEY` is unset **or the call fails/times out (20s)**, `generateGuidance()` returns `null` and the caller falls back to `buildTemplateAnswer()` — a deterministic template response. The response includes `source: 'ai' | 'template'` so the UI knows which path ran.
+2. **Generation** (`lib/gemini.ts`) — grounds the reply in the retrieved verses via `gemini-2.5-flash`. Two transports share one request body: **Vertex AI** (`lib/vertex.ts`, preferred when `GOOGLE_VERTEX_*` is configured — service-account OAuth against `aiplatform.googleapis.com`, spends your GCP Vertex credits) and the **public Gemini API** (`generativelanguage.googleapis.com` with `GEMINI_API_KEY`, the fallback). Chain: Vertex (if configured) → Gemini key (if set) → `null`. If neither is configured **or the call fails/times out (20s)**, `generateGuidance()` returns `null` and the caller falls back to `buildTemplateAnswer()` — a deterministic template response. The response includes `source: 'ai' | 'template'` so the UI knows which path ran. **TTS (`app/api/tts/route.ts`) stays on the Gemini API key** regardless (the TTS preview model has limited Vertex availability).
 
 This fallback discipline is the core design principle: **`/api/ask` must never hard-fail.** The route layers defenses — rate limit → bounded input → retrieval (always succeeds) → template answer → optional LLM overlay → top-level try/catch returning a friendly message.
 
@@ -45,7 +45,7 @@ The `answerQuestion()` helper in `lib/guidance.ts` is the single, shared embodim
 - `GET /api/cron/daily-ritual` — sends the daily verse email; protected by `CRON_SECRET`. Registered as a Vercel Cron at 13:00 UTC in `frontend/vercel.json`.
 
 ### Frontend
-- Next.js 14 App Router. Single-page experience in `app/page.tsx` composing components from `components/` (`Hero`, `ChatInterface`, `GuidedPaths`, `DailyVerse`, `StoryCards`, `SubscribeRitual`, `BackToTop`, etc.). Dynamic routes: `app/verse/[reference]/` and `app/journal/`.
+- Next.js 16 App Router (React 19; Turbopack is the default dev/build bundler). Single-page experience in `app/page.tsx` composing components from `components/` (`Hero`, `ChatInterface`, `GuidedPaths`, `DailyVerse`, `StoryCards`, `SubscribeRitual`, `BackToTop`, etc.). Dynamic routes: `app/verse/[reference]/` and `app/journal/`.
 - **Chat continuity & cross-feature loops:** `ChatInterface` persists the conversation to `localStorage` (`askmadhav_chat`, capped 20 turns) and greets returning seekers with a theme-aware recap. Each answer offers "Make this my intention," which hands a step to the Journal via `localStorage` (`askmadhav_pending_intention`) and navigates to `/journal`, where `JournalApp` consumes it. Verse cards and Guided Paths route back into the chat via the `madhav:prefill` CustomEvent (or `sessionStorage['madhav:prefill']` when prefilling from another page). The WhatsApp channel and Journal are surfaced in the navbar/footer (WhatsApp gated on `NEXT_PUBLIC_WHATSAPP_NUMBER`).
 - `lib/api.ts` is the client-side fetch layer (same-origin; honors `NEXT_PUBLIC_API_URL` only if you point at a standalone backend).
 - `@/*` path alias resolves to the `frontend/` root (`tsconfig.json`).
@@ -82,7 +82,8 @@ A FastAPI + Django hybrid (`backend/main.py` is FastAPI; `backend/askmadhav/` + 
 
 | Variable | Enables |
 |---|---|
-| `GEMINI_API_KEY` | AI chat (RAG). Absent → deterministic template replies. |
+| `GEMINI_API_KEY` | AI chat (RAG) + TTS read-aloud. Absent → deterministic template replies (and TTS falls back to the browser voice). |
+| `GOOGLE_VERTEX_PROJECT`, `GOOGLE_VERTEX_LOCATION`, `GOOGLE_VERTEX_CREDENTIALS` | Runs **chat** on Vertex AI (your GCP credits) instead of the free Gemini tier. All three required; chat falls back to `GEMINI_API_KEY` if a Vertex call fails. `CREDENTIALS` = the service-account JSON (whole file, stringified). |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sankalpa Journal (auth, saved verses, streaks). |
 | `SUPABASE_SERVICE_ROLE_KEY` | Daily Ritual subscriber writes + cron (server-only). |
 | `RESEND_API_KEY`, `DAILY_RITUAL_FROM_EMAIL` | Daily Ritual email delivery. |

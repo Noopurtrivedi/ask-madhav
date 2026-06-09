@@ -25,6 +25,10 @@ const securityHeaders = [
 
 const nextConfig = {
   poweredByHeader: false, // don't advertise the framework version
+  // Pin the Turbopack workspace root to this dir. Sibling projects under
+  // ~/Projects each have their own lockfile, so Turbopack (default in Next 16)
+  // would otherwise infer the wrong root (it guessed the home directory).
+  turbopack: { root: __dirname },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },
