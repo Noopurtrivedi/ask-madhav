@@ -455,7 +455,7 @@ export default function ChatInterface() {
                       {msg.verses && msg.verses.length > 0 && (
                         <div className="space-y-3">
                           {msg.verses.map((v: VerseCard) => (
-                            <VerseCardComponent key={v.reference} verse={v} />
+                            <VerseCardComponent key={v.reference} verse={v} collapsible />
                           ))}
                         </div>
                       )}
