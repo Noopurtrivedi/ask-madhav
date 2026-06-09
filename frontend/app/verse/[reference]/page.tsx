@@ -8,11 +8,12 @@ import SaveVerseButton from '@/components/SaveVerseButton'
 import ChapterBridge from '@/components/ChapterBridge'
 
 interface Props {
-  params: { reference: string }
+  params: Promise<{ reference: string }>
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const verse = findVerse(decodeURIComponent(params.reference))
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { reference } = await params
+  const verse = findVerse(decodeURIComponent(reference))
   if (!verse) return { title: 'Verse not found — Ask Madhav' }
 
   const title = `Bhagavad Gita ${verse.reference} — Ask Madhav`
@@ -36,8 +37,9 @@ export function generateMetadata({ params }: Props): Metadata {
   }
 }
 
-export default function VersePage({ params }: Props) {
-  const verse = findVerse(decodeURIComponent(params.reference))
+export default async function VersePage({ params }: Props) {
+  const { reference } = await params
+  const verse = findVerse(decodeURIComponent(reference))
   if (!verse) notFound()
 
   return (
