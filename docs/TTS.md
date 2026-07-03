@@ -11,8 +11,13 @@ The read-aloud feature is a single Next.js route handler, `app/api/tts/route.ts`
 (`runtime = 'nodejs'`):
 
 1. Reads `{ text }` from the request (bounded to 1800 chars).
-2. Calls **Google Gemini TTS** (`gemini-2.5-flash-preview-tts`, voice **"Charon"** —
-   a calm male voice) via REST, using `GEMINI_API_KEY`.
+2. Calls **Gemini TTS** (`gemini-2.5-flash-lite-preview-tts` by default, voice
+   **"Charon"** — a calm male voice) — **via Vertex AI when `GOOGLE_VERTEX_*` is
+   configured (your GCP credits), otherwise via the `GEMINI_API_KEY`** (see the
+   transport chain below). Flash-Lite is the cheapest, lowest-latency Gemini TTS
+   tier. The prompt asks for reverent, fully-enunciated Sanskrit/Devanagari so
+   quoted shlokas recite in a natural Indian cadence. Override the model with the
+   optional `TTS_MODEL` env var — no code change; absent → Flash-Lite.
 3. Wraps the returned PCM as a WAV and streams it back (`audio/wav`, `no-store`).
 4. **Fail-open:** if `GEMINI_API_KEY` is unset or the call fails/times out (25s),
    the route returns `503` and the client (`components/SpeakButton.tsx`) falls
@@ -21,11 +26,27 @@ The read-aloud feature is a single Next.js route handler, `app/api/tts/route.ts`
 This mirrors the chat pipeline's fallback discipline (see [`CLAUDE.md`](../CLAUDE.md)):
 a good path that degrades gracefully rather than hard-failing.
 
-### Why TTS stayed on Gemini (not Vertex)
+### Transport chain — Vertex first, then the Gemini key
 
-When chat moved to Vertex AI (`lib/vertex.ts`), TTS deliberately stayed on the
-Gemini API key: the `gemini-2.5-flash-preview-tts` model has limited/region-specific
-availability on Vertex. Keeping TTS on the Gemini key is the low-risk choice.
+TTS now mirrors chat: it prefers **Vertex AI** (your GCP credits) and falls back
+to the Gemini API key. The route builds one request body and tries, in order:
+
+```
+Vertex AI (if GOOGLE_VERTEX_* set)  →  Gemini API key (GEMINI_API_KEY)  →  browser SpeechSynthesis
+```
+
+Vertex reuses the same `vertexGenerateContent()` / service-account OAuth as chat
+(`lib/vertex.ts`), so no new credentials are needed. Both transports return the
+same `generateContent` shape (`inlineData` = base64 PCM); Vertex emits raw 16-bit
+24 kHz PCM with no WAV header, which is exactly what the route's `wrapWav()` adds.
+
+**Region/model caveat:** Gemini **Flash** TTS has broad Vertex coverage
+(us-central1, us-east*, several europe-* regions); **Flash-Lite** TTS coverage is
+narrower. If the Vertex path silently isn't being used (credits not consumed),
+your region likely doesn't serve `gemini-2.5-flash-lite-preview-tts` yet — set
+`TTS_MODEL=gemini-2.5-flash-preview-tts` so the credits path succeeds. If Vertex
+returns nothing for any reason, the route falls through to the Gemini key, so
+read-aloud never hard-fails.
 
 ## The Hinglish nuance (drives provider choice)
 

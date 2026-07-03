@@ -83,6 +83,7 @@ A FastAPI + Django hybrid (`backend/main.py` is FastAPI; `backend/askmadhav/` + 
 | Variable | Enables |
 |---|---|
 | `GEMINI_API_KEY` | AI chat (RAG) + TTS read-aloud. Absent → deterministic template replies (and TTS falls back to the browser voice). |
+| `TTS_MODEL` | Optional override for the read-aloud model. Absent → `gemini-2.5-flash-lite-preview-tts` (cheapest, lowest-latency tier). Set to `gemini-2.5-flash-preview-tts` for slightly higher quality at higher cost. |
 | `GOOGLE_VERTEX_PROJECT`, `GOOGLE_VERTEX_LOCATION`, `GOOGLE_VERTEX_CREDENTIALS` | Runs **chat** on Vertex AI (your GCP credits) instead of the free Gemini tier. All three required; chat falls back to `GEMINI_API_KEY` if a Vertex call fails. `CREDENTIALS` = the service-account JSON (whole file, stringified). |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sankalpa Journal (auth, saved verses, streaks). |
 | `SUPABASE_SERVICE_ROLE_KEY` | Daily Ritual subscriber writes + cron (server-only). |
