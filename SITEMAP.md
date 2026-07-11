@@ -67,7 +67,8 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/ChapterBrowser.tsx` | 18 chapter cards; expand to read each chapter's essence; AI ("Explore with Madhav") is optional. |
 | `components/StoryCards.tsx` | Mahabharata story cards from `/api/stories`. |
 | `components/VerseAudio.tsx` | Browser SpeechSynthesis recitation w/ word highlighting + meditation loop. |
-| `components/SpeakButton.tsx` | Reads an answer aloud — server TTS (`/api/tts`, guaranteed male voice) with SpeechSynthesis fallback; `autoPlay` for hands-free/accessible use. |
+| `components/SpeakButton.tsx` | Reads an answer aloud — server TTS (`/api/tts`, guaranteed male voice) with SpeechSynthesis fallback; `autoPlay` for hands-free/accessible use. Emits `madhav:voice` events (live amplitude via a Web Audio analyser) so the matching `MadhavLight` avatar pulses with the voice. |
+| `components/MadhavLight.tsx` | Madhav rendered as *living light* (not a face) — a luminous orb that breathes at rest and awakens/pulses with his voice via the `madhav:voice` event bus. Fail-open + reduced-motion aware. Used as the chat avatar + "thinking" indicator. |
 | `components/MicButton.tsx` | Voice question input via Web Speech API (SpeechRecognition); language-aware; hidden where unsupported. |
 | `components/ShareVerse.tsx` | Share controls (links to the OG Wisdom Card). |
 | `components/SaveVerseButton.tsx` | Save a verse to the journal (Supabase, auth-gated). |

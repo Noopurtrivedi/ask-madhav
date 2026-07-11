@@ -18,10 +18,19 @@ interface Props {
   text: string
   language?: AnswerLanguage
   autoPlay?: boolean
+  /** Message id — lets the matching MadhavLight avatar pulse with this voice. */
+  speechId?: string
 }
 
 function bcp47(language: AnswerLanguage = 'english'): string {
   return language === 'hindi' ? 'hi-IN' : 'en-IN'
+}
+
+// Tell the matching MadhavLight avatar how brightly to glow. `active` wakes the
+// light; `level` (0..1) is the live voice amplitude. See components/MadhavLight.
+function emitVoice(detail: { id?: string; level?: number; active?: boolean }) {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent('madhav:voice', { detail }))
 }
 
 const MALE_HINTS = [
@@ -55,14 +64,71 @@ function pickVoice(voices: SpeechSynthesisVoice[], lang: string): SpeechSynthesi
   return scored[0].v
 }
 
-export default function SpeakButton({ text, language = 'english', autoPlay = false }: Props) {
+export default function SpeakButton({ text, language = 'english', autoPlay = false, speechId }: Props) {
   const [playing, setPlaying] = useState(false)
   const [preparing, setPreparing] = useState(false)
   const voicesRef = useRef<SpeechSynthesisVoice[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const didAutoPlay = useRef(false)
+  // Tears down the Web Audio analyser + tells the avatar to rest. Set while the
+  // server voice is playing; called on end / error / stop.
+  const voiceCleanupRef = useRef<(() => void) | null>(null)
   const hasSynthesis = typeof window !== 'undefined' && 'speechSynthesis' in window
+
+  // Drive the MadhavLight avatar from the playing <audio> via a Web Audio
+  // analyser: each frame we read the RMS amplitude and emit it as the glow
+  // level. Fail-open — if Web Audio is unavailable/blocked, the light still
+  // wakes (active:true was emitted separately) and simply self-shimmers.
+  const startVoiceAnalysis = async (audio: HTMLAudioElement) => {
+    voiceCleanupRef.current?.()
+    let raf = 0
+    let ctx: AudioContext | null = null
+    const rest = () => {
+      if (raf) cancelAnimationFrame(raf)
+      raf = 0
+      emitVoice({ id: speechId, level: 0, active: false })
+      ctx?.close().catch(() => {})
+      ctx = null
+    }
+    voiceCleanupRef.current = rest
+    try {
+      const AC =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (!AC) return
+      ctx = new AC()
+      await ctx.resume().catch(() => {})
+      // A suspended context would route (and silence) the audio through Web
+      // Audio — so only tap it once we know it's running; else leave the
+      // element to play normally and let the light self-shimmer.
+      if (ctx.state !== 'running') {
+        ctx.close().catch(() => {})
+        ctx = null
+        return
+      }
+      const source = ctx.createMediaElementSource(audio)
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 256
+      source.connect(analyser)
+      analyser.connect(ctx.destination)
+      const buf = new Uint8Array(analyser.frequencyBinCount)
+      const tick = () => {
+        analyser.getByteTimeDomainData(buf)
+        let sum = 0
+        for (let i = 0; i < buf.length; i++) {
+          const v = (buf[i] - 128) / 128
+          sum += v * v
+        }
+        const rms = Math.sqrt(sum / buf.length)
+        emitVoice({ id: speechId, level: Math.min(1, rms * 2.6), active: true })
+        raf = requestAnimationFrame(tick)
+      }
+      raf = requestAnimationFrame(tick)
+    } catch {
+      /* analysis unavailable — the light stays awake and self-shimmers */
+    }
+  }
 
   useEffect(() => {
     if (!hasSynthesis) return
@@ -85,6 +151,9 @@ export default function SpeakButton({ text, language = 'english', autoPlay = fal
       audioRef.current = null
     }
     if (hasSynthesis) window.speechSynthesis.cancel()
+    voiceCleanupRef.current?.() // tear down analyser
+    voiceCleanupRef.current = null
+    emitVoice({ id: speechId, level: 0, active: false }) // rest the avatar
     setPreparing(false)
     setPlaying(false)
   }
@@ -106,8 +175,19 @@ export default function SpeakButton({ text, language = 'english', autoPlay = fal
       u.voice = match
       u.lang = match.lang
     }
-    u.onend = () => setPlaying(false)
-    u.onerror = () => setPlaying(false)
+    // No amplitude available from SpeechSynthesis — just wake the avatar so it
+    // shimmers while speaking, and rest it when done.
+    const restLight = () => emitVoice({ id: speechId, level: 0, active: false })
+    u.onstart = () => emitVoice({ id: speechId, active: true })
+    u.onend = () => {
+      restLight()
+      setPlaying(false)
+    }
+    u.onerror = () => {
+      restLight()
+      setPlaying(false)
+    }
+    emitVoice({ id: speechId, active: true })
     window.speechSynthesis.speak(u)
     setPlaying(true)
     const keepAlive = setInterval(() => {
@@ -135,16 +215,23 @@ export default function SpeakButton({ text, language = 'english', autoPlay = fal
       const audio = new Audio(url)
       audioRef.current = audio
       audio.onended = () => {
+        voiceCleanupRef.current?.()
+        voiceCleanupRef.current = null
         setPlaying(false)
         URL.revokeObjectURL(url)
       }
       audio.onerror = () => {
+        voiceCleanupRef.current?.()
+        voiceCleanupRef.current = null
         URL.revokeObjectURL(url)
         speakLocal()
       }
       setPreparing(false)
       setPlaying(true)
+      emitVoice({ id: speechId, active: true }) // wake the avatar immediately
       await audio.play()
+      // Tap the amplitude only after playback starts (needs a live element).
+      startVoiceAnalysis(audio)
     } catch {
       if (controller.signal.aborted) return
       setPreparing(false)

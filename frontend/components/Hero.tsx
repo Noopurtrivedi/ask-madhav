@@ -12,7 +12,7 @@ export default function Hero() {
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-24 pb-16"
-      style={{ background: 'linear-gradient(180deg, #FBEFD6 0%, #FFFCF5 55%, #FBF4E6 100%)' }}
+      style={{ background: 'linear-gradient(180deg, #EFDCA8 0%, #F7EACB 52%, #E9D5A0 100%)' }}
     >
       {/* Dot grid background */}
       <div

@@ -7,6 +7,7 @@ import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } fr
 import VerseCardComponent from './VerseCard'
 import SpeakButton from './SpeakButton'
 import MicButton from './MicButton'
+import MadhavLight from './MadhavLight'
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -400,10 +401,12 @@ export default function ChatInterface() {
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {/* Avatar for assistant */}
+                {/* Madhav's presence — rendered as living light, not a face.
+                    It awakens and pulses with his voice when the reply is read
+                    aloud (see MadhavLight + SpeakButton). */}
                 {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-saffron/20 flex items-center justify-center mr-3 flex-shrink-0 mt-1">
-                    <span className="text-sm select-none">🪷</span>
+                  <div className="mr-3 flex-shrink-0 mt-1">
+                    <MadhavLight id={msg.id} size={32} />
                   </div>
                 )}
 
@@ -434,6 +437,7 @@ export default function ChatInterface() {
                           text={msg.content}
                           language={profile.language}
                           autoPlay={autoRead && msg.id === lastAssistantId}
+                          speechId={msg.id}
                         />
                         <CopyButton text={msg.content} />
                         <ShareAnswerButton
@@ -486,8 +490,8 @@ export default function ChatInterface() {
             {/* Loading indicator */}
             {loading && (
               <div className="flex justify-start">
-                <div className="w-8 h-8 rounded-full bg-saffron/20 flex items-center justify-center mr-3 flex-shrink-0">
-                  <span className="text-sm lotus-pulse select-none">🪷</span>
+                <div className="mr-3 flex-shrink-0 mt-1">
+                  <MadhavLight thinking size={32} />
                 </div>
                 <div className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3">
                   <div className="flex gap-1.5 items-center h-5">
