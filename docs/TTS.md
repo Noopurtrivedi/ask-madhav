@@ -15,9 +15,17 @@ The read-aloud feature is a single Next.js route handler, `app/api/tts/route.ts`
    **"Charon"** — a calm male voice) — **via Vertex AI when `GOOGLE_VERTEX_*` is
    configured (your GCP credits), otherwise via the `GEMINI_API_KEY`** (see the
    transport chain below). Flash-Lite is the cheapest, lowest-latency Gemini TTS
-   tier. The prompt asks for reverent, fully-enunciated Sanskrit/Devanagari so
-   quoted shlokas recite in a natural Indian cadence. Override the model with the
-   optional `TTS_MODEL` env var — no code change; absent → Flash-Lite.
+   tier. The prompt asks for a warm, human, un-robotic delivery with reverent,
+   fully-enunciated Sanskrit/Devanagari so quoted shlokas recite in a natural
+   Indian cadence. Override the model with the optional `TTS_MODEL` env var — no
+   code change; absent → Flash-Lite.
+
+   **Accent (Hindi, not English):** the request sets `speechConfig.languageCode`
+   to an Indian locale — `hi-IN` for Hindi replies, **`en-IN` for English/Hinglish**
+   — which is what biases Gemini's *pronunciation/accent* toward a natural Indian
+   (Hindi) accent rather than a flat American/British English default. The client
+   (`SpeakButton.tsx`) already sends `{ language }`; the route maps it to the
+   locale.
 3. Wraps the returned PCM as a WAV and streams it back (`audio/wav`, `no-store`).
 4. **Fail-open:** if `GEMINI_API_KEY` is unset or the call fails/times out (25s),
    the route returns `503` and the client (`components/SpeakButton.tsx`) falls

@@ -23,6 +23,15 @@ const MODEL = process.env.TTS_MODEL || 'gemini-2.5-flash-lite-preview-tts'
 const VOICE = 'Charon' // deep, calm male
 const MAX_CHARS = 1800
 
+// The accent lever. Gemini TTS honours a BCP-47 languageCode in speechConfig and
+// uses it to pick the *accent/pronunciation*, not just the language. We always
+// route English/Hinglish through the Indian-English locale (en-IN) and Hindi
+// through hi-IN — so Madhav carries a natural Hindi/Indian accent on every reply
+// instead of a flat American/British English default.
+function languageCode(language: unknown): string {
+  return language === 'hindi' ? 'hi-IN' : 'en-IN'
+}
+
 function wrapWav(pcm: Buffer, sampleRate: number): Buffer {
   const numChannels = 1
   const bitsPerSample = 16
@@ -78,25 +87,33 @@ export async function POST(req: NextRequest) {
   }
 
   let text = ''
+  let lang: unknown
   try {
     const body = await req.json()
     text = typeof body?.text === 'string' ? body.text.slice(0, MAX_CHARS) : ''
+    lang = body?.language
   } catch {
     return NextResponse.json({ error: 'bad request' }, { status: 400 })
   }
   if (!text.trim()) return NextResponse.json({ error: 'empty text' }, { status: 400 })
 
-  // A gentle style instruction shapes the delivery (Gemini TTS honours prose
-  // direction). The voice itself is fixed male. The Sanskrit clause makes any
-  // quoted shloka / Devanagari word land reverently and fully enunciated
-  // (Indian recitation cadence, no dropped final vowels).
-  const prompt = `Read this aloud slowly, calmly and warmly, like a wise, gentle teacher speaking from the heart. When you reach any Sanskrit or Devanagari words, recite them reverently with a natural Indian pronunciation, sounding each syllable fully and clearly:\n\n${text}`
+  // A style instruction shapes the delivery (Gemini TTS honours prose direction).
+  // The voice is fixed male; the languageCode below fixes the accent. We push
+  // hard for a HUMAN, un-robotic delivery — a real Indian teacher speaking in
+  // person: natural breaths and pauses, gentle warmth, unhurried, with the soft
+  // musical intonation of an Indian speaker (never a flat, clipped English
+  // newsreader). Any Sanskrit / Devanagari word is recited reverently, each
+  // syllable sounded fully (Indian recitation cadence, no dropped final vowels).
+  const prompt = `Speak this the way a warm, wise Indian teacher would say it to you in person — with a natural, clear Indian (Hindi) accent, gentle and heartfelt, never robotic or flat. Use real human intonation: soft rises and falls, natural pauses and breaths between thoughts, an unhurried and soothing pace. When you reach any Sanskrit or Devanagari words, recite them reverently with authentic Indian pronunciation, sounding each syllable fully and clearly:\n\n${text}`
 
   const requestBody = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
       responseModalities: ['AUDIO'],
-      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } },
+      speechConfig: {
+        languageCode: languageCode(lang),
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } },
+      },
     },
   }
 
