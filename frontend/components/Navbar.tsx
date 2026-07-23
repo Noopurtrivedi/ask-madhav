@@ -1,36 +1,84 @@
 'use client'
 
-import { useState } from 'react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import EngineChakra from './darshan/EngineChakra'
+import { CHAKRA_LOGO_ATTR, replayDarshanLaunch } from '@/lib/darshan-launch'
 
-export default function Navbar() {
+interface Props {
+  /**
+   * The page opens with the dark cosmic Darshan hero, so the bar starts
+   * transparent with moonlight text and only takes on its cream glass once the
+   * seeker scrolls past the hero's first fold.
+   */
+  overlay?: boolean
+}
+
+export default function Navbar({ overlay = false }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   // Only surface the WhatsApp channel when a number is configured — otherwise
   // /whatsapp is inert and the link would dead-end.
   const whatsappEnabled = Boolean(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER)
 
+  useEffect(() => {
+    if (!overlay) return
+    const onScroll = () => setScrolled(window.scrollY > 90)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [overlay])
+
+  // On the cosmic hero (not scrolled, menu closed) the bar is invisible chrome.
+  const onDark = overlay && !scrolled && !menuOpen
+  const link = onDark
+    ? 'text-moonlight/75 hover:text-gold-soft transition-colors'
+    : 'text-ink/70 hover:text-saffron transition-colors'
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-saffron/10">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
+        onDark ? 'bg-transparent border-b border-white/5' : 'bg-white/80 backdrop-blur-sm border-b border-saffron/10'
+      }`}
+    >
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
+        {/* Logo — the Sudarshan Chakra lands here at the end of the launch ritual.
+            The chakra is its own control rather than part of the home link:
+            clicking it releases the discus again, so it must not also navigate. */}
         <div className="flex items-center gap-3">
-          <span className="text-2xl select-none">🪷</span>
-          <span
-            className="text-xl font-semibold text-saffron"
+          <button
+            type="button"
+            onClick={replayDarshanLaunch}
+            aria-label="Release the Sudarshan Chakra"
+            title="Release the Sudarshan Chakra"
+            className="inline-flex rounded-full transition-transform hover:scale-110 active:scale-95
+                       focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4
+                       focus-visible:outline-gold-soft"
+          >
+            <span {...{ [CHAKRA_LOGO_ATTR]: '' }} className="inline-flex">
+              {/* Engine-bound: turns while Madhav is thinking, settles when the
+                  answer begins — the brand mark doubles as the AI status light. */}
+              <EngineChakra size={30} />
+            </span>
+          </button>
+          <Link
+            href="/"
+            className={`text-xl font-semibold transition-colors ${
+              onDark ? 'text-moonlight' : 'text-saffron'
+            }`}
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             Ask Madhav
-          </span>
+          </Link>
         </div>
 
         {/* Desktop nav links */}
-        <div className="hidden md:flex items-center gap-8 text-ink/70 text-sm">
-          <a href="/#daily-verse" className="hover:text-saffron transition-colors">Daily Verse</a>
-          <a href="/#chat" className="hover:text-saffron transition-colors">Ask a Question</a>
-          <a href="/#stories" className="hover:text-saffron transition-colors">Stories</a>
-          <a href="/journal" className="hover:text-saffron transition-colors">Journal</a>
-          {whatsappEnabled && (
-            <a href="/whatsapp" className="hover:text-saffron transition-colors">WhatsApp</a>
-          )}
+        <div className={`hidden md:flex items-center gap-8 text-sm ${onDark ? 'text-moonlight/75' : 'text-ink/70'}`}>
+          <a href="/#daily-verse" className={link}>Daily Verse</a>
+          <a href="/#chat" className={link}>Ask a Question</a>
+          <a href="/#stories" className={link}>Stories</a>
+          <a href="/journal" className={link}>Journal</a>
+          {whatsappEnabled && <a href="/whatsapp" className={link}>WhatsApp</a>}
         </div>
 
         {/* CTA */}
@@ -43,9 +91,10 @@ export default function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden text-ink/70 hover:text-saffron transition-colors"
+          className={`md:hidden transition-colors ${onDark ? 'text-moonlight/80 hover:text-gold-soft' : 'text-ink/70 hover:text-saffron'}`}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
         >
           <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
             {menuOpen ? (

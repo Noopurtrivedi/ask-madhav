@@ -68,7 +68,6 @@ export function LotusMandala({ className = '' }: { className?: string }) {
       fill="#E8A620"
       fillOpacity={opacity}
       transform={`rotate(${rot} 200 200) scale(${scale})`}
-      transform-origin="200 200"
       style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
     />
   )

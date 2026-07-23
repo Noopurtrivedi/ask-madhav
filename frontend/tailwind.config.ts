@@ -32,6 +32,22 @@ const config: Config = {
           DEFAULT: '#3A2A18',
           light: '#6B5840',
         },
+
+        // ── Darshan palette (the cosmic hero layer) ──────────────
+        // Deep indigo & peacock blue carry the sky; gold and lotus pink are
+        // the light within it. Text on the cosmos is moonlight, never pure #fff.
+        cosmos: {
+          DEFAULT: '#0A0E2A',
+          deep: '#060919',
+          violet: '#2A1A4A',
+        },
+        peacock: {
+          DEFAULT: '#1F7A8C',
+          light: '#7FD4D0',
+        },
+        'gold-soft': '#E8C35A',
+        moonlight: '#F6F1E4',
+        lotus: '#E8A0B8',
       },
       fontFamily: {
         crimson: ['"Crimson Text"', 'serif'],

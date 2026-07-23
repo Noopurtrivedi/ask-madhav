@@ -1,100 +1,147 @@
 'use client'
 
-import Image from 'next/image'
-import HeroVerse from './HeroVerse'
-import { SunRays, FloatingPetals } from './SacredArt'
+import { useEffect, useState, useSyncExternalStore } from 'react'
+import ChakraLaunch from './darshan/ChakraLaunch'
+import CosmicBackdrop from './darshan/CosmicBackdrop'
+import MadhavPresence from './darshan/MadhavPresence'
+import MorPankh from './darshan/MorPankh'
+import QuoteReflection from './darshan/QuoteReflection'
+import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
 
+/**
+ * Hero — the Darshan.
+ *
+ * Three layers, as designed:
+ *  1. **Presence** — Madhav seen through an arched darshan window, lit from
+ *     within, dissolving at its edges into the cosmos. `MadhavPresence` decides
+ *     whether that is the 3D scene or the static artwork, from the device tier.
+ *  2. **Reflection** — the shloka on glass, mirrored on the surface below it,
+ *     with the four ways in (Teach me · Guide me · Explain · Ask).
+ *  3. **Sacred interaction** — the Sudarshan Chakra launch ritual and the
+ *     drifting mor pankh, both once and both reduced-motion aware.
+ *
+ * The content stays veiled until the chakra lands in the logo
+ * (`madhav:darshan-ready`). A 3.5s failsafe reveals it regardless, so a broken
+ * or blocked animation can never leave the page empty.
+ */
 export default function Hero() {
+  // Subscribed rather than event-listened by hand: ChakraLaunch is a child, so
+  // its effect (and the landing it announces) runs *before* this component's
+  // effects. `useSyncExternalStore` re-reads the snapshot on subscribe and so
+  // never misses that announcement.
+  const landed = useSyncExternalStore(subscribeDarshanReady, isDarshanReady, darshanNotReady)
+  const [failsafe, setFailsafe] = useState(false)
+
+  useEffect(() => {
+    // The hero reveals itself even if the ritual never reports back.
+    const t = window.setTimeout(() => setFailsafe(true), 3500)
+    return () => clearTimeout(t)
+  }, [])
+
+  const revealed = landed || failsafe
+
   const scrollToChat = () => {
     document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
-    <section
-      className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden pt-24 pb-16"
-      style={{ background: 'linear-gradient(180deg, #EFDCA8 0%, #F7EACB 52%, #E9D5A0 100%)' }}
-    >
-      {/* Dot grid background */}
-      <div
-        className="absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, #E8A620 1px, transparent 0)',
-          backgroundSize: '40px 40px',
-        }}
-      />
+    <>
+      <ChakraLaunch />
 
-      {/* Radiant sun behind everything */}
-      <SunRays className="absolute top-[22%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[680px] opacity-50 pointer-events-none spin-slow" />
+      <section
+        id="darshan"
+        className="relative min-h-screen flex items-center px-6 overflow-hidden pt-24 pb-16"
+      >
+        <CosmicBackdrop />
+        <MorPankh />
 
-      {/* Drifting lotus petals */}
-      <FloatingPetals />
-
-      <div className="relative z-10 text-center max-w-3xl fade-up">
-        <p className="text-saffron/80 text-sm font-medium tracking-[0.3em] uppercase mb-4">
-          Bhagavad Gita · 700 Verses · Timeless Wisdom
-        </p>
-
-        <h1
-          className="text-4xl sm:text-5xl md:text-7xl font-bold text-ink mb-6 leading-tight"
-          style={{ fontFamily: 'Crimson Text, serif' }}
+        <div
+          className={`relative z-10 mx-auto w-full max-w-6xl transition-[opacity,transform] duration-1000 ease-out ${
+            revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}
         >
-          Seek Wisdom.<br />
-          <span className="shimmer-text">Find Peace.</span>
-        </h1>
+          {/* Mobile is one column ordered word → darshan → invitation; desktop is
+              two columns with the word and the invitation stacked on the left.
+              `contents` dissolves the left wrapper on mobile so its two halves
+              can be ordered around the darshan without duplicating any markup. */}
+          <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:items-center">
+            <div className="contents lg:block lg:text-left">
+              {/* ── Word ───────────────────────────────────────── */}
+              <div className="order-1 text-center lg:text-left">
+                <p className="text-gold-soft/70 text-[11px] sm:text-xs font-medium tracking-[0.34em] uppercase mb-5">
+                  Bhagavad Gita · 700 Verses · Timeless Wisdom
+                </p>
 
-        {/* The moment of the Gita — Krishna (Madhav) guiding Arjuna at Kurukshetra */}
-        <div className="relative mx-auto mb-8 max-w-2xl group">
-          {/* Breathing golden aura behind the frame */}
-          <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-r from-saffron/30 via-gold/20 to-saffron/30 blur-2xl lotus-pulse pointer-events-none" />
-          <div className="relative rounded-3xl overflow-hidden border border-saffron/30 shadow-2xl shadow-saffron/20
-                          transition-transform duration-700 ease-out group-hover:scale-[1.02]">
-            <Image
-              src="/art/scene-2.png"
-              alt="Krishna, as the charioteer Madhav, delivers the Bhagavad Gita to the warrior Arjuna on the battlefield of Kurukshetra at dawn"
-              width={1536}
-              height={1024}
-              priority
-              sizes="(max-width: 768px) 100vw, 672px"
-              className="w-full h-auto"
-            />
-            {/* Soft gold vignette to blend the image into the page */}
-            <div className="absolute inset-0 pointer-events-none rounded-3xl bg-gradient-to-t from-black/15 via-transparent to-transparent" />
-            <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-white/10 rounded-3xl" />
+                <h1
+                  className="text-4xl sm:text-5xl md:text-6xl font-bold text-moonlight mb-5 leading-[1.08]"
+                  style={{ fontFamily: 'Crimson Text, serif' }}
+                >
+                  Seek Wisdom.
+                  <br />
+                  <span className="shimmer-text">Find Peace.</span>
+                </h1>
+
+                <p className="text-moonlight/65 text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
+                  Bring your daily life questions. Receive guidance rooted in the eternal
+                  teachings of the Bhagavad Gita — verse by verse, truth by truth.
+                </p>
+              </div>
+
+              {/* ── Invitation ─────────────────────────────────── */}
+              <div className="order-3 text-center lg:text-left lg:mt-8">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                  <button
+                    onClick={scrollToChat}
+                    className="px-8 py-4 bg-saffron text-navy font-semibold rounded-full text-lg
+                               hover:bg-saffron-light transition-all hover:scale-105 shadow-lg shadow-saffron/25"
+                  >
+                    Ask a Question
+                  </button>
+                  <a
+                    href="#daily-verse"
+                    className="px-8 py-4 border border-gold/40 text-moonlight rounded-full text-lg bg-white/[0.06]
+                               backdrop-blur-sm hover:border-gold hover:bg-white/[0.12] transition-all hover:scale-105 inline-block"
+                  >
+                    Today&apos;s Verse
+                  </a>
+                </div>
+
+                <p className="mt-6 text-moonlight/35 text-xs max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                  Guidance inspired by the Bhagavad Gita — for reflection, not a substitute for
+                  medical, legal, or financial advice.
+                </p>
+              </div>
+            </div>
+
+            {/* ── Darshan: presence + the verse resting beneath it ── */}
+            <div className="order-2 flex flex-col items-center">
+              <div className="relative mb-6">
+                {/* Breathing aura */}
+                <div className="darshan-aura lotus-pulse" aria-hidden="true" />
+                {/* Turning halo of light behind the window */}
+                <div className="darshan-halo halo-turn" aria-hidden="true" />
+
+                <div className="darshan-window">
+                  {/* The presence itself: the procedural 3D darshan on capable
+                      devices, the Kurukshetra artwork everywhere else. The
+                      component owns that decision — see MadhavPresence. */}
+                  <MadhavPresence />
+                  {/* Edge dissolve + gold rim so the window belongs to the cosmos */}
+                  <div className="darshan-window-veil" aria-hidden="true" />
+                  <div className="darshan-window-rim" aria-hidden="true" />
+                </div>
+              </div>
+
+              {/* Glass surface the verse rests on */}
+              <div className="darshan-surface" aria-hidden="true" />
+              <div className="w-full">
+                <QuoteReflection tone="cosmic" reflect />
+              </div>
+            </div>
+
           </div>
         </div>
-
-        <p className="text-ink/70 text-lg md:text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-          Bring your daily life questions. Receive guidance rooted in the eternal teachings
-          of the Bhagavad Gita — verse by verse, truth by truth.
-        </p>
-
-        {/* Rotating shloka — opens with "Yada yada hi dharmasya" */}
-        <div className="mb-10">
-          <HeroVerse />
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button
-            onClick={scrollToChat}
-            className="px-8 py-4 bg-saffron text-navy font-semibold rounded-full text-lg
-                       hover:bg-saffron-light transition-all hover:scale-105 shadow-lg shadow-saffron/30"
-          >
-            Ask a Question
-          </button>
-          <a
-            href="#daily-verse"
-            className="px-8 py-4 border border-saffron/50 text-ink rounded-full text-lg bg-white/60
-                       hover:border-saffron hover:bg-white transition-all hover:scale-105 inline-block"
-          >
-            Today&apos;s Verse
-          </a>
-        </div>
-
-        <p className="mt-8 text-ink/40 text-xs max-w-lg mx-auto">
-          Guidance inspired by the Bhagavad Gita — for reflection, not a substitute for medical,
-          legal, or financial advice.
-        </p>
-      </div>
-    </section>
+      </section>
+    </>
   )
 }

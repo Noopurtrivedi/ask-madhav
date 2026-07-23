@@ -44,6 +44,15 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `lib/guidance.ts` | **Shared guidance pipeline** — `answerQuestion()`: retrieval → template answer → optional Gemini overlay. Used by both `/api/ask` and the WhatsApp webhook so channels never drift. |
 | `lib/whatsapp/client.ts` | Meta WhatsApp Cloud API client — `sendWhatsAppText()` (chunks long replies), `isWhatsAppConfigured()`, `verifySignature()` (X-Hub-Signature-256). |
 | `lib/whatsapp/memory.ts` | Per-phone conversation memory + message-id dedup over Upstash Redis (fail-open; stateless without it). Roadmap: migrate to Supabase at scale. |
+| `lib/darshan-launch.ts` | Contract between the launch ritual and the page it unveils — the `madhav:darshan-ready` event (+ a `useSyncExternalStore` subscribe/snapshot pair), the `data-chakra-logo` target attribute, and the once-per-session flag. |
+| `lib/motion.ts` | Motion preference — `prefersReducedMotion()` + the `useReducedMotion()` hook. The lightweight gate the ritual components check; `lib/darshan/tier.ts` builds the full tiering on top. |
+| `lib/darshan/types.ts` | **Darshan engine types** — 1:1 with the `supabase/darshan-schema.sql` tables (sacred assets, forms, quotes, moods, transitions, motion prefs). |
+| `lib/darshan/states.ts` | The 12-state machine: `DARSHAN_STATES` tuning profiles, the explicit `TRANSITIONS` table (illegal transitions are ignored, never thrown), `chakraStateFor()` bridge to `ChakraState`. `reduced_motion` is terminal. |
+| `lib/darshan/tier.ts` | Device + preference → `full` / `lite` / `still`. Real WebGL probe, deviceMemory/cores/saveData budget, persisted seeker preference (`askmadhav_motion_pref`). Gates whether three.js is ever downloaded. |
+| `lib/darshan/registry.ts` | 7 visual moods (palette + background symbol + particle density), 9 quote categories, the sacred-symbol registry. |
+| `lib/darshan/config.ts` | `DEFAULT_DARSHAN_CONFIG` + the nine-form architecture (1 active, 1 Vishwaroop, 7 reserved & unnamed pending review) and `resolveDarshanConfig()` — the seam a CMS plugs into. |
+| `lib/darshan/quotes.ts` | Quote source over `data/quotes.json` — theme filtering, deterministic `dailyQuote()`, mood resolution. |
+| `lib/darshan/events.ts` | The `madhav:darshan` event bus + the `darshan.thinking()/answering()/blessing()/error()` facade. Lets any component drive the engine without importing it. |
 | `lib/ratelimit.ts` | Two-layer fail-open rate limiter: Upstash Redis → in-memory sliding window (20/60s). |
 | `lib/api.ts` | Client-side fetch wrappers for the API routes (`askQuestion`, `getDailyVerse`, …). |
 | `lib/email.ts` | Resend email helpers + `isEmailEnabled()` gate for the Daily Ritual. The daily verse email includes a theme-aware reflection prompt + a "set today's intention & keep your streak" Journal CTA. |
@@ -54,9 +63,8 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
-| `components/Hero.tsx` | Landing hero — Kurukshetra image (`public/art/scene-2.png`), rotating shloka, CTAs. |
-| `components/HeroVerse.tsx` | Rotating hero shloka; opens with Gita 4.7 ("Yada yada hi dharmasya"), cross-fades through iconic verses. |
-| `components/Navbar.tsx` | Top navigation bar. |
+| `components/Hero.tsx` | **The Darshan** — cosmic-indigo landing hero: `CosmicBackdrop` + `MorPankh` + the arched darshan window (`public/art/scene-2.png`) + the shloka on glass + CTAs. Stays veiled until the chakra lands (`madhav:darshan-ready`), with a 3.5s failsafe reveal. |
+| `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. |
 | `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen/Copy/Share; **persists the conversation to `localStorage`** (capped 20 turns) with a returning-seeker recap + "Start a new conversation"; rotating suggested prompts; per-answer "Make this my intention" → Journal; always-present crisis helpline line. Calls `/api/ask`. |
 | `components/GuidedPaths.tsx` | "Walk a Path" — 4 curated multi-verse journeys (Letting Go, Facing Fear, Grief, Purpose); steps link to verse pages, CTA prefills the chat. Pure curation, no API. |
 | `components/BackToTop.tsx` | Floating lotus "↑ top" button; appears after ~1 viewport of scroll. |
@@ -76,6 +84,20 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/SacredArt.tsx` | Decorative sacred art / motifs (sun rays, peacock feather, lotus, petals). |
 | `public/art/scene-1..3.png` | Krishna & Arjuna at Kurukshetra (AI-generated); `scene-2` is the hero image. |
 | `components/ScrollReveal.tsx` | Scroll-triggered reveal animation wrapper. |
+| `components/darshan/SudarshanChakra.tsx` | **Brand signature.** Pure-SVG discus; one rAF loop eases rotation speed + a `--chakra-glow` var toward the target for the current `ChakraState` (`idle`/`processing`/`settling`/`still`), so state changes read as momentum. Still + calm under reduced motion. |
+| `components/darshan/ChakraLaunch.tsx` | The arrival ritual — indigo veil, the chakra gathers light, releases a ring, flies into the navbar logo (measured live from `data-chakra-logo`), veil dissolves. Once per session, skippable (click / Skip / Escape), skipped entirely under reduced motion. |
+| `components/darshan/CosmicBackdrop.tsx` | The hero sky — indigo→peacock→violet gradient, seeded (hydration-safe) star field, turning lotus mandala + orbit rings, gold horizon, bottom dissolve into the warm page. |
+| `components/darshan/MorPankh.tsx` | Krishna's peacock feather as a one-shot flourish: 3 feathers drift across on first paint. Reduced motion → one still feather with a soft glow. |
+| `components/darshan/DarshanProvider.tsx` | **The engine runtime.** Owns state, device tier, config and the active quote; guards transitions; listens to the event bus and to `madhav:darshan-ready`. `useDarshan()` / `useDarshanOptional()`. Wraps the whole app in `app/layout.tsx`. |
+| `components/darshan/EngineChakra.tsx` | The chakra bound to engine state (navbar logo turns while Madhav thinks) + `ChakraLoader`, the chat's processing indicator. |
+| `components/darshan/QuoteReflection.tsx` | **Gita Quote Reflection module.** Sanskrit + IAST + plain English + Hindi-on-demand, theme chip, mood-mapped background symbol, glass reflection, and the four intents (Teach me · Guide me · Explain this shloka · Ask Madhav) that prefill the chat. Supersedes the old `HeroVerse`. |
+| `components/darshan/MadhavPresence.tsx` | Picks what stands in the darshan window: the 3D presence at `full` tier, the Kurukshetra artwork otherwise. Error boundary drops to the artwork on any WebGL failure; the image always carries the alt text. |
+| `components/darshan/three/MadhavAvatarScene.tsx` | The hero's R3F scene — aniconic luminous presence built from canvas-generated radial-gradient sprites (no lit solids, no downloaded assets), aura shells, crown ring, light motes, and the commissioned-GLB slot. Lazily imported; only reached at `full` tier. |
+| `components/darshan/VishwaroopDarshan.tsx` | The opt-in Cosmic Form — invitation card, consented full-screen reveal (portalled to `<body>`, since `[data-reveal]`'s transform would otherwise trap `position:fixed`), self-ending after `max_duration_ms`, Escape always returns. Static mandala under reduced motion. |
+| `components/darshan/three/VishwaroopScene.tsx` | The Vishwaroop R3F scene — starfield, opening mandala rings, nested wireframe shells, core of light. Deliberately abstract: no faces, no horror, no strobing. |
+| `components/darshan/SacredSymbols.tsx` | Vector motifs a mood can call for (still water, lamp flame, cosmic mandala, chakra glyph) + `MoodSymbol`. Drawn in code, never loaded from a URL — the licensing guarantee. |
+| `components/darshan/MotionPreferenceToggle.tsx` | The seeker's own motion control (Automatic / Full / Calm / Text only), persisted and outranking the OS setting. In the footer. |
+| `components/darshan/DarshanDebugPanel.tsx` | `?darshan=debug` QA panel — drive all 12 states by hand, inspect tier/energy/mood. Dev-only. |
 | `components/journal/JournalApp.tsx` | Full journal experience (saved verses, daily intention, streak, themes); consumes a `askmadhav_pending_intention` handoff from the chat to prefill today's intention. |
 
 ### `frontend/` — data, types, config
@@ -83,9 +105,12 @@ The live application is everything under `frontend/`. The repo root holds data-g
 |---|---|
 | `data/verses.json` | **The dataset bundled into the app — all 701 clean verses** (Sanskrit + IAST transliteration + Hindi + English + keywords/themes/guidance). Generated by `build_verses.py`. |
 | `data/verses.curated.json` | The 30 hand-curated rich verses — stable override source for `build_verses.py` (never overwritten by the build). |
+| `data/quotes.json` | **Gita Quote Reflection seed** — 14 curated quotes across all 9 themes, with mood/theme metadata. Generated by `scripts/gen_quotes.js`; the seed for the `gita_quotes` CMS table. |
 | `data/stories.json` | 5 Mahabharata stories. |
 | `types/index.ts` | Shared client types (`Verse`, `Story`, `VerseCard`, `AskResponse`, `ChatMessage`, …). |
 | `supabase/schema.sql` | Postgres schema for journal/subscribers — run in the Supabase SQL editor. |
+| `supabase/darshan-schema.sql` | **Darshan admin/CMS schema** — the 10 tables (sacred assets, licence records, forms, quotes, categories, moods, animation states, transition settings, review notes, motion prefs), RLS, constraints that block unreviewed/unlicensed content, and the seed. |
+| `scripts/gen_quotes.js` | Builds `data/quotes.json` from `data/verses.json` — copies Sanskrit/transliteration/Hindi verbatim, adds curated plain-language English + theme/mood, normalises transliteration to IAST. |
 | `vercel.json` | Vercel config: Next.js preset + daily-ritual cron registration. |
 | `next.config.js` | Next.js config. |
 | `tailwind.config.ts` | Tailwind theme/config. |

@@ -3,11 +3,13 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { askQuestion, type ChatTurn } from '@/lib/api'
+import { darshan } from '@/lib/darshan/events'
 import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } from '@/types'
 import VerseCardComponent from './VerseCard'
 import SpeakButton from './SpeakButton'
 import MicButton from './MicButton'
 import MadhavLight from './MadhavLight'
+import { ChakraLoader } from './darshan/EngineChakra'
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -115,7 +117,7 @@ export default function ChatInterface() {
   const [recap, setRecap] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const didMount = useRef(false)
+  const followConversation = useRef(false)
   const restored = useRef(false)
 
   // Hydrate saved preferences + conversation after mount (avoids SSR/client
@@ -197,11 +199,11 @@ export default function ChatInterface() {
   }
 
   useEffect(() => {
-    // Skip the initial mount so the homepage opens on the hero, not the chat.
-    if (!didMount.current) {
-      didMount.current = true
-      return
-    }
+    // Only follow the conversation once the seeker has actually spoken in it.
+    // Restoring a saved conversation from localStorage also changes `messages`,
+    // and scrolling for that would yank a first-time visitor straight past the
+    // Darshan hero into the middle of the chat.
+    if (!followConversation.current) return
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [messages])
 
@@ -252,10 +254,15 @@ export default function ChatInterface() {
       .filter((m) => m.content?.trim())
       .map((m) => ({ role: m.role, content: m.content }))
 
+    followConversation.current = true // from here on, the view follows the conversation
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setLoading(true)
     setRecap(null)
+    // Tell the Darshan engine a question is in flight: the navbar chakra begins
+    // to turn and the scene draws inward. Fire-and-forget over the event bus —
+    // the chat neither imports the engine nor cares whether one is mounted.
+    darshan.thinking('chat')
 
     try {
       const response = await askQuestion(q, history, profile)
@@ -269,7 +276,13 @@ export default function ChatInterface() {
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, assistantMsg])
+      // The answer has begun. A reply grounded in verses is the deeper moment,
+      // so the aura opens for a beat first — `blessing` is only reachable from
+      // `answering`, and both auto-return to idle.
+      darshan.answering('chat')
+      if (response.verses?.length) darshan.blessing('chat')
     } catch {
+      darshan.error('chat')
       setMessages((prev) => [
         ...prev,
         {
@@ -493,21 +506,11 @@ export default function ChatInterface() {
                 <div className="mr-3 flex-shrink-0 mt-1">
                   <MadhavLight thinking size={32} />
                 </div>
+                {/* The Sudarshan Chakra is the loader — three bouncing dots
+                    read as a generic chatbot, which is exactly what this
+                    product must not feel like. */}
                 <div className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3">
-                  <div className="flex gap-1.5 items-center h-5">
-                    <span
-                      className="w-2 h-2 rounded-full bg-saffron/50 animate-bounce"
-                      style={{ animationDelay: '0ms' }}
-                    />
-                    <span
-                      className="w-2 h-2 rounded-full bg-saffron/50 animate-bounce"
-                      style={{ animationDelay: '150ms' }}
-                    />
-                    <span
-                      className="w-2 h-2 rounded-full bg-saffron/50 animate-bounce"
-                      style={{ animationDelay: '300ms' }}
-                    />
-                  </div>
+                  <ChakraLoader />
                 </div>
               </div>
             )}

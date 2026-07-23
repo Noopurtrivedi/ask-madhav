@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from 'next'
+import DarshanProvider from '@/components/darshan/DarshanProvider'
+import DarshanDebugPanel from '@/components/darshan/DarshanDebugPanel'
 import './globals.css'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
@@ -33,8 +35,26 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    // `suppressHydrationWarning`: the Darshan launch script mutates the veil
+    // before hydration (so a returning seeker never sees it flash), and browser
+    // extensions commonly stamp attributes on <html>. Neither is server-visible.
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        {/*
+          The Darshan Experience Engine wraps the whole app so state, device
+          tier and the active quote are shared by every route — the navbar
+          chakra reacts to a question asked three sections down the page.
+          It renders no markup of its own and, with no CMS configured, resolves
+          to DEFAULT_DARSHAN_CONFIG. See docs/DARSHAN.md.
+
+          TODO(cms): fetch `darshan_config` + `avatar_forms` in a Server
+          Component here and pass them as `config={…}`.
+        */}
+        <DarshanProvider>
+          {children}
+          <DarshanDebugPanel />
+        </DarshanProvider>
+      </body>
     </html>
   )
 }

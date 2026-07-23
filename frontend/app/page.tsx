@@ -9,6 +9,8 @@ import SubscribeRitual from '@/components/SubscribeRitual'
 import ScrollReveal from '@/components/ScrollReveal'
 import BackToTop from '@/components/BackToTop'
 import GuidedPaths from '@/components/GuidedPaths'
+import VishwaroopDarshan from '@/components/darshan/VishwaroopDarshan'
+import MotionPreferenceToggle from '@/components/darshan/MotionPreferenceToggle'
 
 const STATS = [
   {
@@ -32,7 +34,9 @@ export default function Home() {
   return (
     <main>
       <ScrollReveal />
-      <Navbar />
+      {/* `overlay` — the home page opens on the dark cosmic Darshan hero, so the
+          bar starts transparent and only takes on its cream glass on scroll. */}
+      <Navbar overlay />
       <Hero />
 
       {/* Stats bar */}
@@ -61,6 +65,8 @@ export default function Home() {
       <div data-reveal><PopularVerses /></div>
       <div data-reveal><ChapterBrowser /></div>
       <div data-reveal><StoryCards /></div>
+      {/* The Cosmic Form: an invitation only. Nothing loads until it is accepted. */}
+      <div data-reveal><VishwaroopDarshan /></div>
       <div data-reveal><SubscribeRitual /></div>
 
       {/* Footer */}
@@ -82,6 +88,10 @@ export default function Home() {
               <a href="/whatsapp" className="text-saffron/80 hover:text-saffron transition-colors">WhatsApp</a>
             )}
           </div>
+
+          {/* Motion control — the OS setting is honoured automatically, but a
+              seeker who has never found it can choose stillness right here. */}
+          <MotionPreferenceToggle className="mt-8 border-t border-saffron/10 pt-6" />
 
           {/* Gita Press attribution — the credibility line */}
           <p className="text-ink/55 text-xs mt-3 font-medium">
