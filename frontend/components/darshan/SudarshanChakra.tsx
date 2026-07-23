@@ -30,11 +30,18 @@ export type ChakraState =
   /** completely still (used for print / static contexts) */
   | 'still'
 
-/** Degrees per second for each state. */
+/**
+ * Degrees per second for each state.
+ *
+ * `processing` was 190°/s — half a revolution every second, fast enough that the
+ * blades blur into a disc and the discus stops reading as an object. At 105°/s
+ * you can still track a single blade around, which is what makes it feel like a
+ * weight being turned rather than a spinner.
+ */
 const SPEED: Record<ChakraState, number> = {
-  idle: 7,
-  processing: 190,
-  settling: 34,
+  idle: 6,
+  processing: 105,
+  settling: 20,
   still: 0,
 }
 
@@ -107,8 +114,8 @@ export default function SudarshanChakra({
       last = now
 
       // Exponential ease toward the state's speed & glow — momentum, not a snap.
-      speedRef.current += (SPEED[state] - speedRef.current) * Math.min(1, dt / 520)
-      glowRef.current += (GLOW[state] - glowRef.current) * Math.min(1, dt / 380)
+      speedRef.current += (SPEED[state] - speedRef.current) * Math.min(1, dt / 900)
+      glowRef.current += (GLOW[state] - glowRef.current) * Math.min(1, dt / 620)
       angleRef.current = (angleRef.current + (speedRef.current * dt) / 1000) % 360
 
       const a = angleRef.current

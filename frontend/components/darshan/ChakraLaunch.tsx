@@ -40,13 +40,20 @@ import { prefersReducedMotion } from '@/lib/motion'
  *    the veil still lifts — the hero also self-reveals on a timer.
  */
 
-/** The welcome: unhurried, ceremonial. */
+/**
+ * The welcome: unhurried, ceremonial.
+ *
+ * Roughly doubled from the first tuning. The original sequence was over in
+ * ~2.5s, which is long enough to *notice* the chakra but not long enough to
+ * watch it — the discus gathered, flew and landed before the eye had settled on
+ * it. A ritual you cannot follow is just a transition.
+ */
 const WELCOME = {
-  flightDelay: 1150, // chakra has gathered light; begin the throw
-  flightMs: 900,
-  veilDelay: 1800,
-  veilMs: 650,
-  doneMs: 2500,
+  flightDelay: 2400, // the chakra gathers light — let it hold before the throw
+  flightMs: 2100, // the throw itself, at viewer and away
+  veilDelay: 4000,
+  veilMs: 1200,
+  doneMs: 5400,
 }
 
 /**
@@ -54,11 +61,11 @@ const WELCOME = {
  * loosed. Roughly half the durations and almost no wind-up.
  */
 const FAST = {
-  flightDelay: 120,
-  flightMs: 620,
-  veilDelay: 480,
-  veilMs: 380,
-  doneMs: 1050,
+  flightDelay: 180,
+  flightMs: 1150,
+  veilDelay: 900,
+  veilMs: 520,
+  doneMs: 1750,
 }
 
 /** Depth the chakra recedes to before the throw, and how close it passes. */
@@ -176,7 +183,7 @@ export default function ChakraLaunch() {
         timers.current.push(
           window.setTimeout(
             () => setChakraState('settling'),
-            timing.flightDelay + timing.flightMs * 0.7
+            timing.flightDelay + timing.flightMs * 0.62
           )
         )
 
