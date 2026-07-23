@@ -331,7 +331,7 @@ export default function ChatInterface() {
     <section
       id="chat"
       className="relative overflow-hidden py-14 sm:py-20 px-6"
-      style={{ background: '#FFFCF5' }}
+      
     >
       {/* The form behind him while he speaks — swells on the engine's
           answering/blessing states and pulses on his live voice. */}
@@ -342,7 +342,7 @@ export default function ChatInterface() {
           {/* Krishna & Arjuna at Kurukshetra — Madhav, ready to counsel */}
           <div className="relative mx-auto mb-6 w-28 h-28 group">
             <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-saffron/30 to-gold/20 blur-xl lotus-pulse pointer-events-none" />
-            <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-saffron/40 shadow-lg shadow-saffron/20">
+            <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-gold/35 shadow-lg shadow-saffron/20">
               <Image
                 src="/art/scene-3.png"
                 alt="Krishna (Madhav) and Arjuna in dialogue on the field of Kurukshetra"
@@ -352,14 +352,14 @@ export default function ChatInterface() {
               />
             </div>
           </div>
-          <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Gita Guidance</p>
+          <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Gita Guidance</p>
           <h2
-            className="text-4xl font-bold text-ink"
+            className="text-4xl font-bold text-moonlight"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             Ask Madhav
           </h2>
-          <p className="text-ink/50 mt-3 text-sm">
+          <p className="text-moonlight/58 mt-3 text-sm">
             Every answer is grounded in a real verse from the Bhagavad Gita
           </p>
         </div>
@@ -373,8 +373,8 @@ export default function ChatInterface() {
                 key={q}
                 onClick={() => handleSend(q)}
                 disabled={loading}
-                className="px-3 py-1.5 border border-saffron/20 text-ink/60 text-xs rounded-full
-                           hover:border-saffron/50 hover:text-ink/90 transition-all disabled:opacity-40"
+                className="px-3 py-1.5 border border-gold/22 text-moonlight/65 text-xs rounded-full
+                           hover:border-gold/40 hover:text-moonlight/90 transition-all disabled:opacity-40"
               >
                 {q}
               </button>
@@ -388,13 +388,13 @@ export default function ChatInterface() {
                 setSuggestions(pickSuggestions())
                 setShowSuggest((s) => !s)
               }}
-              className="text-saffron/60 hover:text-saffron text-xs transition-colors"
+              className="text-gold-soft/65 hover:text-saffron text-xs transition-colors"
             >
               ✦ {showSuggest ? 'Hide prompts' : 'Try another question'}
             </button>
             <button
               onClick={startNewConversation}
-              className="text-ink/40 hover:text-saffron text-xs transition-colors"
+              className="text-moonlight/48 hover:text-saffron text-xs transition-colors"
             >
               ↺ Start a new conversation
             </button>
@@ -404,7 +404,7 @@ export default function ChatInterface() {
         {/* Returning-seeker recap */}
         {recap && (
           <div className="mb-6 text-center">
-            <p className="inline-block text-saffron/80 text-sm border border-saffron/20 bg-saffron/[0.05] rounded-full px-4 py-2">
+            <p className="inline-block text-gold-soft/85 text-sm border border-gold/22 bg-saffron/[0.05] rounded-full px-4 py-2">
               {recap}
             </p>
           </div>
@@ -412,8 +412,8 @@ export default function ChatInterface() {
 
         {/* Chat window */}
         <div
-          className="border border-saffron/20 rounded-2xl overflow-hidden"
-          style={{ background: '#FFFFFF' }}
+          className="border border-gold/22 rounded-2xl overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.045)' }}
         >
           {/* Messages area */}
           <div className="h-[26rem] sm:h-[520px] overflow-y-auto p-4 sm:p-6 space-y-6">
@@ -441,7 +441,7 @@ export default function ChatInterface() {
                       {/* Answer text — preserve newlines. aria-live so screen
                           readers announce each new reply automatically. */}
                       <div
-                        className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3 text-ink/90 text-sm leading-relaxed"
+                        className="bg-gold-soft/[0.07] rounded-2xl rounded-tl-sm px-4 py-3 text-moonlight/90 text-sm leading-relaxed"
                         aria-live="polite"
                       >
                         {msg.content.split('\n\n').map((para, i) => (
@@ -470,7 +470,7 @@ export default function ChatInterface() {
                           }
                         />
                         {msg.source === 'ai' && (
-                          <p className="text-saffron/40 text-[10px] tracking-wider uppercase flex items-center gap-1">
+                          <p className="text-gold-soft/45 text-[10px] tracking-wider uppercase flex items-center gap-1">
                             <span className="select-none">✦</span> Guided by Madhav, grounded in the verses below
                           </p>
                         )}
@@ -490,7 +490,7 @@ export default function ChatInterface() {
                         <button
                           onClick={() => makeIntention(msg)}
                           className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
-                                     border border-saffron/40 text-saffron hover:bg-saffron/10 transition-colors"
+                                     border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
                         >
                           🕉 Make this my intention for today →
                         </button>
@@ -498,7 +498,7 @@ export default function ChatInterface() {
 
                       {/* Disclaimer */}
                       {msg.disclaimer && (
-                        <p className="text-ink/25 text-xs px-1 leading-relaxed">
+                        <p className="text-moonlight/34 text-xs px-1 leading-relaxed">
                           {msg.disclaimer}
                         </p>
                       )}
@@ -517,7 +517,7 @@ export default function ChatInterface() {
                 {/* The Sudarshan Chakra is the loader — three bouncing dots
                     read as a generic chatbot, which is exactly what this
                     product must not feel like. */}
-                <div className="bg-saffron/5 rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="bg-gold-soft/[0.07] rounded-2xl rounded-tl-sm px-4 py-3">
                   <ChakraLoader />
                 </div>
               </div>
@@ -527,11 +527,11 @@ export default function ChatInterface() {
           </div>
 
           {/* Input bar */}
-          <div className="border-t border-saffron/10 p-4">
+          <div className="border-t border-gold/15 p-4">
             {/* Tuning bar — optional, persisted to localStorage. Lets Madhav fit
                 analogies to the seeker's world and reply in their language. */}
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="text-ink/30 text-xs select-none">Tune for you:</span>
+              <span className="text-moonlight/38 text-xs select-none">Tune for you:</span>
               <select
                 aria-label="Your age group (optional)"
                 value={profile.ageGroup ?? ''}
@@ -541,7 +541,7 @@ export default function ChatInterface() {
                     ageGroup: (e.target.value || undefined) as AgeGroup | undefined,
                   })
                 }
-                className="bg-saffron/5 border border-saffron/20 rounded-lg px-2.5 py-1.5 text-xs text-ink/70
+                className="bg-gold-soft/[0.07] border border-gold/22 rounded-lg px-2.5 py-1.5 text-xs text-moonlight/72
                            focus:outline-none focus:border-saffron/60 transition-colors cursor-pointer"
               >
                 {AGE_OPTIONS.map((o) => (
@@ -556,7 +556,7 @@ export default function ChatInterface() {
                 onChange={(e) =>
                   updateProfile({ ...profile, language: e.target.value as AnswerLanguage })
                 }
-                className="bg-saffron/5 border border-saffron/20 rounded-lg px-2.5 py-1.5 text-xs text-ink/70
+                className="bg-gold-soft/[0.07] border border-gold/22 rounded-lg px-2.5 py-1.5 text-xs text-moonlight/72
                            focus:outline-none focus:border-saffron/60 transition-colors cursor-pointer"
               >
                 {LANGUAGE_OPTIONS.map((o) => (
@@ -572,14 +572,14 @@ export default function ChatInterface() {
                 aria-pressed={autoRead}
                 className={`text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
                   autoRead
-                    ? 'border-saffron/60 text-saffron bg-saffron/10'
-                    : 'border-saffron/20 text-ink/50 hover:border-saffron/40'
+                    ? 'border-saffron/60 text-saffron bg-gold-soft/[0.10]'
+                    : 'border-gold/22 text-moonlight/58 hover:border-gold/35'
                 }`}
               >
                 🔊 {autoRead ? 'Read aloud: on' : 'Read aloud'}
               </button>
               {/* The tuning bar is subtle — say what it does so it's discoverable. */}
-              <span className="text-ink/25 text-[11px] basis-full">
+              <span className="text-moonlight/34 text-[11px] basis-full">
                 Optional — shapes Madhav&apos;s voice and language to you. Saved on this device only.
               </span>
             </div>
@@ -592,8 +592,8 @@ export default function ChatInterface() {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a life question, or tap the mic to speak..."
                 disabled={loading}
-                className="flex-1 bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink
-                           placeholder:text-ink/30 focus:outline-none focus:border-saffron/60
+                className="flex-1 bg-gold-soft/[0.07] border border-gold/22 rounded-xl px-4 py-3 text-moonlight
+                           placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60
                            transition-colors disabled:opacity-50 text-sm"
               />
               <MicButton
@@ -612,11 +612,11 @@ export default function ChatInterface() {
                 Ask
               </button>
             </div>
-            <p className="text-ink/20 text-xs mt-2 text-center">
+            <p className="text-moonlight/30 text-xs mt-2 text-center">
               Press Enter to send · tap the mic to ask by voice
             </p>
             {/* Crisis pathway — always present, gentle, never gating the chat. */}
-            <p className="text-ink/30 text-xs mt-1 text-center">
+            <p className="text-moonlight/38 text-xs mt-1 text-center">
               In crisis or unsafe? You&apos;re not alone — please reach a real person now at{' '}
               <a
                 href="https://findahelpline.com"
@@ -664,7 +664,7 @@ function ShareAnswerButton({ quote, question }: { quote: string; question?: stri
       type="button"
       onClick={share}
       aria-label="Share this guidance as an image"
-      className="text-saffron/60 hover:text-saffron text-[11px] flex items-center gap-1 transition-colors"
+      className="text-gold-soft/65 hover:text-saffron text-[11px] flex items-center gap-1 transition-colors"
     >
       ↗ Share
     </button>
@@ -690,7 +690,7 @@ function CopyButton({ text }: { text: string }) {
       type="button"
       onClick={copy}
       aria-label="Copy this answer"
-      className="text-saffron/60 hover:text-saffron text-[11px] flex items-center gap-1 transition-colors"
+      className="text-gold-soft/65 hover:text-saffron text-[11px] flex items-center gap-1 transition-colors"
     >
       {copied ? '✓ Copied' : '⧉ Copy'}
     </button>

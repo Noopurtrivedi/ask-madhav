@@ -34,54 +34,52 @@ export function SunRays({ className = '' }: { className?: string }) {
 /**
  * Mor pankh — Krishna's peacock feather.
  *
- * Drawn from the anatomy of a real feather rather than as a symbol, because the
- * symbolic version (a few straight lines and four flat ellipses) reads as
- * clip-art at any size:
+ * Modelled on a real feather rather than on the symbol, which is why it is
+ * built the way it is:
  *
- *  · a **rachis** that curves — a dead-straight shaft is the first tell,
- *  · ~46 fine **barbs** per side, each an arc rather than a line, lengthening
- *    and steepening toward the tip so the plume widens into the eye, with
- *    per-barb opacity jitter so it never looks combed,
- *  · the **ocellus** built as the real one is: bronze fringe → gold → green →
- *    turquoise → a notched indigo heart, each ring offset slightly upward so
- *    the eye reads as domed rather than as flat rings,
- *  · a specular highlight, since the whole point of a peacock feather is that
- *    it is iridescent.
+ *  · **Sparse barbs, not a plume.** ~24 per side, widely spaced, so the
+ *    background shows *between* them. A dense fill is the single thing that
+ *    makes a drawn feather read as clip-art.
+ *  · **Long and swept.** Each barb is an arc that leaves the shaft at a shallow
+ *    angle and sweeps up and outward, longest just below the eye, tapering to
+ *    the tip at the base — the lance shape a real tail feather has.
+ *  · **Bronze, not green.** The barbs run copper → gold; the green belongs to
+ *    the ocellus, not the shaft.
+ *  · **A large ocellus**, ringed as the real one is: copper → green → cyan →
+ *    a notched navy heart, with a specular highlight, since iridescence is the
+ *    entire point of a peacock feather.
  *
- * Deterministic throughout (a hashed jitter, never `Math.random()`), so server
- * and client render identical markup.
+ * Deterministic throughout (integer LCG, never `Math.sin`) and every coordinate
+ * is rounded before it reaches the DOM — `Math.sin` precision is
+ * implementation-defined, so seeding with it makes server and client disagree
+ * and produces a hydration mismatch on every load.
  */
 export function PeacockFeather({ className = '' }: { className?: string }) {
-  const BARBS = 46
-  const EYE_Y = 168
+  const BARBS = 24
+  const EYE_Y = 150
 
-  // Deterministic jitter in [0,1) — keeps barbs from looking machined.
-  //
-  // Integer LCG, not `Math.sin`: ECMAScript leaves `Math.sin` precision
-  // implementation-defined, so Node and the browser disagree around the 12th
-  // decimal and every emitted coordinate becomes a hydration mismatch. Integer
-  // arithmetic is exact everywhere. (Same reason CosmicBackdrop seeds its stars
-  // this way.) Every coordinate below is also rounded before it reaches the DOM.
   const jitter = (i: number) => ((i * 1664525 + 1013904223) % 4294967296) / 4294967296
 
   const barb = (i: number, side: 1 | -1) => {
-    const t = i / (BARBS - 1) // 0 at the base, 1 just below the eye
-    const y = 600 - t * 400
-    // Barbs lengthen toward the eye, so the plume opens into it.
-    const len = 10 + Math.pow(t, 1.35) * 74 + jitter(i) * 6
-    // …and sweep from near-horizontal at the base to steeply upswept at the tip.
-    const angle = ((58 - t * 26) * Math.PI) / 180
-    const dx = side * len * Math.sin(angle)
-    const dy = len * Math.cos(angle)
-    // Control point pulled outward gives each barb its natural bow.
-    const cx = 100 + side * len * 0.72
-    const cy = y - dy * 0.28
+    const t = i / (BARBS - 1) // 0 at the base tip, 1 just below the eye
+    const y = 600 - t * 372
+    // Longest just under the eye; the plume tapers to a point at the base.
+    const len = 14 + Math.pow(t, 0.78) * 92 + jitter(i) * 9
+    // Shallower sweep near the eye, steeper down at the tip.
+    const angle = ((62 - t * 22) * Math.PI) / 180
+    const ex = +(100 + side * len * Math.sin(angle)).toFixed(1)
+    const ey = +(y - len * Math.cos(angle)).toFixed(1)
+    // Two control points give the barb its S-bow: out from the shaft, then up.
+    const c1x = +(100 + side * len * 0.34).toFixed(1)
+    const c1y = +(y - len * 0.06).toFixed(1)
+    const c2x = +(100 + side * len * 0.92).toFixed(1)
+    const c2y = +(y - len * 0.46).toFixed(1)
     return (
       <path
         key={`${side}-${i}`}
-        d={`M100 ${y.toFixed(1)} Q${cx.toFixed(1)} ${cy.toFixed(1)} ${(100 + dx).toFixed(1)} ${(y - dy).toFixed(1)}`}
-        strokeOpacity={(0.28 + t * 0.42 + jitter(i + 7) * 0.16).toFixed(2)}
-        strokeWidth={(0.7 + t * 0.7).toFixed(2)}
+        d={`M100 ${y.toFixed(1)} C${c1x} ${c1y} ${c2x} ${c2y} ${ex} ${ey}`}
+        strokeOpacity={(0.42 + t * 0.4).toFixed(2)}
+        strokeWidth={(1 + t * 1.1).toFixed(2)}
       />
     )
   }
@@ -89,107 +87,76 @@ export function PeacockFeather({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 200 620" className={className} aria-hidden="true">
       <defs>
-        {/* Barbs shift green → gold along their length, as real barbules do. */}
+        {/* Copper at the shaft, warm gold at the tips. */}
         <linearGradient id="pankhBarb" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" stopColor="#1F6B4F" />
-          <stop offset="45%" stopColor="#3FA67E" />
-          <stop offset="80%" stopColor="#8FC46A" />
-          <stop offset="100%" stopColor="#D9C25E" />
+          <stop offset="0%" stopColor="#7A5A2E" />
+          <stop offset="50%" stopColor="#A8802F" />
+          <stop offset="100%" stopColor="#E0C070" />
         </linearGradient>
-        <radialGradient id="pankhBronze" cx="50%" cy="56%" r="52%">
-          <stop offset="60%" stopColor="#B98A3C" stopOpacity="0.95" />
-          <stop offset="100%" stopColor="#8A6428" stopOpacity="0" />
+        <radialGradient id="pankhOuter" cx="50%" cy="52%" r="52%">
+          <stop offset="62%" stopColor="#C2762F" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#8A5220" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="pankhGold" cx="50%" cy="54%" r="54%">
-          <stop offset="0%" stopColor="#F0D67A" />
-          <stop offset="100%" stopColor="#C79A3A" />
+        <radialGradient id="pankhCopper" cx="50%" cy="50%" r="54%">
+          <stop offset="0%" stopColor="#E08A3C" />
+          <stop offset="100%" stopColor="#A85A22" />
         </radialGradient>
-        <radialGradient id="pankhGreen" cx="50%" cy="52%" r="56%">
-          <stop offset="0%" stopColor="#5FBE7E" />
-          <stop offset="100%" stopColor="#1E7A55" />
+        <radialGradient id="pankhGreen" cx="50%" cy="50%" r="56%">
+          <stop offset="0%" stopColor="#6FBF4A" />
+          <stop offset="100%" stopColor="#2E7A34" />
         </radialGradient>
-        <radialGradient id="pankhTeal" cx="48%" cy="46%" r="60%">
-          <stop offset="0%" stopColor="#3FC8D4" />
-          <stop offset="100%" stopColor="#12707F" />
+        <radialGradient id="pankhCyan" cx="46%" cy="42%" r="62%">
+          <stop offset="0%" stopColor="#3FC4EC" />
+          <stop offset="100%" stopColor="#1373B4" />
         </radialGradient>
-        <radialGradient id="pankhHeart" cx="44%" cy="36%" r="72%">
-          <stop offset="0%" stopColor="#3A4FA8" />
-          <stop offset="55%" stopColor="#152A6B" />
-          <stop offset="100%" stopColor="#0A1436" />
+        <radialGradient id="pankhHeart" cx="42%" cy="34%" r="76%">
+          <stop offset="0%" stopColor="#2B3F8F" />
+          <stop offset="55%" stopColor="#122A66" />
+          <stop offset="100%" stopColor="#0A1330" />
         </radialGradient>
-        <filter id="pankhSoft" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="1.1" />
-        </filter>
       </defs>
 
-      {/* Sparse, downy after-feather at the base */}
-      <g
-        stroke="#2F8F6B"
-        strokeOpacity="0.22"
-        strokeWidth="0.7"
-        fill="none"
-        filter="url(#pankhSoft)"
-      >
-        {Array.from({ length: 10 }, (_, i) => {
-          const y = 600 - i * 9
-          // Rounded before it reaches the DOM — see the note on `jitter`.
-          const w = +(16 + jitter(i) * 12).toFixed(1)
-          const cw = +(w * 0.7).toFixed(1)
-          return (
-            <path
-              key={`d${i}`}
-              d={`M100 ${y} Q${100 - cw} ${y - 6} ${100 - w} ${y - 12}
-                  M100 ${y} Q${100 + cw} ${y - 6} ${100 + w} ${y - 12}`}
-            />
-          )
-        })}
-      </g>
-
-      {/* The plume */}
+      {/* The plume — sparse enough to see between */}
       <g stroke="url(#pankhBarb)" fill="none" strokeLinecap="round">
         {Array.from({ length: BARBS }, (_, i) => barb(i, -1))}
         {Array.from({ length: BARBS }, (_, i) => barb(i, 1))}
       </g>
 
-      {/* Rachis — curved, pale, and tapering into the eye */}
+      {/* Rachis — a pale hairline, visible the whole way down */}
       <path
-        d="M100 612 C99 520 101 420 100 320 C99 250 100 200 100 176"
-        stroke="#C8B87E"
-        strokeOpacity="0.55"
-        strokeWidth="2.2"
+        d="M100 606 C99 520 101 420 100 320 C99 250 100 205 100 186"
+        stroke="#EADFBE"
+        strokeOpacity="0.5"
+        strokeWidth="1.6"
         fill="none"
         strokeLinecap="round"
       />
 
-      {/* ── The ocellus ─────────────────────────────────────────
-          Rings step upward as they narrow, so the eye domes toward
-          the viewer instead of reading as concentric flat discs. */}
-      <ellipse cx="100" cy={EYE_Y + 6} rx="60" ry="54" fill="url(#pankhBronze)" />
-      <ellipse cx="100" cy={EYE_Y + 2} rx="46" ry="42" fill="url(#pankhGold)" fillOpacity="0.92" />
-      <ellipse cx="100" cy={EYE_Y} rx="37" ry="34" fill="url(#pankhGreen)" />
-      <ellipse cx="100" cy={EYE_Y - 2} rx="26" ry="25" fill="url(#pankhTeal)" />
+      {/* ── The ocellus ───────────────────────────────────────── */}
+      <ellipse cx="100" cy={EYE_Y + 4} rx="62" ry="58" fill="url(#pankhOuter)" />
+      <ellipse cx="100" cy={EYE_Y + 2} rx="47" ry="44" fill="url(#pankhCopper)" />
+      <ellipse cx="100" cy={EYE_Y} rx="36" ry="34" fill="url(#pankhGreen)" />
+      <ellipse cx="100" cy={EYE_Y - 2} rx="25" ry="25" fill="url(#pankhCyan)" />
       {/* The heart, notched at the top as a real ocellus is */}
       <path
-        d={`M100 ${EYE_Y - 20}
-            C112 ${EYE_Y - 26} 122 ${EYE_Y - 14} 122 ${EYE_Y - 2}
-            C122 ${EYE_Y + 14} 110 ${EYE_Y + 24} 100 ${EYE_Y + 28}
-            C90 ${EYE_Y + 24} 78 ${EYE_Y + 14} 78 ${EYE_Y - 2}
-            C78 ${EYE_Y - 14} 88 ${EYE_Y - 26} 100 ${EYE_Y - 20}
-            C100 ${EYE_Y - 20} 100 ${EYE_Y - 12} 100 ${EYE_Y - 8}
-            C100 ${EYE_Y - 12} 100 ${EYE_Y - 20} 100 ${EYE_Y - 20} Z`}
+        d={`M100 ${EYE_Y - 18}
+            C111 ${EYE_Y - 25} 121 ${EYE_Y - 13} 121 ${EYE_Y - 1}
+            C121 ${EYE_Y + 13} 109 ${EYE_Y + 23} 100 ${EYE_Y + 27}
+            C91 ${EYE_Y + 23} 79 ${EYE_Y + 13} 79 ${EYE_Y - 1}
+            C79 ${EYE_Y - 13} 89 ${EYE_Y - 25} 100 ${EYE_Y - 18}
+            C100 ${EYE_Y - 14} 100 ${EYE_Y - 10} 100 ${EYE_Y - 7}
+            C100 ${EYE_Y - 12} 100 ${EYE_Y - 16} 100 ${EYE_Y - 18} Z`}
         fill="url(#pankhHeart)"
       />
-      {/* Iridescent specular — the reason a peacock feather is a peacock feather */}
       <ellipse
-        cx="91"
-        cy={EYE_Y - 10}
-        rx="9"
-        ry="6"
+        cx="90"
+        cy={EYE_Y - 9}
+        rx="8"
+        ry="5"
         fill="#EAF6FF"
-        fillOpacity="0.3"
-        transform={`rotate(-24 91 ${EYE_Y - 10})`}
+        fillOpacity="0.34"
+        transform={`rotate(-26 90 ${EYE_Y - 9})`}
       />
-      <ellipse cx="100" cy={EYE_Y - 30} rx="22" ry="7" fill="#FFF3C4" fillOpacity="0.14" />
     </svg>
   )
 }

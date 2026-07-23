@@ -216,3 +216,158 @@ export function TempleSkyline({
     </svg>
   )
 }
+
+/**
+ * VishwaroopForm — the cosmic form itself, as Arjuna was shown it.
+ *
+ * The climax the Dashavatar builds to: the same faceless silhouette, but now
+ * many-armed and radiant, arms fanning around the torso like a corona. Many
+ * arms is the universally-read signature of Vishwaroop, and — unlike multiplied
+ * faces or devouring mouths — it carries awe without horror, which is the line
+ * this app must not cross (docs/DARSHAN.md § What Vishwaroop must never become).
+ *
+ * `intensity` (0→1) drives how far the arms extend and how hot the corona
+ * burns, so the parent can *manifest* it rather than switch it on.
+ */
+export function VishwaroopForm({
+  className = '',
+  color = '#BFB6FF',
+  glow = '#D4A017',
+  intensity = 1,
+}: Props & { intensity?: number }) {
+  const uid = useId().replace(/:/g, '')
+  const k = Math.max(0, Math.min(1, intensity))
+
+  // Arms fan through the upper hemisphere, longest at the sides, so the corona
+  // reads as opening outward rather than as a wheel.
+  const ARMS = 14
+  const arms = Array.from({ length: ARMS }, (_, i) => {
+    const spread = 200 // degrees of fan, centred on straight up
+    const deg = -90 - spread / 2 + (i / (ARMS - 1)) * spread
+    const rad = (deg * Math.PI) / 180
+    const reach = (120 + 90 * k) * (0.72 + 0.28 * Math.abs(Math.cos(rad)))
+    const ox = 200 + Math.cos(rad) * 34
+    const oy = 210 + Math.sin(rad) * 20
+    const ex = +(ox + Math.cos(rad) * reach).toFixed(1)
+    const ey = +(oy + Math.sin(rad) * reach).toFixed(1)
+    const w = 9 - (i % 3) * 1.4
+    const nx = -Math.sin(rad) * w
+    const ny = Math.cos(rad) * w
+    return (
+      <g key={i}>
+        <path
+          d={`M${(ox + nx).toFixed(1)} ${(oy + ny).toFixed(1)}
+              L${(ex + nx * 0.32).toFixed(1)} ${(ey + ny * 0.32).toFixed(1)}
+              L${(ex - nx * 0.32).toFixed(1)} ${(ey - ny * 0.32).toFixed(1)}
+              L${(ox - nx).toFixed(1)} ${(oy - ny).toFixed(1)} Z`}
+        />
+        <ellipse cx={ex} cy={ey} rx={7.5} ry={9} transform={`rotate(${deg + 90} ${ex} ${ey})`} />
+      </g>
+    )
+  })
+
+  return (
+    <svg viewBox="0 0 400 560" className={className} aria-hidden="true">
+      <defs>
+        <radialGradient id={`${uid}-corona`} cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stopColor={glow} stopOpacity={0.5 * k} />
+          <stop offset="45%" stopColor={color} stopOpacity={0.24 * k} />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id={`${uid}-limb`} x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor={glow} stopOpacity="0.9" />
+          <stop offset="60%" stopColor={color} stopOpacity="0.7" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.25" />
+        </linearGradient>
+        <filter id={`${uid}-soft`} x="-45%" y="-45%" width="190%" height="190%">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <filter id={`${uid}-bloom`} x="-45%" y="-45%" width="190%" height="190%">
+          <feGaussianBlur stdDeviation="17" />
+        </filter>
+      </defs>
+
+      {/* Corona the whole form burns inside */}
+      <ellipse cx="200" cy="230" rx="230" ry="250" fill={`url(#${uid}-corona)`} />
+
+      <g fill={`url(#${uid}-limb)`}>
+        <g filter={`url(#${uid}-bloom)`} opacity={0.5 * k}>
+          {arms}
+        </g>
+        <g filter={`url(#${uid}-soft)`} opacity={0.42 + 0.5 * k}>
+          {arms}
+        </g>
+      </g>
+
+      {/* The body at the heart of it */}
+      <g fill={`url(#${uid}-limb)`} filter={`url(#${uid}-soft)`} opacity={0.6 + 0.4 * k}>
+        <BodyPaths />
+      </g>
+      <circle cx="200" cy="26" r={7 + 5 * k} fill={glow} fillOpacity={0.8 * k} filter={`url(#${uid}-soft)`} />
+    </svg>
+  )
+}
+
+/**
+ * ArjunaWitness — the one being shown.
+ *
+ * A small kneeling silhouette at the foot of the reveal, hands folded, bow set
+ * down. It gives the cosmic form a *scale*: without a human figure in frame,
+ * "vast" is just "large". This is the Kurukshetra moment of Chapter 11.
+ */
+export function ArjunaWitness({
+  className = '',
+  color = '#05081C',
+  rim = '#E8C35A',
+}: {
+  className?: string
+  color?: string
+  rim?: string
+}) {
+  const uid = useId().replace(/:/g, '')
+  return (
+    <svg viewBox="0 0 200 130" className={className} aria-hidden="true">
+      <defs>
+        {/* A pure dark silhouette is invisible against a dark sky. The rim is
+            what makes him readable — and it reads as the cosmic form's light
+            falling on him, which is exactly the moment being depicted. */}
+        <linearGradient id={`${uid}-rim`} x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor={rim} stopOpacity="0.85" />
+          <stop offset="55%" stopColor={rim} stopOpacity="0.25" />
+          <stop offset="100%" stopColor={rim} stopOpacity="0.05" />
+        </linearGradient>
+      </defs>
+      <g fill={`url(#${uid}-rim)`} transform="translate(0,-2.5)">
+        {/* the bow, laid down */}
+        <path
+          d="M34 120 C22 100 22 74 34 54"
+          stroke={color}
+          strokeWidth="3"
+          fill="none"
+          strokeLinecap="round"
+        />
+        {/* kneeling body, head bowed */}
+        <ellipse cx="104" cy="48" rx="12" ry="13" />
+        <path d="M92 62 C92 58 116 58 116 62 L122 96 L86 96 Z" />
+        {/* folded hands raised before the chest */}
+        <path d="M104 66 L112 78 L104 88 L96 78 Z" />
+        {/* the kneel */}
+        <path d="M86 96 L122 96 L138 122 L74 122 Z" />
+      </g>
+      {/* the solid body, drawn over the rim so only its edge catches the light */}
+      <g fill={color}>
+        <path
+          d="M34 120 C22 100 22 74 34 54"
+          stroke={color}
+          strokeWidth="3"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <ellipse cx="104" cy="48" rx="12" ry="13" />
+        <path d="M92 62 C92 58 116 58 116 62 L122 96 L86 96 Z" />
+        <path d="M104 66 L112 78 L104 88 L96 78 Z" />
+        <path d="M86 96 L122 96 L138 122 L74 122 Z" />
+      </g>
+    </svg>
+  )
+}

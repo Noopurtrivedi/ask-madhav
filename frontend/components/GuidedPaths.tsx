@@ -93,19 +93,19 @@ export default function GuidedPaths() {
   const [open, setOpen] = useState<string | null>(null)
 
   return (
-    <section id="paths" className="py-14 sm:py-20 px-6" style={{ background: '#FBF4E6' }}>
+    <section id="paths" className="py-14 sm:py-20 px-6" >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-saffron/60 text-xs font-medium uppercase tracking-widest mb-3">
+          <p className="text-gold-soft/65 text-xs font-medium uppercase tracking-widest mb-3">
             Guided Journeys
           </p>
           <h2
-            className="text-3xl md:text-4xl text-ink mb-3"
+            className="text-3xl md:text-4xl text-moonlight mb-3"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             Walk a Path
           </h2>
-          <p className="text-ink/50 text-sm max-w-md mx-auto">
+          <p className="text-moonlight/58 text-sm max-w-md mx-auto">
             Not sure what to ask? Choose what your heart is carrying. Each path is a short journey
             of verses — read them, or walk through them with Madhav.
           </p>
@@ -119,8 +119,8 @@ export default function GuidedPaths() {
                 key={path.id}
                 className={`rounded-2xl border transition-all duration-300 ${
                   isOpen
-                    ? 'border-saffron/50 bg-white shadow-lg shadow-saffron/10'
-                    : 'border-saffron/15 bg-white/60 hover:border-saffron/40 hover:shadow-md hover:shadow-saffron/10'
+                    ? 'border-gold/40 bg-white shadow-lg shadow-saffron/10'
+                    : 'border-saffron/15 bg-white/[0.05] hover:border-gold/35 hover:shadow-md hover:shadow-saffron/10'
                 }`}
               >
                 <button
@@ -132,20 +132,20 @@ export default function GuidedPaths() {
                     <span className="text-3xl select-none">{path.icon}</span>
                     <div>
                       <p
-                        className="text-ink text-lg font-semibold leading-snug group-hover:text-saffron"
+                        className="text-moonlight text-lg font-semibold leading-snug group-hover:text-saffron"
                         style={{ fontFamily: 'Crimson Text, serif' }}
                       >
                         {path.title}
                       </p>
-                      <p className="text-saffron/60 text-xs">{path.yoga} · {path.steps.length} verses</p>
+                      <p className="text-gold-soft/65 text-xs">{path.yoga} · {path.steps.length} verses</p>
                     </div>
                     <span
-                      className={`ml-auto text-saffron/50 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                      className={`ml-auto text-gold-soft/55 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                     >
                       ▾
                     </span>
                   </div>
-                  <p className="text-ink/60 text-sm leading-relaxed">{path.intro}</p>
+                  <p className="text-moonlight/65 text-sm leading-relaxed">{path.intro}</p>
                 </button>
 
                 <div
@@ -154,11 +154,11 @@ export default function GuidedPaths() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-5 pb-5 pt-1 space-y-3 border-t border-saffron/10">
+                    <div className="px-5 pb-5 pt-1 space-y-3 border-t border-gold/15">
                       <ol className="space-y-2.5 mt-3">
                         {path.steps.map((step, i) => (
                           <li key={step.ref} className="flex gap-3">
-                            <span className="text-saffron/50 text-sm font-semibold w-5 flex-shrink-0">
+                            <span className="text-gold-soft/55 text-sm font-semibold w-5 flex-shrink-0">
                               {i + 1}.
                             </span>
                             <div>
@@ -168,7 +168,7 @@ export default function GuidedPaths() {
                               >
                                 Gita {step.ref}
                               </Link>
-                              <p className="text-ink/70 text-sm leading-relaxed">{step.line}</p>
+                              <p className="text-moonlight/72 text-sm leading-relaxed">{step.line}</p>
                             </div>
                           </li>
                         ))}
@@ -176,7 +176,7 @@ export default function GuidedPaths() {
                       <button
                         onClick={() => walkWithMadhav(path.title)}
                         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
-                                   border border-saffron/40 text-saffron hover:bg-saffron/10 transition-colors mt-2"
+                                   border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors mt-2"
                       >
                         🪷 Walk this path with Madhav →
                       </button>

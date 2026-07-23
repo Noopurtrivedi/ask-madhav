@@ -22,18 +22,18 @@ export default function DailyVerse() {
   }, [])
 
   return (
-    <section id="daily-verse" className="py-14 sm:py-20 px-6" style={{ background: '#FBF4E6' }}>
+    <section id="daily-verse" className="py-14 sm:py-20 px-6" >
       <div className="max-w-4xl mx-auto text-center">
-        <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Daily Wisdom</p>
+        <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Daily Wisdom</p>
         <h2
-          className="text-4xl font-bold text-ink mb-12"
+          className="text-4xl font-bold text-moonlight mb-12"
           style={{ fontFamily: 'Crimson Text, serif' }}
         >
           Today&apos;s Verse from the Gita
         </h2>
 
         {loading && (
-          <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-saffron/25 bg-white shadow-2xl shadow-saffron/10 text-left">
+          <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/25 bg-white shadow-2xl shadow-saffron/10 text-left">
             <div className="skeleton min-h-[260px] md:min-h-full rounded-none" />
             <div className="p-8 space-y-4">
               <div className="flex gap-2">
@@ -51,10 +51,10 @@ export default function DailyVerse() {
         )}
 
         {error && !loading && (
-          <div className="border border-saffron/20 rounded-2xl p-8 text-center">
+          <div className="border border-gold/22 rounded-2xl p-8 text-center">
             <span className="text-3xl mb-3 block">🪷</span>
-            <p className="text-ink/50 mb-2">Could not load today&apos;s verse.</p>
-            <p className="text-ink/30 text-sm">Please refresh the page in a moment.</p>
+            <p className="text-moonlight/58 mb-2">Could not load today&apos;s verse.</p>
+            <p className="text-moonlight/38 text-sm">Please refresh the page in a moment.</p>
           </div>
         )}
 
@@ -63,7 +63,7 @@ export default function DailyVerse() {
             {/* Breathing golden aura */}
             <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-r from-saffron/20 via-gold/15 to-saffron/20 blur-2xl lotus-pulse pointer-events-none" />
 
-            <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-saffron/25 bg-white shadow-2xl shadow-saffron/10">
+            <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/25 bg-white shadow-2xl shadow-saffron/10">
               {/* Krishna teaching Arjuna — the eternal dialogue */}
               <div className="relative min-h-[260px] md:min-h-full overflow-hidden group">
                 <Image
@@ -74,7 +74,7 @@ export default function DailyVerse() {
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                <span className="absolute bottom-4 left-4 px-3 py-1 bg-white/90 text-saffron text-sm font-medium rounded-full shadow">
+                <span className="absolute bottom-4 left-4 px-3 py-1 bg-cosmos-deep/80 text-gold-soft border border-gold/25 text-sm font-medium rounded-full shadow">
                   Chapter {verse.chapter_number}, Verse {verse.verse_number}
                 </span>
               </div>
@@ -85,7 +85,7 @@ export default function DailyVerse() {
                   {verse.themes.slice(0, 3).map((t) => (
                     <span
                       key={t}
-                      className="px-2 py-1 border border-saffron/20 text-ink/50 text-xs rounded-full capitalize"
+                      className="px-2 py-1 border border-gold/22 text-moonlight/58 text-xs rounded-full capitalize"
                     >
                       {t}
                     </span>
@@ -94,7 +94,7 @@ export default function DailyVerse() {
 
                 {/* Sanskrit */}
                 <p
-                  className="text-ink text-2xl leading-relaxed mb-4"
+                  className="text-moonlight text-2xl leading-relaxed mb-4"
                   style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
                   lang="sa"
                 >
@@ -109,30 +109,30 @@ export default function DailyVerse() {
                 {/* Meanings */}
                 <div className="space-y-4 mb-6">
                   <div>
-                    <p className="text-saffron/60 text-xs tracking-wider uppercase mb-1">हिंदी अर्थ</p>
-                    <p className="text-ink/80 leading-relaxed text-sm" lang="hi">
+                    <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-1">हिंदी अर्थ</p>
+                    <p className="text-moonlight/80 leading-relaxed text-sm" lang="hi">
                       {verse.hindi_meaning}
                     </p>
                   </div>
                   <div>
-                    <p className="text-saffron/60 text-xs tracking-wider uppercase mb-1">English Meaning</p>
-                    <p className="text-ink/80 leading-relaxed text-sm">{verse.english_meaning}</p>
+                    <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-1">English Meaning</p>
+                    <p className="text-moonlight/80 leading-relaxed text-sm">{verse.english_meaning}</p>
                   </div>
                 </div>
 
                 {/* Practical step — revealed on tap */}
-                <div className="border-t border-saffron/10 pt-5">
+                <div className="border-t border-gold/15 pt-5">
                   {showStep ? (
                     <div className="fade-up">
-                      <p className="text-saffron/60 text-xs tracking-wider uppercase mb-2">
+                      <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-2">
                         Today&apos;s Practical Step
                       </p>
-                      <p className="text-ink/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+                      <p className="text-moonlight/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
                     </div>
                   ) : (
                     <button
                       onClick={() => setShowStep(true)}
-                      className="text-sm px-4 py-2 rounded-full bg-saffron/10 text-saffron border border-saffron/30
+                      className="text-sm px-4 py-2 rounded-full bg-gold-soft/[0.10] text-saffron border border-gold/28
                                  hover:bg-saffron/20 transition-colors"
                     >
                       ✨ Reveal today&apos;s practical step

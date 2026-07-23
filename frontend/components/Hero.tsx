@@ -135,10 +135,9 @@ export default function Hero() {
                   {/* The presence itself: the procedural 3D darshan on capable
                       devices, the Kurukshetra artwork everywhere else. The
                       component owns that decision — see MadhavPresence. */}
+                  {/* No frame: Madhav is masked to a soft ellipse and dissolves
+                      straight into the sky. See `.darshan-window` in globals.css. */}
                   <MadhavPresence />
-                  {/* Edge dissolve + gold rim so the window belongs to the cosmos */}
-                  <div className="darshan-window-veil" aria-hidden="true" />
-                  <div className="darshan-window-rim" aria-hidden="true" />
                 </div>
               </div>
 

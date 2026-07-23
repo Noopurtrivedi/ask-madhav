@@ -29,7 +29,7 @@ export default function ChapterBridge({ chapter }: { chapter: number }) {
   return (
     <button
       onClick={go}
-      className="text-saffron/70 hover:text-saffron text-xs flex items-center gap-1 transition-colors"
+      className="text-gold-soft/75 hover:text-saffron text-xs flex items-center gap-1 transition-colors"
     >
       📖 Read all of Chapter {chapter}
     </button>

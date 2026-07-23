@@ -21,7 +21,7 @@ export default function VerseCard({ verse, compact = false, collapsible = false 
   const showBody = !collapsible || expanded
 
   return (
-    <div className="border border-saffron/20 rounded-xl p-5 bg-saffron/[0.05] hover:border-saffron/40 transition-all">
+    <div className="border border-gold/22 rounded-xl p-5 bg-saffron/[0.05] hover:border-gold/35 transition-all">
       {/* Reference badge. When collapsible, the whole row is the expand toggle. */}
       {collapsible ? (
         <button
@@ -33,8 +33,8 @@ export default function VerseCard({ verse, compact = false, collapsible = false 
           <span className="px-2 py-0.5 bg-saffron/20 text-saffron text-xs font-medium rounded-full">
             Chapter {verse.chapter}, Verse {verse.verse}
           </span>
-          <span className="text-ink/30 text-xs font-mono">{verse.reference}</span>
-          <span className="ml-auto flex items-center gap-1 text-saffron/60 text-xs">
+          <span className="text-moonlight/38 text-xs font-mono">{verse.reference}</span>
+          <span className="ml-auto flex items-center gap-1 text-gold-soft/65 text-xs">
             {expanded ? 'Hide' : 'Read the verse'}
             <svg
               width="14"
@@ -54,7 +54,7 @@ export default function VerseCard({ verse, compact = false, collapsible = false 
           <span className="px-2 py-0.5 bg-saffron/20 text-saffron text-xs font-medium rounded-full">
             Chapter {verse.chapter}, Verse {verse.verse}
           </span>
-          <span className="text-ink/30 text-xs font-mono">{verse.reference}</span>
+          <span className="text-moonlight/38 text-xs font-mono">{verse.reference}</span>
         </div>
       )}
 
@@ -62,17 +62,17 @@ export default function VerseCard({ verse, compact = false, collapsible = false 
         <div className={collapsible ? 'mt-4' : ''}>
           {/* Practical step FIRST — speak to the moment before the scripture. */}
           {!compact && (
-            <div className="mb-4 border-l-2 border-saffron/40 pl-3">
-              <p className="text-saffron/70 text-xs font-medium uppercase tracking-wider mb-1">
+            <div className="mb-4 border-l-2 border-gold/35 pl-3">
+              <p className="text-gold-soft/75 text-xs font-medium uppercase tracking-wider mb-1">
                 Practical Step
               </p>
-              <p className="text-ink/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+              <p className="text-moonlight/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
             </div>
           )}
 
           {/* Sanskrit shloka */}
           <p
-            className="text-ink text-lg leading-relaxed mb-2"
+            className="text-moonlight text-lg leading-relaxed mb-2"
             style={{ fontFamily: 'serif' }}
             lang="sa"
           >
@@ -88,24 +88,24 @@ export default function VerseCard({ verse, compact = false, collapsible = false 
             <>
               {/* Hindi meaning */}
               <div className="mb-3">
-                <p className="text-saffron/70 text-xs font-medium uppercase tracking-wider mb-1">
+                <p className="text-gold-soft/75 text-xs font-medium uppercase tracking-wider mb-1">
                   Hindi अर्थ
                 </p>
-                <p className="text-ink/80 text-sm leading-relaxed" lang="hi">
+                <p className="text-moonlight/80 text-sm leading-relaxed" lang="hi">
                   {verse.hindi_meaning}
                 </p>
               </div>
 
               {/* English meaning */}
               <div className="mb-4">
-                <p className="text-saffron/70 text-xs font-medium uppercase tracking-wider mb-1">
+                <p className="text-gold-soft/75 text-xs font-medium uppercase tracking-wider mb-1">
                   Meaning
                 </p>
-                <p className="text-ink/80 text-sm leading-relaxed">{verse.english_meaning}</p>
+                <p className="text-moonlight/80 text-sm leading-relaxed">{verse.english_meaning}</p>
               </div>
 
               {/* Actions + source attribution */}
-              <div className="flex justify-between items-center border-t border-saffron/10 pt-4 flex-wrap gap-3">
+              <div className="flex justify-between items-center border-t border-gold/15 pt-4 flex-wrap gap-3">
                 <ChapterBridge chapter={verse.chapter} />
                 <div className="flex items-center gap-4">
                   <SaveVerseButton
@@ -116,7 +116,7 @@ export default function VerseCard({ verse, compact = false, collapsible = false 
                   <ShareVerse reference={verse.reference} meaning={verse.english_meaning} compact />
                 </div>
               </div>
-              <p className="text-ink/20 text-xs italic mt-3">Gita Press, Gorakhpur</p>
+              <p className="text-moonlight/30 text-xs italic mt-3">Gita Press, Gorakhpur</p>
             </>
           )}
         </div>

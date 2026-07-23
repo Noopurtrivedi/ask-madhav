@@ -32,7 +32,7 @@ const STATS = [
 
 export default function Home() {
   return (
-    <main>
+    <main className="darshan-page">
       <ScrollReveal />
       {/* `overlay` — the home page opens on the dark cosmic Darshan hero, so the
           bar starts transparent and only takes on its cream glass on scroll. */}
@@ -40,7 +40,7 @@ export default function Home() {
       <Hero />
 
       {/* Stats bar */}
-      <section className="py-16 px-6" style={{ background: '#F3E7CD' }} data-reveal>
+      <section className="py-16 px-6"  data-reveal>
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             {STATS.map((item) => (
@@ -51,8 +51,8 @@ export default function Home() {
                 >
                   {item.number}
                 </p>
-                <p className="text-ink font-medium mb-2">{item.label}</p>
-                <p className="text-ink/50 text-sm leading-relaxed">{item.desc}</p>
+                <p className="text-moonlight font-medium mb-2">{item.label}</p>
+                <p className="text-moonlight/58 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -72,9 +72,9 @@ export default function Home() {
       <div data-reveal><VishwaroopDarshan /></div>
 
       {/* Footer */}
-      {/* The footer is the second dark bookend, and it continues straight out of
-          the Vishwaroop section above it — no seam, no border. */}
-      <footer className="px-6 py-14" style={{ background: '#0A0E2A' }}>
+      {/* No background of its own — it sits in the same continuous sky as
+          everything above it, separated only by a hairline. */}
+      <footer className="border-t border-white/[0.06] px-6 py-14">
         <div className="max-w-4xl mx-auto text-center">
           <span className="text-3xl select-none">🪷</span>
           <p className="text-moonlight/70 mt-3 text-sm font-medium">

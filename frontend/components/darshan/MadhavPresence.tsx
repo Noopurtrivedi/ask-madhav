@@ -25,9 +25,10 @@
 
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { Component, useEffect, useRef, useState, type ReactNode } from 'react'
+import { Component, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { useDarshanOptional } from './DarshanProvider'
 import { useReducedMotion } from '@/lib/motion'
+import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
 import { profileOf } from '@/lib/darshan/states'
 
 // ssr:false is required — the scene touches WebGL on import.
@@ -63,6 +64,19 @@ export default function MadhavPresence() {
   const engine = useDarshanOptional()
   const reduced = useReducedMotion()
   const wrapRef = useRef<HTMLDivElement>(null)
+
+  // The arrival must begin when the hero is actually visible — i.e. when the
+  // chakra has landed and the veil lifted — otherwise Madhav resolves behind
+  // the veil and the seeker misses the whole descent. Same subscription Hero
+  // uses, so the two cannot drift apart.
+  const landed = useSyncExternalStore(subscribeDarshanReady, isDarshanReady, darshanNotReady)
+  const [failsafe, setFailsafe] = useState(false)
+  useEffect(() => {
+    const t = window.setTimeout(() => setFailsafe(true), 3500)
+    return () => clearTimeout(t)
+  }, [])
+  // Reduced motion gets him immediately and fully — no descent, no delay.
+  const arriving = !reduced && (landed || failsafe)
 
   const use3D = Boolean(engine?.use3D)
   const palette = engine?.form.color_palette ?? {
@@ -125,16 +139,27 @@ export default function MadhavPresence() {
         </div>
       )}
 
-      {/* Madhav. Always present, always the accessible description. */}
-      <Image
-        src={imageSrc}
-        alt={imageAlt}
-        width={1123}
-        height={1404}
-        priority
-        sizes="(max-width: 640px) 240px, 292px"
-        className={`madhav-avatar-img ${reduced ? '' : 'madhav-breathe'}`}
-      />
+      {/* The light that carries him in. */}
+      {!reduced && (
+        <div
+          className={`darshan-arrival-light ${arriving ? 'is-arriving' : ''}`}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Madhav. Always in the DOM and always the accessible description —
+          only his *appearance* is animated, so a screen reader never waits. */}
+      <div className={`madhav-figure ${arriving ? 'is-arriving' : ''}`}>
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          width={1123}
+          height={1404}
+          priority
+          sizes="(max-width: 640px) 290px, 360px"
+          className={`madhav-avatar-img ${reduced ? '' : 'madhav-breathe'}`}
+        />
+      </div>
 
       {/* Light falling across him from the cosmos behind — sells the compositing. */}
       <div className="madhav-avatar-light" aria-hidden="true" />

@@ -83,8 +83,10 @@ export default function CosmicBackdrop() {
         <circle cx="200" cy="200" r="148" fill="none" stroke="#7FD4D0" strokeOpacity="0.10" strokeWidth="0.6" strokeDasharray="1 9" />
       </svg>
 
-      {/* Dissolve into the warm page below */}
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-b from-transparent via-[#5B3A5B]/25 to-[#F3E7CD]" />
+      {/* Dissolve into the page below. The page is now the same sky, so this
+          fades to transparent rather than to cream — a hard colour here was
+          what made the hero look bolted onto a different theme. */}
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#2A1A4A]/30 to-[#131A3E]" />
     </div>
   )
 }

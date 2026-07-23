@@ -50,20 +50,20 @@ export default function ChapterBrowser() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="py-14 sm:py-20 px-6" style={{ background: '#F3E7CD' }}>
+    <section className="py-14 sm:py-20 px-6" >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-saffron/60 text-xs font-medium uppercase tracking-widest mb-3">
+          <p className="text-gold-soft/65 text-xs font-medium uppercase tracking-widest mb-3">
             18 Chapters · 700 Verses
           </p>
           <h2
-            className="text-3xl md:text-4xl text-ink mb-3"
+            className="text-3xl md:text-4xl text-moonlight mb-3"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             The Yogs of the Bhagavad Gita
           </h2>
-          <p className="text-ink/50 text-sm max-w-md mx-auto">
+          <p className="text-moonlight/58 text-sm max-w-md mx-auto">
             Each chapter is a complete yoga — a path. Tap any chapter to read its essence.
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function ChapterBrowser() {
                 key={ch.n}
                 className={`group rounded-xl border bg-gradient-to-br ${ch.color} to-transparent
                   transition-all duration-300 ${
-                    isOpen ? 'border-saffron/50 shadow-lg shadow-saffron/10' : 'border-saffron/10 hover:border-saffron/35'
+                    isOpen ? 'border-gold/40 shadow-lg shadow-saffron/10' : 'border-gold/15 hover:border-saffron/35'
                   }`}
               >
                 <button
@@ -87,20 +87,20 @@ export default function ChapterBrowser() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <span
-                      className="text-saffron/40 text-3xl font-bold leading-none"
+                      className="text-gold-soft/45 text-3xl font-bold leading-none"
                       style={{ fontFamily: 'Crimson Text, serif' }}
                     >
                       {ch.n}
                     </span>
-                    <span className="text-ink/25 text-xs mt-1">{ch.verses} verses</span>
+                    <span className="text-moonlight/34 text-xs mt-1">{ch.verses} verses</span>
                   </div>
                   <p
-                    className="text-ink/90 text-sm font-semibold mb-0.5 group-hover:text-saffron transition-colors leading-snug"
+                    className="text-moonlight/90 text-sm font-semibold mb-0.5 group-hover:text-saffron transition-colors leading-snug"
                     style={{ fontFamily: 'Crimson Text, serif' }}
                   >
                     {ch.yoga}
                   </p>
-                  <p className="text-ink/40 text-xs flex items-center justify-between">
+                  <p className="text-moonlight/48 text-xs flex items-center justify-between">
                     {ch.short}
                     <span className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>▾</span>
                   </p>
@@ -113,14 +113,14 @@ export default function ChapterBrowser() {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-4 pb-4 pt-1 space-y-3 border-t border-saffron/10">
-                      <p className="text-ink/75 text-sm leading-relaxed">{ch.summary}</p>
+                    <div className="px-4 pb-4 pt-1 space-y-3 border-t border-gold/15">
+                      <p className="text-moonlight/75 text-sm leading-relaxed">{ch.summary}</p>
                       <button
                         onClick={() =>
                           askMadhav(`Tell me the essence of Chapter ${ch.n} of the Bhagavad Gita — ${ch.yoga} — and how it applies to my life.`)
                         }
                         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
-                                   border border-saffron/40 text-saffron hover:bg-saffron/10 transition-colors"
+                                   border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
                       >
                         🪷 Explore this chapter with Madhav →
                       </button>

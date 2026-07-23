@@ -24,7 +24,7 @@ import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDarshanOptional } from './DarshanProvider'
 import { CosmicMandala } from './SacredSymbols'
-import { DivineSilhouette } from './CosmicForms'
+import { ArjunaWitness, DivineSilhouette, VishwaroopForm } from './CosmicForms'
 import { DASHAVATAR, AvatarGlyphIcon } from './Dashavatar'
 import { useReducedMotion } from '@/lib/motion'
 import { quoteByReference } from '@/lib/darshan/quotes'
@@ -119,18 +119,18 @@ export default function VishwaroopDarshan() {
 
   const quote = quoteByReference(VISHWAROOP_REFERENCE)
 
+  // ── The two acts ────────────────────────────────────────────────────────
+  // I  (0 → 0.52): the ten descents arrive one by one around the form.
+  // II (0.52 → 1): they converge inward and the Vishwaroop manifests — the form
+  //                Arjuna was actually shown. The Dashavatar is the *prelude*;
+  //                this is the moment it builds to.
+  const ACT_II = 0.52
+  const manifest = Math.max(0, Math.min(1, (progress - ACT_II) / (1 - ACT_II)))
+  // Reduced motion has no timeline, so it is shown the climax directly.
+  const climax = reduced ? 1 : manifest
+
   return (
-    <section
-      id="vishwaroop"
-      className="relative overflow-hidden px-6 py-24"
-      style={{
-        // A dark bookend to the dark hero: the cosmos returns at the foot of the
-        // page, so the cream middle reads as a deliberate passage between two
-        // darshans rather than as a palette that lost its nerve.
-        background:
-          'linear-gradient(180deg, #FFFCF5 0%, #6B4A5A 26%, #2A1A4A 60%, #0A0E2A 100%)',
-      }}
-    >
+    <section id="vishwaroop" className="relative overflow-hidden px-6 py-24">
       {/* A few stars so the bookend belongs to the same sky as the hero. */}
       <div
         aria-hidden="true"
@@ -200,13 +200,13 @@ export default function VishwaroopDarshan() {
             )}
           </div>
 
-          {/* The form that contains the forms, rising at the centre. */}
+          {/* Act I's form, which dissolves as Act II takes over. */}
           <div
             className="pointer-events-none absolute left-1/2 top-[46%] h-[68vh] w-[min(720px,80vw)] -translate-x-1/2 -translate-y-1/2"
             aria-hidden="true"
             style={{
-              opacity: 0.55 + 0.35 * Math.min(1, progress * 2),
-              transition: 'opacity 700ms ease-out',
+              opacity: (0.55 + 0.35 * Math.min(1, progress * 2)) * (1 - climax),
+              transition: 'opacity 900ms ease-out',
             }}
           >
             <DivineSilhouette
@@ -215,6 +215,37 @@ export default function VishwaroopDarshan() {
               glow={palette.primary}
               opacity={0.85}
             />
+          </div>
+
+          {/* Act II — the Vishwaroop itself. Grows as it manifests, so it opens
+              *into* the viewer rather than simply appearing. */}
+          {climax > 0 && (
+            <div
+              className="pointer-events-none absolute left-1/2 top-[44%] h-[92vh] w-[min(1080px,98vw)] -translate-x-1/2 -translate-y-1/2"
+              aria-hidden="true"
+              style={{
+                opacity: Math.min(1, climax * 1.6),
+                transform: `translate(-50%, -50%) scale(${(0.72 + 0.28 * climax).toFixed(3)})`,
+                transition: 'opacity 900ms ease-out',
+              }}
+            >
+              <VishwaroopForm
+                className="h-full w-full"
+                color={palette.glow}
+                glow={palette.accent}
+                intensity={climax}
+              />
+            </div>
+          )}
+
+          {/* Arjuna, kneeling at the foot of it. Without a human figure in frame,
+              "vast" is only "large". */}
+          <div
+            className="pointer-events-none absolute bottom-[9vh] left-1/2 h-[19vh] w-[min(380px,56vw)] -translate-x-1/2"
+            aria-hidden="true"
+            style={{ opacity: 0.55 + 0.45 * climax, transition: 'opacity 900ms ease-out' }}
+          >
+            <ArjunaWitness className="h-full w-full" color="#05081C" />
           </div>
 
           {/* The ten, arriving one after another around the form. */}
@@ -232,9 +263,11 @@ export default function VishwaroopDarshan() {
                   key={glyph.id}
                   className="absolute left-1/2 top-[46%] flex flex-col items-center"
                   style={{
-                    transform: `translate(-50%, -50%) translate(calc(${R} * ${Math.cos(angle).toFixed(4)}), calc(${R} * ${Math.sin(angle).toFixed(4)}))`,
-                    opacity: shown ? 1 : 0,
-                    transition: 'opacity 1100ms ease-out',
+                    // They draw inward as Act II begins — the ten gathering back
+                    // into the one they were always descents of.
+                    transform: `translate(-50%, -50%) translate(calc(${R} * ${(Math.cos(angle) * (1 - 0.72 * climax)).toFixed(4)}), calc(${R} * ${(Math.sin(angle) * (1 - 0.72 * climax)).toFixed(4)}))`,
+                    opacity: shown ? 1 - climax : 0,
+                    transition: 'opacity 1100ms ease-out, transform 1400ms cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
                 >
                   <AvatarGlyphIcon glyph={glyph} size={56} color={palette.glow} active={shown} />
@@ -256,18 +289,21 @@ export default function VishwaroopDarshan() {
           {/* The verse. Readability wins over the visual: the form is behind a
               soft glass panel so the Sanskrit never has to compete with the
               mandala's brightest rings. */}
-          <div className="relative z-10 mx-6 max-w-xl rounded-2xl bg-cosmos-deep/70 px-6 py-4 text-center backdrop-blur-[3px]">
+          <div
+            className="relative z-10 mx-6 max-w-lg rounded-2xl bg-cosmos-deep/45 px-5 py-3 text-center backdrop-blur-[2px] transition-opacity duration-1000"
+            style={{ opacity: 1 - 0.72 * climax }}
+          >
             {quote && (
               <>
                 <p
-                  className="mb-2 text-base leading-relaxed text-moonlight md:text-lg"
+                  className="mb-1.5 text-sm leading-relaxed text-moonlight/95 md:text-base"
                   style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
                   lang="sa"
                 >
                   {quote.sanskrit}
                 </p>
-                <p className="mb-2 text-xs italic text-gold-soft/80">{quote.transliteration}</p>
-                <p className="text-sm leading-relaxed text-moonlight/80">
+                <p className="mb-1.5 text-[11px] italic text-gold-soft/75">{quote.transliteration}</p>
+                <p className="text-xs leading-relaxed text-moonlight/75 md:text-sm">
                   “{quote.english_meaning}”
                 </p>
                 <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-gold-soft/60">

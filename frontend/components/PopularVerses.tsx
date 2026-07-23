@@ -36,20 +36,20 @@ export default function PopularVerses() {
   }, [])
 
   return (
-    <section className="py-14 sm:py-20 px-6" style={{ background: '#FFFCF5' }}>
+    <section className="py-14 sm:py-20 px-6" >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-saffron/60 text-xs font-medium uppercase tracking-widest mb-3">
+          <p className="text-gold-soft/65 text-xs font-medium uppercase tracking-widest mb-3">
             Timeless Wisdom
           </p>
           <h2
-            className="text-3xl md:text-4xl text-ink mb-3"
+            className="text-3xl md:text-4xl text-moonlight mb-3"
             style={{ fontFamily: 'Crimson Text, serif' }}
           >
             Popular Verses
           </h2>
-          <p className="text-ink/50 text-sm max-w-md mx-auto">
+          <p className="text-moonlight/58 text-sm max-w-md mx-auto">
             The shlokas people return to again and again — in moments of doubt, grief, and searching.
             Tap a verse to unfold its meaning.
           </p>
@@ -64,7 +64,7 @@ export default function PopularVerses() {
               <div
                 key={meta.reference}
                 className={`group border rounded-xl overflow-hidden transition-all duration-300
-                  ${isOpen ? 'border-saffron/50 bg-white shadow-lg shadow-saffron/10' : 'border-saffron/15 bg-saffron/[0.04] hover:border-saffron/40 hover:shadow-md hover:shadow-saffron/10'}`}
+                  ${isOpen ? 'border-gold/40 bg-white shadow-lg shadow-saffron/10' : 'border-saffron/15 bg-saffron/[0.04] hover:border-gold/35 hover:shadow-md hover:shadow-saffron/10'}`}
               >
                 {/* Card head — toggles the meaning */}
                 <button
@@ -76,11 +76,11 @@ export default function PopularVerses() {
                     <span className="px-2 py-0.5 bg-saffron/20 text-saffron text-xs font-medium rounded-full">
                       {meta.reference}
                     </span>
-                    <span className="text-ink/30 text-xs">{meta.yoga}</span>
+                    <span className="text-moonlight/38 text-xs">{meta.yoga}</span>
                   </div>
 
                   <p
-                    className="text-ink text-base font-semibold mb-3 group-hover:text-saffron transition-colors"
+                    className="text-moonlight text-base font-semibold mb-3 group-hover:text-saffron transition-colors"
                     style={{ fontFamily: 'Crimson Text, serif' }}
                   >
                     {meta.label}
@@ -89,7 +89,7 @@ export default function PopularVerses() {
                   {/* Sanskrit shloka — the verse itself, not a translation */}
                   {verse ? (
                     <p
-                      className="text-ink/90 text-lg leading-relaxed"
+                      className="text-moonlight/90 text-lg leading-relaxed"
                       style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
                       lang="sa"
                     >
@@ -97,12 +97,12 @@ export default function PopularVerses() {
                     </p>
                   ) : (
                     <div className="space-y-2 animate-pulse">
-                      <div className="h-4 bg-saffron/10 rounded w-full" />
-                      <div className="h-4 bg-saffron/10 rounded w-4/5" />
+                      <div className="h-4 bg-gold-soft/[0.10] rounded w-full" />
+                      <div className="h-4 bg-gold-soft/[0.10] rounded w-4/5" />
                     </div>
                   )}
 
-                  <p className="text-saffron/50 text-xs mt-4 flex items-center gap-1 group-hover:text-saffron/80 transition-colors">
+                  <p className="text-gold-soft/55 text-xs mt-4 flex items-center gap-1 group-hover:text-gold-soft/85 transition-colors">
                     {isOpen ? 'Hide meaning' : 'See meaning'}
                     <span className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>▾</span>
                   </p>
@@ -116,21 +116,21 @@ export default function PopularVerses() {
                 >
                   <div className="overflow-hidden">
                     {verse && (
-                      <div className="px-5 pb-5 pt-1 space-y-4 border-t border-saffron/10">
+                      <div className="px-5 pb-5 pt-1 space-y-4 border-t border-gold/15">
                         {verse.transliteration && (
-                          <p className="text-saffron/70 text-xs italic leading-relaxed">
+                          <p className="text-gold-soft/75 text-xs italic leading-relaxed">
                             {verse.transliteration}
                           </p>
                         )}
                         <div>
-                          <p className="text-saffron/60 text-[11px] tracking-wider uppercase mb-1">हिंदी अर्थ</p>
-                          <p className="text-ink/80 text-sm leading-relaxed" lang="hi">
+                          <p className="text-gold-soft/65 text-[11px] tracking-wider uppercase mb-1">हिंदी अर्थ</p>
+                          <p className="text-moonlight/80 text-sm leading-relaxed" lang="hi">
                             {verse.hindi_meaning}
                           </p>
                         </div>
                         <div>
-                          <p className="text-saffron/60 text-[11px] tracking-wider uppercase mb-1">English Meaning</p>
-                          <p className="text-ink/70 text-sm leading-relaxed">{verse.english_meaning}</p>
+                          <p className="text-gold-soft/65 text-[11px] tracking-wider uppercase mb-1">English Meaning</p>
+                          <p className="text-moonlight/72 text-sm leading-relaxed">{verse.english_meaning}</p>
                         </div>
 
                         {/* AI is optional — only if deeper reflection is wanted */}
@@ -139,7 +139,7 @@ export default function PopularVerses() {
                             askMadhav(`Help me understand Bhagavad Gita ${meta.reference} and how to live it.`)
                           }
                           className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
-                                     border border-saffron/40 text-saffron hover:bg-saffron/10 transition-colors"
+                                     border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
                         >
                           🪷 Reflect on this with Madhav →
                         </button>

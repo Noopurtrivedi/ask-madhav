@@ -127,7 +127,7 @@ export const DEFAULT_DARSHAN_CONFIG: DarshanConfig = {
     require_explicit_consent: true,
     // Bounded on purpose: a rare moment that ends on its own, so it can never
     // become an ambient drain or an overwhelming loop.
-    max_duration_ms: 24_000,
+    max_duration_ms: 34_000,
   },
   chakra: {
     launch_enabled: true,
@@ -136,7 +136,9 @@ export const DEFAULT_DARSHAN_CONFIG: DarshanConfig = {
     trail_enabled: true,
   },
   quotes: {
-    rotate_ms: 9000,
+    // A shloka needs to be *read* — Sanskrit, then transliteration, then the
+    // meaning. Nine seconds was not enough time to finish one.
+    rotate_ms: 18_000,
     themes: [], // empty = draw from every theme
     show_hindi: false,
   },

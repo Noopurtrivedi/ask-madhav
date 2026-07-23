@@ -38,13 +38,13 @@ export default function SubscribeRitual() {
   }
 
   return (
-    <section className="py-14 sm:py-20 px-6" style={{ background: '#FFFCF5' }}>
+    <section className="py-14 sm:py-20 px-6" >
       <div className="max-w-2xl mx-auto text-center">
-        <p className="text-saffron/70 text-xs tracking-[0.3em] uppercase mb-2">Daily Ritual</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-ink mb-3" style={{ fontFamily: 'Crimson Text, serif' }}>
+        <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Daily Ritual</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-moonlight mb-3" style={{ fontFamily: 'Crimson Text, serif' }}>
           A verse in your inbox, every morning
         </h2>
-        <p className="text-ink/50 text-sm mb-8 max-w-lg mx-auto">
+        <p className="text-moonlight/58 text-sm mb-8 max-w-lg mx-auto">
           Begin each day with one verse from the Gita and a small practical step. No noise, just wisdom.
         </p>
 
@@ -58,8 +58,8 @@ export default function SubscribeRitual() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="flex-1 bg-saffron/5 border border-saffron/20 rounded-xl px-4 py-3 text-ink
-                         placeholder:text-ink/30 focus:outline-none focus:border-saffron/60 transition-colors text-sm"
+              className="flex-1 bg-gold-soft/[0.07] border border-gold/22 rounded-xl px-4 py-3 text-moonlight
+                         placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60 transition-colors text-sm"
             />
             <button
               type="submit"
@@ -72,7 +72,7 @@ export default function SubscribeRitual() {
           </form>
         )}
 
-        {status === 'error' && <p className="text-ink/40 text-xs mt-3">{message}</p>}
+        {status === 'error' && <p className="text-moonlight/48 text-xs mt-3">{message}</p>}
       </div>
     </section>
   )
