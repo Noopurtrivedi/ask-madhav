@@ -27,7 +27,6 @@ import { CosmicMandala } from './SacredSymbols'
 import { ArjunaWitness, DivineSilhouette, VishwaroopForm } from './CosmicForms'
 import { DASHAVATAR, AvatarGlyphIcon } from './Dashavatar'
 import { useReducedMotion } from '@/lib/motion'
-import { quoteByReference } from '@/lib/darshan/quotes'
 import { darshan } from '@/lib/darshan/events'
 import { VISUAL_MOODS } from '@/lib/darshan/registry'
 
@@ -35,9 +34,6 @@ const VishwaroopScene = dynamic(() => import('./three/VishwaroopScene'), {
   ssr: false,
   loading: () => null,
 })
-
-/** Gita 11.12 — the light of a thousand suns. The verse this moment belongs to. */
-const VISHWAROOP_REFERENCE = '11.12'
 
 export default function VishwaroopDarshan() {
   const engine = useDarshanOptional()
@@ -118,8 +114,6 @@ export default function VishwaroopDarshan() {
   }, [open, close])
 
   if (!enabled) return null
-
-  const quote = quoteByReference(VISHWAROOP_REFERENCE)
 
   // ── The two acts ────────────────────────────────────────────────────────
   // I  (0 → 0.52): the ten descents arrive one by one around the form.
@@ -280,8 +274,10 @@ export default function VishwaroopDarshan() {
           {/* The ten, arriving one after another around the form. */}
           <div className="pointer-events-none absolute inset-0" aria-hidden="true">
             {DASHAVATAR.map((glyph, i) => {
-              // Ringed evenly, starting at the top and going clockwise.
-              const angle = (i / DASHAVATAR.length) * Math.PI * 2 - Math.PI / 2
+              // Ringed evenly, clockwise from the top — but rotated half a step
+              // so nothing lands at dead bottom, where Arjuna kneels.
+              const angle =
+                (i / DASHAVATAR.length) * Math.PI * 2 - Math.PI / 2 + Math.PI / DASHAVATAR.length
               // Each arrives in turn over the first ~75% of the reveal, so the
               // sequence reads as a descent rather than ten simultaneous pops.
               const arrival = (i / DASHAVATAR.length) * 0.75
@@ -315,32 +311,10 @@ export default function VishwaroopDarshan() {
             })}
           </div>
 
-          {/* The verse. Readability wins over the visual: the form is behind a
-              soft glass panel so the Sanskrit never has to compete with the
-              mandala's brightest rings. */}
-          <div
-            className="relative z-10 mx-6 max-w-lg rounded-2xl bg-cosmos-deep/45 px-5 py-3 text-center backdrop-blur-[2px] transition-opacity duration-1000"
-            style={{ opacity: 1 - 0.72 * climax }}
-          >
-            {quote && (
-              <>
-                <p
-                  className="mb-1.5 text-sm leading-relaxed text-moonlight/95 md:text-base"
-                  style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
-                  lang="sa"
-                >
-                  {quote.sanskrit}
-                </p>
-                <p className="mb-1.5 text-[11px] italic text-gold-soft/75">{quote.transliteration}</p>
-                <p className="text-xs leading-relaxed text-moonlight/75 md:text-sm">
-                  “{quote.english_meaning}”
-                </p>
-                <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-gold-soft/60">
-                  Bhagavad Gita · {quote.reference}
-                </p>
-              </>
-            )}
-          </div>
+          {/* No verse here by design. The cosmic form is the whole point of this
+              moment, and a panel of text in front of it — however small — reads
+              as a caption on a photograph. The shloka lives on the invitation
+              card and on the verse pages, where it can actually be read. */}
 
           <button
             type="button"
