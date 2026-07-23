@@ -152,7 +152,7 @@ export const DEFAULT_DARSHAN_CONFIG: DarshanConfig = {
     mor_pankh_feather_count: 3,
     mor_pankh_duration_ms: 1800,
     chakra_launch_enabled: true,
-    chakra_launch_duration_ms: 5400, // matches WELCOME.doneMs in ChakraLaunch
+    chakra_launch_duration_ms: 7000, // matches WELCOME.doneMs in ChakraLaunch
     route_fade_ms: 320,
   },
   default_mood: 'dawn',

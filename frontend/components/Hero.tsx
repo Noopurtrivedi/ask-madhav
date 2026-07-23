@@ -35,10 +35,10 @@ export default function Hero() {
 
   useEffect(() => {
     // The hero reveals itself even if the ritual never reports back.
-    // Must outlast the launch ritual (~5.4s). If this fires first, the hero
+    // Must outlast the launch ritual (~7s). If this fires first, the hero
     // reveals — and Madhav's arrival plays — while the veil is still up, and the
     // seeker misses the entire descent. It is a failsafe, not a schedule.
-    const t = window.setTimeout(() => setFailsafe(true), 7000)
+    const t = window.setTimeout(() => setFailsafe(true), 9000)
     return () => clearTimeout(t)
   }, [])
 

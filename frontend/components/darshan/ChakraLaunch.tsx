@@ -49,11 +49,11 @@ import { prefersReducedMotion } from '@/lib/motion'
  * it. A ritual you cannot follow is just a transition.
  */
 const WELCOME = {
-  flightDelay: 2400, // the chakra gathers light — let it hold before the throw
-  flightMs: 2100, // the throw itself, at viewer and away
-  veilDelay: 4000,
+  flightDelay: 1800, // the chakra gathers light — let it hold before the throw
+  flightMs: 4500, // the throw: in at the viewer, two tumbles, then away
+  veilDelay: 5700,
   veilMs: 1200,
-  doneMs: 5400,
+  doneMs: 7000,
 }
 
 /**
@@ -62,10 +62,10 @@ const WELCOME = {
  */
 const FAST = {
   flightDelay: 180,
-  flightMs: 1150,
-  veilDelay: 900,
-  veilMs: 520,
-  doneMs: 1750,
+  flightMs: 2200,
+  veilDelay: 1900,
+  veilMs: 600,
+  doneMs: 3000,
 }
 
 /** Depth the chakra recedes to before the throw, and how close it passes. */
@@ -152,17 +152,32 @@ export default function ChakraLaunch() {
               offset: 0,
             },
             {
-              transform: `translate3d(${dx * 0.06}px, ${dy * 0.04}px, ${Z_NEAR}px) rotateX(26deg) rotateZ(120deg)`,
+              // Rushing in and opening to face the viewer.
+              transform: `translate3d(${dx * 0.04}px, ${dy * 0.03}px, ${Z_NEAR}px) rotateX(0deg) rotateZ(200deg)`,
               opacity: 1,
-              offset: 0.3,
+              offset: 0.18,
             },
             {
-              transform: `translate3d(${dx * 0.3}px, ${dy * 0.22}px, 120px) rotateX(10deg) rotateZ(260deg)`,
+              // Closest point — the first flip begins here, where it is biggest.
+              transform: `translate3d(${dx * 0.1}px, ${dy * 0.07}px, ${Z_NEAR + 140}px) rotateX(-200deg) rotateZ(430deg)`,
               opacity: 1,
-              offset: 0.55,
+              offset: 0.38,
             },
             {
-              transform: `translate3d(${dx}px, ${dy}px, 0) rotateX(0deg) rotateZ(420deg) scale(${scale})`,
+              transform: `translate3d(${dx * 0.22}px, ${dy * 0.16}px, ${Z_NEAR - 20}px) rotateX(-420deg) rotateZ(680deg)`,
+              opacity: 1,
+              offset: 0.58,
+            },
+            {
+              // Second flip completing as it starts to recede.
+              transform: `translate3d(${dx * 0.5}px, ${dy * 0.4}px, 260px) rotateX(-620deg) rotateZ(900deg)`,
+              opacity: 1,
+              offset: 0.78,
+            },
+            {
+              // Lands face-on: -720deg is visually identical to 0, so the discus
+              // settles flat into the logo rather than mid-tumble.
+              transform: `translate3d(${dx}px, ${dy}px, 0) rotateX(-720deg) rotateZ(1080deg) scale(${scale})`,
               opacity: 0.95,
               offset: 1,
             },
@@ -171,7 +186,8 @@ export default function ChakraLaunch() {
             duration: timing.flightMs,
             delay: timing.flightDelay,
             // Fast out of the hand, long settle into the logo.
-            easing: 'cubic-bezier(0.5, 0, 0.2, 1)',
+            // Out of the hand fast, long hang while it tumbles, gentle landing.
+            easing: 'cubic-bezier(0.42, 0, 0.28, 1)',
             fill: 'forwards',
           }
         )

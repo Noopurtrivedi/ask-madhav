@@ -72,10 +72,10 @@ export default function MadhavPresence() {
   const landed = useSyncExternalStore(subscribeDarshanReady, isDarshanReady, darshanNotReady)
   const [failsafe, setFailsafe] = useState(false)
   useEffect(() => {
-    // Must outlast the launch ritual (~5.4s). If this fires first, the hero
+    // Must outlast the launch ritual (~7s). If this fires first, the hero
     // reveals — and Madhav's arrival plays — while the veil is still up, and the
     // seeker misses the entire descent. It is a failsafe, not a schedule.
-    const t = window.setTimeout(() => setFailsafe(true), 7000)
+    const t = window.setTimeout(() => setFailsafe(true), 9000)
     return () => clearTimeout(t)
   }, [])
   // Reduced motion gets him immediately and fully — no descent, no delay.
@@ -136,7 +136,12 @@ export default function MadhavPresence() {
               energy={energy}
               tempo={tempo}
               modelUrl={modelUrl}
-              mode="atmosphere"
+              // `scene` puts the artwork *inside* a 3D environment — light
+              // shafts across it, embers between it and the camera, a camera
+              // that drifts and answers the pointer. A flat image on a gradient
+              // reads as a cutout no matter how well it is graded.
+              mode="scene"
+              imageUrl={imageSrc}
             />
           </PresenceBoundary>
         </div>
@@ -152,7 +157,12 @@ export default function MadhavPresence() {
 
       {/* Madhav. Always in the DOM and always the accessible description —
           only his *appearance* is animated, so a screen reader never waits. */}
-      <div className={`madhav-figure ${arriving ? 'is-arriving' : ''}`}>
+      {/* When the 3D scene is drawing him, this copy is hidden from sight but
+          left in the tree, so the alt text and the no-WebGL fallback survive. */}
+      <div
+        className={`madhav-figure ${arriving ? 'is-arriving' : ''}`}
+        style={use3D ? { opacity: 0, pointerEvents: 'none' } : undefined}
+      >
         <Image
           src={imageSrc}
           alt={imageAlt}

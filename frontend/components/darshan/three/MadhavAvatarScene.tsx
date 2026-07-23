@@ -21,8 +21,8 @@
  * scene is a few sprites plus one points cloud.
  */
 
-import { Suspense, useMemo, useRef } from 'react'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { ColorPalette } from '@/lib/darshan/types'
@@ -41,7 +41,9 @@ interface SceneProps {
    * `presence` — the full luminous form, for contexts with no artwork (and the
    * mode a commissioned GLB will render into).
    */
-  mode?: 'atmosphere' | 'presence'
+  mode?: 'atmosphere' | 'presence' | 'scene'
+  /** Artwork to place *inside* the scene when `mode = 'scene'`. */
+  imageUrl?: string
 }
 
 /**
@@ -326,17 +328,220 @@ function Rig({ palette }: { palette: ColorPalette }) {
   )
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+   `scene` mode — Madhav inside a living environment, not on top of one.
+
+   The hero used to be a cropped photograph masked into a soft ellipse. However
+   well it is graded, a flat image on a gradient reads as a cutout: nothing
+   passes in front of it, nothing sits behind it, and it does not move when you
+   do. Here the same artwork becomes a *plane inside a 3D scene* — light shafts
+   rake across it, embers drift between it and the camera, a nebula sits behind
+   it, and the camera itself breathes and answers the pointer. That parallax is
+   what makes it read as a place rather than a picture.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/** The artwork, as geometry. Masked to an ellipse in-shader-ish via alpha map. */
+function ArtworkPlane({ url, energy }: { url: string; energy: number }) {
+  const texture = useLoader(THREE.TextureLoader, url)
+  const group = useRef<THREE.Group>(null)
+  const t = useRef(0)
+
+  // A soft elliptical alpha mask, generated on a canvas — so the plane's
+  // rectangle never shows an edge against the cosmos.
+  const alphaMap = useMemo(() => {
+    if (typeof document === 'undefined') return null
+    const size = 512
+    const c = document.createElement('canvas')
+    c.width = c.height = size
+    const ctx = c.getContext('2d')
+    if (!ctx) return null
+    const g = ctx.createRadialGradient(size / 2, size * 0.44, 0, size / 2, size * 0.44, size * 0.56)
+    g.addColorStop(0, '#fff')
+    g.addColorStop(0.55, '#fff')
+    g.addColorStop(0.78, 'rgba(255,255,255,0.5)')
+    g.addColorStop(1, 'rgba(255,255,255,0)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, size, size)
+    return new THREE.CanvasTexture(c)
+  }, [])
+
+  // Configuring the texture is a mutation, so it belongs in a layout effect, not
+  // in `useMemo` — a memo that mutates is not a memo, and it would re-run
+  // unpredictably. Layout timing so the crop is correct on the very first frame.
+  useLayoutEffect(() => {
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.wrapS = THREE.ClampToEdgeWrapping
+    texture.wrapT = THREE.ClampToEdgeWrapping
+    // Crown-to-chest. Tighter than this and it becomes a headshot; wider and
+    // Arjuna and the chariot crowd back into frame.
+    texture.repeat.set(0.58, 0.46)
+    texture.offset.set(0.4, 0.36)
+    texture.needsUpdate = true
+  }, [texture])
+
+  useFrame((_, delta) => {
+    t.current += delta
+    const g = group.current
+    if (!g) return
+    // Breath — a slow push toward the viewer rather than a scale on a flat image.
+    const breath = Math.sin(t.current * 0.7) * 0.5 + 0.5
+    g.position.z = breath * (0.04 + 0.06 * energy)
+    g.position.y = -0.08 + breath * 0.03
+  })
+
+  return (
+    <group ref={group}>
+      <mesh>
+        <planeGeometry args={[3.5, 4.7]} />
+        <meshBasicMaterial
+          map={texture}
+          alphaMap={alphaMap ?? undefined}
+          transparent
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+/**
+ * Light shafts raking across the scene.
+ *
+ * Four long, narrow additive planes at shallow angles, drifting slowly. Cheap
+ * god-rays: real volumetrics would need a depth pre-pass and a blur chain for a
+ * effect nobody would look at directly.
+ */
+function LightShafts({ palette, energy, tempo }: SceneProps) {
+  const group = useRef<THREE.Group>(null)
+  const t = useRef(0)
+
+  useFrame((_, delta) => {
+    t.current += delta / Math.max(0.2, tempo)
+    const g = group.current
+    if (!g) return
+    g.rotation.z = -0.22 + Math.sin(t.current * 0.09) * 0.05
+    g.children.forEach((c, i) => {
+      const m = (c as THREE.Mesh).material as THREE.MeshBasicMaterial
+      // Each shaft breathes on its own phase so they never pulse in unison.
+      m.opacity = (0.05 + 0.09 * energy) * (0.55 + 0.45 * Math.sin(t.current * 0.5 + i * 1.7))
+    })
+  })
+
+  return (
+    <group ref={group} position={[0, 0.6, -0.6]}>
+      {[-1.5, -0.5, 0.6, 1.6].map((x, i) => (
+        <mesh key={x} position={[x, 0, 0]} rotation={[0, 0, 0.06 * i]}>
+          <planeGeometry args={[0.42 + i * 0.1, 9]} />
+          <meshBasicMaterial
+            color={i % 2 ? palette.glow : palette.primary}
+            transparent
+            opacity={0.08}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
+/** Embers between the camera and Madhav — the layer that sells the depth. */
+function ForegroundEmbers({ palette, energy, tempo }: SceneProps) {
+  const points = useRef<THREE.Points>(null)
+  const t = useRef(0)
+
+  const geometry = useMemo(() => {
+    const count = 90
+    const pos = new Float32Array(count * 3)
+    let seed = 4242
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) % 4294967296
+      return seed / 4294967296
+    }
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (rand() - 0.5) * 7
+      pos[i * 3 + 1] = (rand() - 0.5) * 8
+      // In front of the artwork plane, spread through the near depth.
+      pos[i * 3 + 2] = 0.6 + rand() * 2.6
+    }
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    return g
+  }, [])
+
+  useFrame((_, delta) => {
+    t.current += delta / Math.max(0.2, tempo)
+    const p = points.current
+    if (!p) return
+    // Rising, like embers off a fire, with a slow lateral sway.
+    p.position.y = (t.current * 0.08) % 4
+    p.position.x = Math.sin(t.current * 0.12) * 0.2
+  })
+
+  return (
+    <points ref={points} geometry={geometry}>
+      <pointsMaterial
+        color={palette.accent}
+        size={0.05}
+        sizeAttenuation
+        transparent
+        opacity={0.4 + 0.35 * energy}
+        blending={THREE.AdditiveBlending}
+        depthWrite={false}
+      />
+    </points>
+  )
+}
+
+/**
+ * The camera drifts and answers the pointer.
+ *
+ * This is the single most important part of `scene` mode: without camera
+ * movement the layers are still just stacked images. A few degrees of parallax
+ * is enough — more and it becomes a funhouse.
+ */
+function CameraDrift({ tempo }: { tempo: number }) {
+  const { camera } = useThree()
+  const t = useRef(0)
+  const target = useRef({ x: 0, y: 0 })
+
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      target.current.x = (e.clientX / window.innerWidth - 0.5) * 0.5
+      target.current.y = (e.clientY / window.innerHeight - 0.5) * 0.3
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+
+  useFrame((_, delta) => {
+    t.current += delta / Math.max(0.2, tempo)
+    // Idle drift, so the scene lives even with no pointer (and on touch).
+    const dx = Math.sin(t.current * 0.13) * 0.12 + target.current.x
+    const dy = Math.cos(t.current * 0.1) * 0.08 - target.current.y
+    camera.position.x += (dx - camera.position.x) * 0.04
+    camera.position.y += (0.2 + dy - camera.position.y) * 0.04
+    camera.lookAt(0, 0, 0)
+  })
+
+  return null
+}
+
 export default function MadhavAvatarScene({
   palette,
   energy,
   tempo,
   modelUrl,
   mode = 'atmosphere',
+  imageUrl,
 }: SceneProps) {
   const scene = { palette, energy, tempo }
   // Atmosphere sits behind the artwork, so it must never draw a body: only the
   // aura it stands in and the motes drifting around it.
   const atmosphere = mode === 'atmosphere' && !modelUrl
+  const cinematic = mode === 'scene' && !!imageUrl && !modelUrl
 
   return (
     <Canvas
@@ -348,8 +553,18 @@ export default function MadhavAvatarScene({
       style={{ width: '100%', height: '100%' }}
     >
       <Rig palette={palette} />
+      {cinematic && <CameraDrift tempo={tempo} />}
       <Aura {...scene} />
-      {!atmosphere && (
+      {cinematic && imageUrl && (
+        <>
+          <LightShafts {...scene} />
+          <Suspense fallback={null}>
+            <ArtworkPlane url={imageUrl} energy={energy} />
+          </Suspense>
+          <ForegroundEmbers {...scene} />
+        </>
+      )}
+      {!atmosphere && !cinematic && (
         <>
           <Suspense fallback={<PresenceCore {...scene} />}>
             {modelUrl ? <PresenceModel url={modelUrl} energy={energy} /> : <PresenceCore {...scene} />}
