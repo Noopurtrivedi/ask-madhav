@@ -28,15 +28,23 @@ const OPTIONS: { value: MotionPreference; label: string; hint: string }[] = [
   { value: 'text-only', label: 'Text only', hint: 'Words alone, no decorative visuals' },
 ]
 
-export default function MotionPreferenceToggle({ className = '' }: { className?: string }) {
+export default function MotionPreferenceToggle({
+  className = '',
+  tone = 'light',
+}: {
+  className?: string
+  /** `dark` for the cosmic footer; `light` for the cream pages. */
+  tone?: 'light' | 'dark'
+}) {
   const engine = useDarshanOptional()
   // Without a provider there is nothing to configure — render nothing rather
   // than a control that silently does nothing.
   if (!engine) return null
+  const dark = tone === 'dark'
 
   return (
     <fieldset className={className}>
-      <legend className="mb-2 text-xs font-medium uppercase tracking-[0.2em] text-ink/45">
+      <legend className={`mb-2 text-xs font-medium uppercase tracking-[0.2em] ${dark ? 'text-moonlight/45' : 'text-ink/45'}`}>
         Motion
       </legend>
       <div className="flex flex-wrap justify-center gap-2">
@@ -48,8 +56,12 @@ export default function MotionPreferenceToggle({ className = '' }: { className?:
               title={opt.hint}
               className={`cursor-pointer rounded-full border px-3 py-1.5 text-xs transition-colors ${
                 active
-                  ? 'border-saffron bg-saffron/15 text-ink'
-                  : 'border-saffron/25 text-ink/55 hover:border-saffron/60 hover:text-ink/80'
+                  ? dark
+                    ? 'border-gold bg-gold-soft/20 text-moonlight'
+                    : 'border-saffron bg-saffron/15 text-ink'
+                  : dark
+                    ? 'border-white/15 text-moonlight/55 hover:border-gold/60 hover:text-moonlight/85'
+                    : 'border-saffron/25 text-ink/55 hover:border-saffron/60 hover:text-ink/80'
               }`}
             >
               <input
@@ -65,7 +77,7 @@ export default function MotionPreferenceToggle({ className = '' }: { className?:
           )
         })}
       </div>
-      <p className="mt-2 text-[11px] text-ink/35">
+      <p className={`mt-2 text-[11px] ${dark ? 'text-moonlight/30' : 'text-ink/35'}`}>
         Currently: {engine.tier} — {engine.capability.reason}
       </p>
     </fieldset>

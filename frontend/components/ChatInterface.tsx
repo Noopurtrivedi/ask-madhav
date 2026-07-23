@@ -10,6 +10,7 @@ import SpeakButton from './SpeakButton'
 import MicButton from './MicButton'
 import MadhavLight from './MadhavLight'
 import { ChakraLoader } from './darshan/EngineChakra'
+import DivineShadow from './darshan/DivineShadow'
 
 function generateId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -327,7 +328,14 @@ export default function ChatInterface() {
   )
 
   return (
-    <section id="chat" className="py-14 sm:py-20 px-6" style={{ background: '#FFFCF5' }}>
+    <section
+      id="chat"
+      className="relative overflow-hidden py-14 sm:py-20 px-6"
+      style={{ background: '#FFFCF5' }}
+    >
+      {/* The form behind him while he speaks — swells on the engine's
+          answering/blessing states and pulses on his live voice. */}
+      <DivineShadow intensity={0.26} />
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">

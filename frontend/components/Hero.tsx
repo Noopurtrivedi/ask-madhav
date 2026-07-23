@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import ChakraLaunch from './darshan/ChakraLaunch'
 import CosmicBackdrop from './darshan/CosmicBackdrop'
 import MadhavPresence from './darshan/MadhavPresence'
+import { DivineSilhouette, TempleSkyline } from './darshan/CosmicForms'
 import MorPankh from './darshan/MorPankh'
 import QuoteReflection from './darshan/QuoteReflection'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
@@ -54,6 +55,10 @@ export default function Hero() {
       >
         <CosmicBackdrop />
         <MorPankh />
+
+        {/* The city, silhouetted along the base — foreground world, cosmos behind.
+            Custom vector (components/darshan/CosmicForms.tsx), never sourced art. */}
+        <TempleSkyline className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[74px] w-full opacity-90 md:h-[112px]" />
 
         <div
           className={`relative z-10 mx-auto w-full max-w-6xl transition-[opacity,transform] duration-1000 ease-out ${
@@ -120,6 +125,11 @@ export default function Hero() {
                 <div className="darshan-aura lotus-pulse" aria-hidden="true" />
                 {/* Turning halo of light behind the window */}
                 <div className="darshan-halo halo-turn" aria-hidden="true" />
+
+                {/* The form behind the form — a translucent divine silhouette
+                    rising out of the cosmos behind Madhav. Rendered for every
+                    tier (pure SVG), so it is not gated on WebGL. */}
+                <DivineSilhouette className="divine-behind" opacity={0.6} />
 
                 <div className="darshan-window">
                   {/* The presence itself: the procedural 3D darshan on capable

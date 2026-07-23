@@ -294,18 +294,156 @@ h1, h2, h3 {
 .darshan-skip:hover { color: var(--moonlight); border-color: rgba(246, 241, 228, 0.5); }
 
 /* ── Mor pankh (peacock feather) — one-shot drift ────────────── */
+/* A falling feather does not travel in a straight line — it rocks, stalls and
+   slips sideways as each face catches the air. The drift is therefore split
+   into five stops that overshoot the horizontal drift and back off again, with
+   the rotation leading the sideways motion (the feather turns, *then* slides).
+   `--sway` scales the lateral overshoot per feather so no two fall alike. */
 @keyframes pankh-drift {
-  0% { transform: translate3d(0, 0, 0) rotate(var(--r0, 0deg)); opacity: 0; }
-  14% { opacity: var(--peak, 0.4); }
-  74% { opacity: var(--peak, 0.4); }
-  100% { transform: translate3d(var(--dx, -20vw), var(--dy, 70vh), 0) rotate(var(--r1, 0deg)); opacity: 0; }
+  0% {
+    transform: translate3d(0, 0, 0) rotate(var(--r0, 0deg)) rotateY(0deg);
+    opacity: 0;
+  }
+  12% { opacity: var(--peak, 0.4); }
+  28% {
+    transform:
+      translate3d(calc(var(--dx, -20vw) * 0.18 + var(--sway, 3vw)), calc(var(--dy, 70vh) * 0.24), 0)
+      rotate(calc(var(--r0, 0deg) + (var(--r1, 0deg) - var(--r0, 0deg)) * 0.42))
+      rotateY(38deg);
+  }
+  52% {
+    transform:
+      translate3d(calc(var(--dx, -20vw) * 0.46 - var(--sway, 3vw)), calc(var(--dy, 70vh) * 0.5), 0)
+      rotate(calc(var(--r0, 0deg) + (var(--r1, 0deg) - var(--r0, 0deg)) * 0.28))
+      rotateY(-26deg);
+  }
+  76% {
+    opacity: var(--peak, 0.4);
+    transform:
+      translate3d(calc(var(--dx, -20vw) * 0.76 + var(--sway, 3vw) * 0.6), calc(var(--dy, 70vh) * 0.76), 0)
+      rotate(calc(var(--r0, 0deg) + (var(--r1, 0deg) - var(--r0, 0deg)) * 0.8))
+      rotateY(22deg);
+  }
+  100% {
+    transform:
+      translate3d(var(--dx, -20vw), var(--dy, 70vh), 0)
+      rotate(var(--r1, 0deg))
+      rotateY(0deg);
+    opacity: 0;
+  }
 }
 .mor-pankh {
   animation-name: pankh-drift;
-  animation-timing-function: linear;
+  /* Eased, not linear: a feather is slowed by air, and linear reads mechanical. */
+  animation-timing-function: cubic-bezier(0.37, 0.12, 0.52, 0.94);
   animation-iteration-count: 1;
   animation-fill-mode: both;
+  transform-style: preserve-3d;
   will-change: transform, opacity;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+}
+
+/* ── The form behind the form ────────────────────────────────────
+   A translucent divine silhouette rising out of the cosmos behind
+   Madhav. It must always read as *behind* him — so it is wider and
+   taller than the darshan window, sits earlier in the DOM, and never
+   sharpens beyond a soft glow. Its breath is slower than his, which is
+   what makes it feel vast rather than merely large. */
+.divine-behind {
+  position: absolute;
+  left: 50%;
+  /* Tall enough that the crown and both raised hands clear the arch — if the
+     form is contained by the window it reads as a glow, not as a presence.
+     The offset is tuned so the crown lands just under the navbar: push it much
+     higher and the head leaves the viewport, which is what happened first. */
+  top: -16%;
+  width: 300%;
+  height: 190%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  animation: divine-breathe 11s ease-in-out infinite;
+}
+@media (max-width: 640px) {
+  /* On a narrow screen 300% overflows the viewport and gets clipped to a smear;
+     pull it in so the silhouette still resolves as a figure. */
+  .divine-behind { width: 215%; height: 165%; top: -12%; }
+}
+@keyframes divine-breathe {
+  0%, 100% { opacity: 0.66; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.035); }
+}
+
+/* ── The form behind him while he speaks ─────────────────────────
+   Bound to the engine's answering/blessing states and to the live voice
+   amplitude (`--voice`, written by DivineShadow outside React). It sits
+   *behind body text*, so `--peak` is deliberately low and the fade is
+   slow — it should be felt at the edge of attention, never read. */
+.divine-shadow {
+  --voice: 0;
+  --peak: 0.3;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(560px, 92%);
+  height: 120%;
+  transform: translate(-50%, -50%) scale(0.96);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1400ms ease-out, transform 1400ms cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+  mix-blend-mode: screen;
+}
+.divine-shadow.is-present {
+  /* The voice adds on top of the resting presence, so louder syllables
+     genuinely brighten the form rather than just cycling it. */
+  opacity: calc(var(--peak) * (0.55 + 0.45 * var(--voice)));
+  transform: translate(-50%, -50%) scale(calc(1 + 0.045 * var(--voice)));
+}
+
+/* ── Madhav, the avatar ──────────────────────────────────────────
+   The artwork *is* the avatar. Three layers move independently: the
+   portrait breathes, the whole wrap leans against the pointer, and a
+   light sweep falls across him from the cosmos behind. `--px/--py/--tilt`
+   are written by MadhavPresence on pointermove (never through React
+   state — that would re-render on every mouse event). */
+.madhav-avatar-wrap {
+  --px: 0px;
+  --py: 0px;
+  --tilt: 0deg;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  transform: translate3d(var(--px), var(--py), 0) rotateZ(var(--tilt));
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.madhav-avatar-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Frames Krishna's crown-to-waist out of the wider Kurukshetra scene. */
+  object-position: 71% 20%;
+  transform: scale(1.72);
+  transform-origin: 71% 20%;
+}
+@keyframes madhav-breathe-scale {
+  0%, 100% { transform: scale(1.72) translateY(0); }
+  50% { transform: scale(1.755) translateY(-0.7%); }
+}
+.madhav-breathe { animation: madhav-breathe-scale 7s ease-in-out infinite; }
+
+/* Light thrown across him from the cosmos behind — this is what makes the
+   portrait read as *in* the scene rather than pasted onto it. */
+.madhav-avatar-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 42% at 66% 16%, rgba(255, 236, 180, 0.3), transparent 62%),
+    radial-gradient(80% 60% at 20% 92%, rgba(10, 14, 42, 0.55), transparent 60%);
+  mix-blend-mode: screen;
 }
 
 /* ── The darshan window (Madhav's presence) ──────────────────── */

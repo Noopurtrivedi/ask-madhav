@@ -65,48 +65,49 @@ export default function Home() {
       <div data-reveal><PopularVerses /></div>
       <div data-reveal><ChapterBrowser /></div>
       <div data-reveal><StoryCards /></div>
-      {/* The Cosmic Form: an invitation only. Nothing loads until it is accepted. */}
-      <div data-reveal><VishwaroopDarshan /></div>
       <div data-reveal><SubscribeRitual /></div>
+      {/* The Cosmic Form: an invitation only — nothing loads until it is accepted.
+          It sits last so its gradient runs straight into the dark footer, making
+          the page open and close on the same cosmos. */}
+      <div data-reveal><VishwaroopDarshan /></div>
 
       {/* Footer */}
-      <footer
-        className="py-12 px-6 border-t border-saffron/10"
-        style={{ background: '#F3E7CD' }}
-      >
+      {/* The footer is the second dark bookend, and it continues straight out of
+          the Vishwaroop section above it — no seam, no border. */}
+      <footer className="px-6 py-14" style={{ background: '#0A0E2A' }}>
         <div className="max-w-4xl mx-auto text-center">
           <span className="text-3xl select-none">🪷</span>
-          <p className="text-ink/60 mt-3 text-sm font-medium">
+          <p className="text-moonlight/70 mt-3 text-sm font-medium">
             Ask Madhav — Bhagavad Gita Guidance
           </p>
 
           {/* Channels */}
           <div className="flex items-center justify-center gap-5 mt-4 text-sm">
-            <a href="/#chat" className="text-saffron/80 hover:text-saffron transition-colors">Ask a Question</a>
-            <a href="/journal" className="text-saffron/80 hover:text-saffron transition-colors">Journal</a>
+            <a href="/#chat" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Ask a Question</a>
+            <a href="/journal" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Journal</a>
             {process.env.NEXT_PUBLIC_WHATSAPP_NUMBER && (
-              <a href="/whatsapp" className="text-saffron/80 hover:text-saffron transition-colors">WhatsApp</a>
+              <a href="/whatsapp" className="text-gold-soft/80 hover:text-gold-soft transition-colors">WhatsApp</a>
             )}
           </div>
 
           {/* Motion control — the OS setting is honoured automatically, but a
               seeker who has never found it can choose stillness right here. */}
-          <MotionPreferenceToggle className="mt-8 border-t border-saffron/10 pt-6" />
+          <MotionPreferenceToggle tone="dark" className="mt-8 border-t border-white/10 pt-6" />
 
           {/* Gita Press attribution — the credibility line */}
-          <p className="text-ink/55 text-xs mt-3 font-medium">
+          <p className="text-moonlight/55 text-xs mt-3 font-medium">
             Sanskrit & Hindi Bhavartha: Swami Ramsukhdas,{' '}
             <span className="italic">Sadhak-Sanjivani</span>
             {' '}(Gita Press, Gorakhpur) · English: Swami Gambhirananda
             {' '}· Digitized by IIT Kanpur Gita Supersite
           </p>
 
-          <p className="text-ink/30 text-xs mt-4 max-w-lg mx-auto leading-relaxed">
+          <p className="text-moonlight/35 text-xs mt-4 max-w-lg mx-auto leading-relaxed">
             This application provides spiritual guidance inspired by the Bhagavad Gita.
             It is not a religious authority, does not represent the divine Krishna,
             and is not a substitute for medical, legal, or financial advice.
           </p>
-          <p className="text-ink/20 text-xs mt-6">
+          <p className="text-moonlight/25 text-xs mt-6">
             Built with reverence for timeless wisdom
           </p>
         </div>

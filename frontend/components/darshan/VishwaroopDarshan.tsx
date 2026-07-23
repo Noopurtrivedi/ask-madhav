@@ -24,6 +24,8 @@ import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDarshanOptional } from './DarshanProvider'
 import { CosmicMandala } from './SacredSymbols'
+import { DivineSilhouette } from './CosmicForms'
+import { DASHAVATAR, AvatarGlyphIcon } from './Dashavatar'
 import { useReducedMotion } from '@/lib/motion'
 import { quoteByReference } from '@/lib/darshan/quotes'
 import { darshan } from '@/lib/darshan/events'
@@ -118,28 +120,52 @@ export default function VishwaroopDarshan() {
   const quote = quoteByReference(VISHWAROOP_REFERENCE)
 
   return (
-    <section id="vishwaroop" className="px-6 py-20" style={{ background: '#F3E7CD' }}>
-      <div className="mx-auto max-w-3xl text-center">
-        <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-saffron/70">
+    <section
+      id="vishwaroop"
+      className="relative overflow-hidden px-6 py-24"
+      style={{
+        // A dark bookend to the dark hero: the cosmos returns at the foot of the
+        // page, so the cream middle reads as a deliberate passage between two
+        // darshans rather than as a palette that lost its nerve.
+        background:
+          'linear-gradient(180deg, #FFFCF5 0%, #6B4A5A 26%, #2A1A4A 60%, #0A0E2A 100%)',
+      }}
+    >
+      {/* A few stars so the bookend belongs to the same sky as the hero. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          backgroundImage:
+            'radial-gradient(1.4px 1.4px at 12% 62%, rgba(246,241,228,0.55), transparent),' +
+            'radial-gradient(1.2px 1.2px at 78% 44%, rgba(246,241,228,0.45), transparent),' +
+            'radial-gradient(1.6px 1.6px at 33% 84%, rgba(232,195,90,0.4), transparent),' +
+            'radial-gradient(1.2px 1.2px at 62% 74%, rgba(246,241,228,0.4), transparent),' +
+            'radial-gradient(1.3px 1.3px at 88% 88%, rgba(246,241,228,0.35), transparent)',
+        }}
+      />
+      <div className="relative mx-auto max-w-3xl text-center">
+        <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-gold-soft/75">
           Bhagavad Gita · Chapter 11
         </p>
-        <h2 className="mb-4 text-3xl font-bold text-ink md:text-4xl">Vishwaroop Darshan</h2>
-        <p className="mx-auto mb-8 max-w-xl leading-relaxed text-ink/65">
-          Arjuna asked to see the form beyond form — and having seen it, asked
-          gently for the familiar one back. Enter only if you wish to. It lasts a
-          moment, then returns you here.
+        <h2 className="mb-4 text-3xl font-bold text-moonlight md:text-4xl">Vishwaroop · Dashavatar</h2>
+        <p className="mx-auto mb-8 max-w-xl leading-relaxed text-moonlight/70">
+          Arjuna asked to see the form that contains all forms. What opened was
+          not one figure but the whole descent — fish, tortoise, boar, man-lion,
+          dwarf, axe-bearer, archer, cowherd, the awakened one, and the rider yet
+          to come. Enter only if you wish to; it lasts a moment, then returns you.
         </p>
 
         <button
           ref={returnFocus}
           type="button"
           onClick={enter}
-          className="rounded-full bg-cosmos px-8 py-4 text-lg font-semibold text-moonlight shadow-lg shadow-cosmos/25 transition-all hover:scale-105 hover:bg-cosmos-violet"
+          className="rounded-full border border-gold/40 bg-gold-soft/10 px-8 py-4 text-lg font-semibold text-moonlight shadow-lg shadow-black/40 backdrop-blur-sm transition-all hover:scale-105 hover:border-gold hover:bg-gold-soft/20"
         >
           Behold the Cosmic Form
         </button>
 
-        <p className="mt-4 text-xs text-ink/40">
+        <p className="mt-4 text-xs text-moonlight/40">
           A brief, quiet reveal · press Escape at any time to return
         </p>
       </div>
@@ -153,7 +179,7 @@ export default function VishwaroopDarshan() {
       */}
       {open && mounted && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-end pb-8"
           style={{ background: palette.deep }}
           role="dialog"
           aria-modal="true"
@@ -174,24 +200,77 @@ export default function VishwaroopDarshan() {
             )}
           </div>
 
+          {/* The form that contains the forms, rising at the centre. */}
+          <div
+            className="pointer-events-none absolute left-1/2 top-[46%] h-[68vh] w-[min(720px,80vw)] -translate-x-1/2 -translate-y-1/2"
+            aria-hidden="true"
+            style={{
+              opacity: 0.55 + 0.35 * Math.min(1, progress * 2),
+              transition: 'opacity 700ms ease-out',
+            }}
+          >
+            <DivineSilhouette
+              className="h-full w-full"
+              color={palette.glow}
+              glow={palette.primary}
+              opacity={0.85}
+            />
+          </div>
+
+          {/* The ten, arriving one after another around the form. */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            {DASHAVATAR.map((glyph, i) => {
+              // Ringed evenly, starting at the top and going clockwise.
+              const angle = (i / DASHAVATAR.length) * Math.PI * 2 - Math.PI / 2
+              // Each arrives in turn over the first ~75% of the reveal, so the
+              // sequence reads as a descent rather than ten simultaneous pops.
+              const arrival = (i / DASHAVATAR.length) * 0.75
+              const shown = reduced || progress >= arrival
+              const R = 'min(38vh, 36vw)'
+              return (
+                <div
+                  key={glyph.id}
+                  className="absolute left-1/2 top-[46%] flex flex-col items-center"
+                  style={{
+                    transform: `translate(-50%, -50%) translate(calc(${R} * ${Math.cos(angle).toFixed(4)}), calc(${R} * ${Math.sin(angle).toFixed(4)}))`,
+                    opacity: shown ? 1 : 0,
+                    transition: 'opacity 1100ms ease-out',
+                  }}
+                >
+                  <AvatarGlyphIcon glyph={glyph} size={56} color={palette.glow} active={shown} />
+                  <p className="mt-1 whitespace-nowrap text-[11px] tracking-[0.14em] text-moonlight/75">
+                    {glyph.name}
+                  </p>
+                  <p
+                    className="whitespace-nowrap text-[10px] text-gold-soft/60"
+                    lang="sa"
+                    style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+                  >
+                    {glyph.sanskrit}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+
           {/* The verse. Readability wins over the visual: the form is behind a
               soft glass panel so the Sanskrit never has to compete with the
               mandala's brightest rings. */}
-          <div className="relative z-10 mx-6 max-w-2xl rounded-3xl bg-cosmos-deep/55 px-8 py-7 text-center backdrop-blur-[3px]">
+          <div className="relative z-10 mx-6 max-w-xl rounded-2xl bg-cosmos-deep/70 px-6 py-4 text-center backdrop-blur-[3px]">
             {quote && (
               <>
                 <p
-                  className="mb-3 text-lg leading-relaxed text-moonlight md:text-2xl"
+                  className="mb-2 text-base leading-relaxed text-moonlight md:text-lg"
                   style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
                   lang="sa"
                 >
                   {quote.sanskrit}
                 </p>
-                <p className="mb-4 text-sm italic text-gold-soft/80">{quote.transliteration}</p>
-                <p className="text-base leading-relaxed text-moonlight/80">
+                <p className="mb-2 text-xs italic text-gold-soft/80">{quote.transliteration}</p>
+                <p className="text-sm leading-relaxed text-moonlight/80">
                   “{quote.english_meaning}”
                 </p>
-                <p className="mt-4 text-xs uppercase tracking-[0.25em] text-gold-soft/60">
+                <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-gold-soft/60">
                   Bhagavad Gita · {quote.reference}
                 </p>
               </>
@@ -202,7 +281,7 @@ export default function VishwaroopDarshan() {
             type="button"
             onClick={close}
             autoFocus
-            className="relative z-10 mt-10 rounded-full border border-gold/40 px-6 py-3 text-sm text-moonlight/80 transition-colors hover:border-gold hover:text-moonlight"
+            className="relative z-10 mt-4 rounded-full border border-gold/40 bg-cosmos-deep/60 px-6 py-2.5 text-sm text-moonlight/80 backdrop-blur-[2px] transition-colors hover:border-gold hover:text-moonlight"
           >
             Return to the gentle form
           </button>

@@ -23,14 +23,14 @@ const MADHAV_PRESENCE: AvatarForm = {
   display_name: 'Madhav',
   spiritual_theme: 'Presence',
   description:
-    'Madhav as living light rather than likeness — a luminous, breathing presence ' +
-    'crowned with mor pankh. Depicted without a face, so the seeker is turned ' +
-    'toward their own consciousness rather than toward an image.',
+    'Madhav as he is shown throughout the app — crowned with mor pankh, hand ' +
+    'raised in teaching — brought alive with breath, parallax and an aura of ' +
+    'light, with a translucent divine form rising behind him.',
   symbol: 'peacock_feather',
   // TODO(asset): drop a commissioned, licensed GLB at /models/madhav-presence.glb
   // and set this to '/models/madhav-presence.glb'. Until then the engine renders
-  // the procedural placeholder presence (pure geometry, zero third-party assets).
-  // Register the asset in `sacred_assets` FIRST — resolveAsset() rejects models
+  // the artwork below, animated, with a WebGL atmosphere behind it.
+  // Register the asset in `sacred_assets` FIRST — the schema rejects models
   // without commercial_use_allowed + an approved cultural review.
   model_url: null,
   thumbnail_url: '/art/scene-2.png',
@@ -45,8 +45,9 @@ const MADHAV_PRESENCE: AvatarForm = {
   entry_animation: 'light_bloom',
   active_status: true,
   reviewer_notes:
-    'Approved: aniconic depiction (light, not likeness). Keeps the app clear of ' +
-    'idol-dependency and of any claim to represent the divine Krishna.',
+    'Approved. The artwork already ships across the app; the divine form behind ' +
+    'him is a faceless silhouette, so nothing here claims to depict the deity. ' +
+    'The footer disclaimer remains the binding statement.',
 }
 
 /**
@@ -114,9 +115,11 @@ export const DEFAULT_DARSHAN_CONFIG: DarshanConfig = {
     // entirely, or '3d' to force it (dev/QA only — it ignores device tiering).
     mode: 'auto',
     active_form_id: 'madhav_presence',
-    fallback_image: '/art/scene-2.png',
+    // scene-1 is the closest thing to a portrait in the set — crown, mor pankh,
+    // gentle expression, teaching gesture — so it frames best inside the arch.
+    fallback_image: '/art/scene-1.png',
     fallback_image_alt:
-      'Krishna, as the charioteer Madhav, delivers the Bhagavad Gita to the warrior Arjuna on the battlefield of Kurukshetra at dawn',
+      'Krishna — Madhav — crowned with a peacock feather, raising a hand in teaching, beside Arjuna at Kurukshetra',
     particles_enabled: true,
   },
   vishwaroop: {

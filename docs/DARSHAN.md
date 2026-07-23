@@ -237,6 +237,40 @@ whose tradition this is.
 
 ---
 
+## 5b. The avatar, the form behind it, and the city
+
+**Madhav is the artwork.** An earlier revision replaced him with an abstract orb
+of light on aniconic grounds. That was wrong for this product — it ships Krishna
+artwork throughout, and the brief specified a crown, mor pankh and a blessing
+pose. The engine's job is to bring him alive, not to abstract him away.
+`MadhavPresence` animates the portrait on three layers (breath, pointer
+parallax, and a WebGL atmosphere of motes behind him) and never fades it out.
+
+**`DivineSilhouette`** is the four-armed luminous form rising behind him, and at
+the centre of Vishwaroop. **`TempleSkyline`** is the shikhara city along the
+hero's base. Both are drawn as vectors in `CosmicForms.tsx`. The reference for
+this composition is a copyrighted production still, so what is reproduced is the
+*technique* — a translucent form behind a solid figure, architecture silhouetted
+in front of a nebula — never the artwork. Silhouettes also keep it non-figurative:
+no rendered face, so nothing claims to depict the deity.
+
+**Two traps worth knowing about**, both of which bit during development:
+
+- *SVG def ids are document-global.* With the hero and the Vishwaroop overlay
+  both mounted, hardcoded gradient ids collide and whichever renders second
+  silently paints with the first one's gradients — the `color` props appear to
+  do nothing. Every def id is `useId`-scoped. Do the same in any new vector.
+- *`Math.sin` is not hydration-safe.* ECMAScript leaves its precision
+  implementation-defined, so Node and Chrome disagree around the 12th decimal.
+  A feather barb seeded with `Math.sin` produced a hydration mismatch on every
+  load. Use integer LCG seeding (as `CosmicBackdrop` does) **and** round every
+  coordinate before it reaches the DOM.
+
+**`DivineShadow`** puts that same form behind Madhav *while he speaks* — it
+swells on the engine's `answering`/`blessing` states and pulses on live voice
+amplitude from the `madhav:voice` bus. It sits behind body text, so `--peak` is
+low and the fade is slow; reduced motion removes it rather than freezing it.
+
 ## 6. What Vishwaroop must never become
 
 `VishwaroopDarshan` is the product's one moment of spectacle, which makes it the
@@ -248,7 +282,16 @@ one most likely to go wrong. The scene is abstract on purpose:
 - **no combat or game-style effects**.
 
 Awe here comes from vastness and order — rings opening, shells nesting, a field
-of stars — not from horror. The app's safety constraint forbids creating fear,
+of stars — not from horror.
+
+What it resolves into is the **Dashavatar**: the ten descents ringed around the
+central form, arriving one after another across the first ~75% of the reveal, so
+the sequence reads as a descent rather than ten simultaneous pops. Ordering
+follows the Garuda Purana; traditions differ on the ninth (Balarama vs Buddha),
+which `Dashavatar.tsx` records in `reviewer_note` rather than the codebase
+asserting one tradition is correct. The verse sits as a caption at the foot so it
+never covers the ring — an earlier centred panel clipped the glyphs at 3 and 9
+o'clock. The app's safety constraint forbids creating fear,
 and a frightening Vishwaroop would break it.
 
 Structurally it is also bounded: it is an *invitation card* until tapped, nothing

@@ -1,28 +1,24 @@
 'use client'
 
 /**
- * MadhavAvatarScene — the hero's 3D presence.
+ * MadhavAvatarScene — the atmosphere around the hero avatar.
  *
- * ── Why this is abstract ──────────────────────────────────────────────────
- * There is no Krishna model here, and that is a design decision, not a
- * placeholder apology. The app's safety constraint forbids representing the
- * divine Krishna, and `MadhavLight` already established the answer: Madhav as
- * *jyotiṣām api taj jyotiḥ* — light, not likeness. So the scene renders a
- * luminous standing presence, an aura, a crown ring and a drift of light motes.
- * Peacock blue, deep indigo, gold and soft saffron, exactly as briefed —
- * expressed as light rather than as a face.
+ * Madhav himself is the artwork (`MadhavPresence`), not this canvas. What this
+ * renders in its default `atmosphere` mode is the air he stands in: a soft aura
+ * and a drift of light motes behind the portrait, in peacock blue, deep indigo,
+ * gold and soft saffron.
  *
- * Every vertex is generated in code. Nothing is downloaded, so nothing here can
- * be unlicensed. When a commissioned GLB exists, set `modelUrl` (from
- * `avatar_forms.model_url`) and it replaces the procedural core while keeping
- * the same aura, crown, motes and lighting rig.
+ * `presence` mode still exists and draws a luminous faceless form — used where
+ * there is no artwork, and the mode a commissioned GLB renders into. Everything
+ * procedural here is generated in code (canvas radial-gradient sprites, not lit
+ * solids: a `meshStandardMaterial` body catches speculars and reads as plastic,
+ * and light has no surface), so nothing in this file can be unlicensed.
  *
  * ── Performance ───────────────────────────────────────────────────────────
- * This module is only ever reached through a dynamic import from
- * `MadhavPresence`, and only when the engine has already decided the device is
- * `full` tier with working WebGL. `dpr` is capped at 1.75, the frameloop is
- * demand-free but every animation is delta-timed, and the whole scene is a
- * few hundred triangles plus one points cloud.
+ * Only ever reached through a dynamic import from `MadhavPresence`, and only
+ * when the engine has already decided the device is `full` tier with working
+ * WebGL. `dpr` is capped at 1.75, every animation is delta-timed, and the whole
+ * scene is a few sprites plus one points cloud.
  */
 
 import { Suspense, useMemo, useRef } from 'react'
@@ -39,6 +35,13 @@ interface SceneProps {
   tempo: number
   /** Optional commissioned GLB. Null → the procedural presence. */
   modelUrl?: string | null
+  /**
+   * `atmosphere` — motes and a faint aura only, to sit *behind* the artwork
+   * avatar. This is the default in the hero, because Madhav is the artwork.
+   * `presence` — the full luminous form, for contexts with no artwork (and the
+   * mode a commissioned GLB will render into).
+   */
+  mode?: 'atmosphere' | 'presence'
 }
 
 /**
@@ -323,8 +326,18 @@ function Rig({ palette }: { palette: ColorPalette }) {
   )
 }
 
-export default function MadhavAvatarScene({ palette, energy, tempo, modelUrl }: SceneProps) {
+export default function MadhavAvatarScene({
+  palette,
+  energy,
+  tempo,
+  modelUrl,
+  mode = 'atmosphere',
+}: SceneProps) {
   const scene = { palette, energy, tempo }
+  // Atmosphere sits behind the artwork, so it must never draw a body: only the
+  // aura it stands in and the motes drifting around it.
+  const atmosphere = mode === 'atmosphere' && !modelUrl
+
   return (
     <Canvas
       // Cap DPR: a 3× retina phone gains nothing visible here and pays ~2.2×
@@ -336,10 +349,14 @@ export default function MadhavAvatarScene({ palette, energy, tempo, modelUrl }: 
     >
       <Rig palette={palette} />
       <Aura {...scene} />
-      <Suspense fallback={<PresenceCore {...scene} />}>
-        {modelUrl ? <PresenceModel url={modelUrl} energy={energy} /> : <PresenceCore {...scene} />}
-      </Suspense>
-      <CrownRing {...scene} />
+      {!atmosphere && (
+        <>
+          <Suspense fallback={<PresenceCore {...scene} />}>
+            {modelUrl ? <PresenceModel url={modelUrl} energy={energy} /> : <PresenceCore {...scene} />}
+          </Suspense>
+          <CrownRing {...scene} />
+        </>
+      )}
       <Motes {...scene} />
     </Canvas>
   )

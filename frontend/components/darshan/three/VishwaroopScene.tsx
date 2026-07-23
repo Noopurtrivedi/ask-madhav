@@ -118,7 +118,13 @@ function LayeredForms({ palette, progress }: Props) {
   )
 }
 
-/** The core of light at the centre of the form. */
+/**
+ * The core of light at the centre of the form.
+ *
+ * Deliberately restrained: this sits directly behind the divine silhouette, and
+ * an earlier, brighter version washed the figure out into a white disc. The
+ * core's job is to *backlight* the form, not to compete with it.
+ */
 function CosmicCore({ palette, progress }: Props) {
   const mesh = useRef<THREE.Mesh>(null)
   const t = useRef(0)
@@ -128,7 +134,7 @@ function CosmicCore({ palette, progress }: Props) {
     const m = mesh.current
     if (!m) return
     const breath = Math.sin(t.current * 0.8) * 0.5 + 0.5
-    m.scale.setScalar(0.35 + easeOut(progress) * 0.35 + breath * 0.04)
+    m.scale.setScalar(0.22 + easeOut(progress) * 0.2 + breath * 0.03)
   })
 
   return (
@@ -137,7 +143,7 @@ function CosmicCore({ palette, progress }: Props) {
       <meshBasicMaterial
         color={palette.glow}
         transparent
-        opacity={0.5 + 0.4 * easeOut(progress)}
+        opacity={0.22 + 0.2 * easeOut(progress)}
         blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
