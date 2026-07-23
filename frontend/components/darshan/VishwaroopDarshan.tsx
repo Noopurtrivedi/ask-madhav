@@ -59,6 +59,8 @@ export default function VishwaroopDarshan() {
     VISUAL_MOODS.cosmos.palette
   // The scene only runs where the engine has already cleared the device.
   const canRender3D = Boolean(engine?.use3D) && !reduced
+  const videoUrl = engine?.config.vishwaroop.video_url ?? null
+  const videoPoster = engine?.config.vishwaroop.video_poster ?? null
 
   const close = useCallback(() => {
     setOpen(false)
@@ -185,6 +187,33 @@ export default function VishwaroopDarshan() {
           aria-modal="true"
           aria-label="Vishwaroop Darshan — the Cosmic Form"
         >
+          {/* An optional rendered loop, *behind* the real-time layer rather than
+              instead of it — so the Dashavatar, the verse and the reduced-motion
+              path all keep working whether or not the asset exists. Muted and
+              `playsInline`: the app never autoplays audio. */}
+          {videoUrl && !reduced && (
+            <video
+              className="absolute inset-0 h-full w-full object-cover opacity-70"
+              src={videoUrl}
+              poster={videoPoster ?? undefined}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden="true"
+            />
+          )}
+          {videoUrl && reduced && videoPoster && (
+            // Stillness gets the first frame, not a frozen video element.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              className="absolute inset-0 h-full w-full object-cover opacity-70"
+              src={videoPoster}
+              alt=""
+              aria-hidden="true"
+            />
+          )}
+
           {/* The reveal itself. */}
           <div className="absolute inset-0" aria-hidden="true">
             {canRender3D ? (

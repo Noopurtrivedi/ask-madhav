@@ -261,7 +261,7 @@ export default function SpeakButton({ text, language = 'english', autoPlay = fal
     <button
       onClick={toggle}
       aria-label={playing || preparing ? 'Stop reading the answer aloud' : 'Listen to this answer'}
-      className="inline-flex items-center gap-1 text-saffron/70 hover:text-saffron text-[11px]
+      className="inline-flex items-center gap-1 text-gold-soft/75 hover:text-saffron text-[11px]
                  tracking-wider uppercase transition-colors"
     >
       {preparing ? (

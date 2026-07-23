@@ -271,6 +271,16 @@ export interface DarshanConfig {
     /** Require an explicit tap; never trigger on scroll. */
     require_explicit_consent: boolean
     max_duration_ms: number
+    /**
+     * Optional cinematic loop (WebM, MP4 fallback). When set, it plays *behind*
+     * the real-time layer instead of replacing it, so the Dashavatar, the verse
+     * and the reduced-motion path all keep working. Always muted — the app
+     * never autoplays audio.
+     * TODO(asset): render from Blender, ≤6MB, ≤20s, seamless loop.
+     */
+    video_url?: string | null
+    /** First frame, shown while the video buffers and under reduced motion. */
+    video_poster?: string | null
   }
   chakra: {
     launch_enabled: boolean

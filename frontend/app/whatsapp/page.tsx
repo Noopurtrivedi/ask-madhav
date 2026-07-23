@@ -24,7 +24,7 @@ export default async function WhatsAppPage() {
 
   if (!number) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-amber-50">
+      <main className="darshan-page min-h-screen flex flex-col items-center justify-center px-6 text-center bg-amber-50">
         <h1 className="text-2xl font-semibold text-amber-900">WhatsApp chat is coming soon</h1>
         <p className="mt-3 max-w-md text-amber-800/80">
           Madhav will soon walk beside you in WhatsApp too. For now, ask him here on the web.
@@ -54,7 +54,7 @@ export default async function WhatsAppPage() {
       </p>
 
       <div
-        className="mt-8 w-56 h-56 sm:w-64 sm:h-64 p-4 bg-white rounded-2xl shadow-lg ring-1 ring-amber-200"
+        className="mt-8 w-56 h-56 sm:w-64 sm:h-64 p-4 bg-white/[0.05] rounded-2xl shadow-lg ring-1 ring-amber-200"
         // qrSvg is generated server-side from a trusted env var — safe to inline.
         dangerouslySetInnerHTML={{ __html: qrSvg }}
       />

@@ -63,7 +63,7 @@ export default function SaveVerseButton({ reference, englishMeaning, themes = []
       disabled={busy}
       aria-label={saved ? 'Remove from journal' : 'Save to journal'}
       title={userId ? (saved ? 'Saved — tap to remove' : 'Save to your journal') : 'Sign in to save'}
-      className="text-ink/40 hover:text-saffron transition-colors text-xs flex items-center gap-1 disabled:opacity-50"
+      className="text-moonlight/48 hover:text-saffron transition-colors text-xs flex items-center gap-1 disabled:opacity-50"
     >
       <svg width="13" height="13" viewBox="0 0 24 24" fill={saved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />

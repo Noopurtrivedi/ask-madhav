@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import DarshanProvider from '@/components/darshan/DarshanProvider'
+import CosmicJourney from '@/components/darshan/CosmicJourney'
 import DarshanDebugPanel from '@/components/darshan/DarshanDebugPanel'
 import './globals.css'
 
@@ -51,6 +52,9 @@ export default function RootLayout({
           Component here and pass them as `config={…}`.
         */}
         <DarshanProvider>
+          {/* One sky behind every route — fixed, scroll-driven, and the only
+              background the site has. See components/darshan/CosmicJourney.tsx. */}
+          <CosmicJourney />
           {children}
           <DarshanDebugPanel />
         </DarshanProvider>

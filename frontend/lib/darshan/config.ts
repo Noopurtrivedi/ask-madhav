@@ -128,6 +128,10 @@ export const DEFAULT_DARSHAN_CONFIG: DarshanConfig = {
     // Bounded on purpose: a rare moment that ends on its own, so it can never
     // become an ambient drain or an overwhelming loop.
     max_duration_ms: 34_000,
+    // Drop a rendered loop in here and it plays behind the real-time scene.
+    // Absent → the real-time Dashavatar/Vishwaroop is the whole experience.
+    video_url: null,
+    video_poster: null,
   },
   chakra: {
     launch_enabled: true,

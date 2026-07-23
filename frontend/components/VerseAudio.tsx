@@ -104,7 +104,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
 
   if (!supported) {
     // Graceful: just show the transliteration with no controls.
-    return <p className="text-ink/40 text-sm italic">{text}</p>
+    return <p className="text-moonlight/48 text-sm italic">{text}</p>
   }
 
   return (
@@ -113,7 +113,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
         <button
           onClick={togglePlay}
           aria-label={playing ? 'Stop recitation' : 'Play recitation'}
-          className="flex-shrink-0 mt-0.5 w-7 h-7 rounded-full bg-saffron/15 border border-saffron/30
+          className="flex-shrink-0 mt-0.5 w-7 h-7 rounded-full bg-saffron/15 border border-gold/28
                      flex items-center justify-center text-saffron hover:bg-saffron/30 transition-colors"
         >
           {playing ? (
@@ -134,7 +134,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
               className={
                 i === wordIndex
                   ? 'text-saffron font-medium transition-colors'
-                  : 'text-ink/40 transition-colors'
+                  : 'text-moonlight/48 transition-colors'
               }
             >
               {w}{' '}
@@ -149,7 +149,7 @@ export default function VerseAudio({ text, meditation = false }: Props) {
           className={`text-xs px-3 py-1 rounded-full border transition-colors ${
             loop
               ? 'border-saffron/60 text-saffron bg-saffron/10'
-              : 'border-saffron/20 text-ink/50 hover:border-saffron/40'
+              : 'border-gold/22 text-moonlight/58 hover:border-gold/35'
           }`}
         >
           🧘 {loop ? 'Meditation on · tap to stop' : 'Meditation mode'}
