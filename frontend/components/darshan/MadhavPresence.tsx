@@ -3,28 +3,20 @@
 /**
  * MadhavPresence — the hero's avatar.
  *
- * Madhav is *visible here*: the artwork is the avatar, always rendered, never
- * faded out. An earlier revision replaced him with an abstract orb of light on
- * aniconic grounds; that was the wrong call for this product, which ships
- * Krishna artwork throughout and was specified with a crown, mor pankh and a
- * blessing pose. The engine's job is to bring him alive, not to abstract him
- * away.
+ * Madhav stands here as a **stylised 3D figure** (three/KrishnaFigure.tsx):
+ * crown, mor pankh, flute, tribhanga stance, aura — real geometry in the scene,
+ * with a camera that drifts and answers the pointer. Faceless by the app's
+ * safety constraint; recognisable by silhouette. A commissioned photoreal GLB
+ * swaps in via `avatar_forms.model_url` when one exists (docs/ASSETS.md).
  *
- * The avatar is animated on three layers:
- *   1. **Breath** — a slow scale/rise on the artwork itself (CSS, so it costs
- *      nothing and runs on the compositor).
- *   2. **Parallax** — the portrait leans a few pixels against pointer movement,
- *      which is what sells depth inside a flat window.
- *   3. **Atmosphere** — when the device can afford it, a WebGL layer of drifting
- *      light motes and a soft aura sits *behind* him inside the arch.
- *
- * Order of fallback: artwork + atmosphere → artwork + breath → artwork. The
- * artwork always carries the alt text; every animated layer is `aria-hidden`,
- * so the accessible experience is identical in all three cases.
+ * Fallback ladder: 3D figure (full tier) → the faceless `DivineSilhouette`
+ * (SVG, any tier, no WebGL). The Kurukshetra photograph is no longer in the
+ * hero at all — it features in its own section. A screen reader always gets a
+ * plain sentence; every visual layer is aria-hidden.
  */
 
-import Image from 'next/image'
 import dynamic from 'next/dynamic'
+import { DivineSilhouette } from './CosmicForms'
 import { Component, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { useDarshanOptional } from './DarshanProvider'
 import { useReducedMotion } from '@/lib/motion'
@@ -91,7 +83,6 @@ export default function MadhavPresence() {
   const energy = engine?.energy ?? 0.3
   const tempo = engine ? profileOf(engine.state).tempo : 1
   const modelUrl = engine?.form.model_url ?? null
-  const imageSrc = engine?.config.hero.fallback_image ?? '/art/madhav-avatar.png'
   const imageAlt =
     engine?.config.hero.fallback_image_alt ??
     'Krishna — Madhav — crowned with a peacock feather, raising a hand in teaching, at Kurukshetra'
@@ -136,12 +127,11 @@ export default function MadhavPresence() {
               energy={energy}
               tempo={tempo}
               modelUrl={modelUrl}
-              // `scene` puts the artwork *inside* a 3D environment — light
-              // shafts across it, embers between it and the camera, a camera
-              // that drifts and answers the pointer. A flat image on a gradient
-              // reads as a cutout no matter how well it is graded.
-              mode="scene"
-              imageUrl={imageSrc}
+              // A stylised 3D Krishna figure — crown, mor pankh, flute,
+              // tribhanga stance — standing *in* the scene, not a photo plane.
+              // See three/KrishnaFigure.tsx. (`scene` mode, which places the
+              // artwork on a plane, is kept for the commissioned-GLB fallback.)
+              mode="figure"
             />
           </PresenceBoundary>
         </div>
@@ -155,27 +145,28 @@ export default function MadhavPresence() {
         />
       )}
 
-      {/* Madhav. Always in the DOM and always the accessible description —
-          only his *appearance* is animated, so a screen reader never waits. */}
-      {/* When the 3D scene is drawing him, this copy is hidden from sight but
-          left in the tree, so the alt text and the no-WebGL fallback survive. */}
-      <div
-        className={`madhav-figure ${arriving ? 'is-arriving' : ''}`}
-        style={use3D ? { opacity: 0, pointerEvents: 'none' } : undefined}
-      >
-        <Image
-          src={imageSrc}
-          alt={imageAlt}
-          width={1123}
-          height={1404}
-          priority
-          sizes="(max-width: 640px) 290px, 360px"
-          className={`madhav-avatar-img ${reduced ? '' : 'madhav-breathe'}`}
-        />
-      </div>
+      {/* The no-WebGL presence: the faceless divine silhouette, not the
+          photograph. The Kurukshetra artwork was moved out of the hero (it now
+          features in its own section); on a device that can't run the 3D figure,
+          the silhouette carries the hero instead — on-theme, and license-clean
+          at every tier. */}
+      {!use3D && (
+        <div className={`madhav-figure ${arriving ? 'is-arriving' : ''}`} aria-hidden="true">
+          <DivineSilhouette
+            className="absolute inset-0 h-full w-full"
+            color="#8FD3D8"
+            glow="#3A4FA8"
+            opacity={0.85}
+          />
+        </div>
+      )}
+
+      {/* The accessible description — Madhav is a visual presence, so a screen
+          reader gets a plain sentence rather than any of the animated layers. */}
+      <span className="sr-only">{imageAlt}</span>
 
       {/* Light falling across him from the cosmos behind — sells the compositing. */}
-      <div className="madhav-avatar-light" aria-hidden="true" />
+      {use3D && <div className="madhav-avatar-light" aria-hidden="true" />}
     </div>
   )
 }

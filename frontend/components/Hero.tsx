@@ -132,7 +132,7 @@ export default function Hero() {
                 {/* The form behind the form — a translucent divine silhouette
                     rising out of the cosmos behind Madhav. Rendered for every
                     tier (pure SVG), so it is not gated on WebGL. */}
-                <DivineSilhouette className="divine-behind" opacity={0.6} />
+                <DivineSilhouette className="divine-behind" opacity={0.28} />
 
                 <div className="darshan-window">
                   {/* The presence itself: the procedural 3D darshan on capable

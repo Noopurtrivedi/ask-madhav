@@ -10,6 +10,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import BackToTop from '@/components/BackToTop'
 import GuidedPaths from '@/components/GuidedPaths'
 import VishwaroopDarshan from '@/components/darshan/VishwaroopDarshan'
+import KurukshetraMoment from '@/components/darshan/KurukshetraMoment'
 import MotionPreferenceToggle from '@/components/darshan/MotionPreferenceToggle'
 
 const STATS = [
@@ -59,6 +60,8 @@ export default function Home() {
         </div>
       </section>
 
+      {/* The wide Kurukshetra artwork that left the hero now lives here. */}
+      <div data-reveal><KurukshetraMoment /></div>
       <div data-reveal><DailyVerse /></div>
       <div data-reveal><ChatInterface /></div>
       <div data-reveal><GuidedPaths /></div>

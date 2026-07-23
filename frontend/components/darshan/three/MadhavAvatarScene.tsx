@@ -25,6 +25,7 @@ import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import KrishnaFigure from './KrishnaFigure'
 import type { ColorPalette } from '@/lib/darshan/types'
 
 interface SceneProps {
@@ -41,7 +42,7 @@ interface SceneProps {
    * `presence` — the full luminous form, for contexts with no artwork (and the
    * mode a commissioned GLB will render into).
    */
-  mode?: 'atmosphere' | 'presence' | 'scene'
+  mode?: 'atmosphere' | 'presence' | 'scene' | 'figure'
   /** Artwork to place *inside* the scene when `mode = 'scene'`. */
   imageUrl?: string
 }
@@ -502,7 +503,7 @@ function ForegroundEmbers({ palette, energy, tempo }: SceneProps) {
  * movement the layers are still just stacked images. A few degrees of parallax
  * is enough — more and it becomes a funhouse.
  */
-function CameraDrift({ tempo }: { tempo: number }) {
+function CameraDrift({ tempo, lookY = 0, ease = 0.2 }: { tempo: number; lookY?: number; ease?: number }) {
   const { camera } = useThree()
   const t = useRef(0)
   const target = useRef({ x: 0, y: 0 })
@@ -522,8 +523,8 @@ function CameraDrift({ tempo }: { tempo: number }) {
     const dx = Math.sin(t.current * 0.13) * 0.12 + target.current.x
     const dy = Math.cos(t.current * 0.1) * 0.08 - target.current.y
     camera.position.x += (dx - camera.position.x) * 0.04
-    camera.position.y += (0.2 + dy - camera.position.y) * 0.04
-    camera.lookAt(0, 0, 0)
+    camera.position.y += (lookY + 0.2 + dy - camera.position.y) * 0.04
+    camera.lookAt(0, lookY, 0)
   })
 
   return null
@@ -542,6 +543,7 @@ export default function MadhavAvatarScene({
   // aura it stands in and the motes drifting around it.
   const atmosphere = mode === 'atmosphere' && !modelUrl
   const cinematic = mode === 'scene' && !!imageUrl && !modelUrl
+  const figure = mode === 'figure' && !modelUrl
 
   return (
     <Canvas
@@ -549,12 +551,17 @@ export default function MadhavAvatarScene({
       // the fill cost. `alpha` lets the cosmic backdrop show through.
       dpr={[1, 1.75]}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
-      camera={{ position: [0, 0.35, 5.2], fov: 42 }}
+      camera={figure ? { position: [0, 0.3, 4.9], fov: 42 } : { position: [0, 0.35, 5.2], fov: 42 }}
       style={{ width: '100%', height: '100%' }}
     >
-      <Rig palette={palette} />
+      {!figure && <Rig palette={palette} />}
       {cinematic && <CameraDrift tempo={tempo} />}
-      <Aura {...scene} />
+      {figure && <CameraDrift tempo={tempo} lookY={0.35} />}
+      {figure ? (
+        <KrishnaFigure palette={palette} energy={energy} tempo={tempo} />
+      ) : (
+        <Aura {...scene} />
+      )}
       {cinematic && imageUrl && (
         <>
           <LightShafts {...scene} />
@@ -564,7 +571,7 @@ export default function MadhavAvatarScene({
           <ForegroundEmbers {...scene} />
         </>
       )}
-      {!atmosphere && !cinematic && (
+      {!atmosphere && !cinematic && !figure && (
         <>
           <Suspense fallback={<PresenceCore {...scene} />}>
             {modelUrl ? <PresenceModel url={modelUrl} energy={energy} /> : <PresenceCore {...scene} />}
