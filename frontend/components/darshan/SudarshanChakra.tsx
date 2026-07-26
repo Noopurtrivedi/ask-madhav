@@ -88,6 +88,7 @@ export default function SudarshanChakra({
   const rootRef = useRef<SVGSVGElement>(null)
   const outerRef = useRef<SVGGElement>(null)
   const innerRef = useRef<SVGGElement>(null)
+  const iridRef = useRef<SVGGElement>(null)
   const angleRef = useRef(0)
   const speedRef = useRef(0)
   const glowRef = useRef(GLOW.idle)
@@ -123,6 +124,18 @@ export default function SudarshanChakra({
       inner.setAttribute('transform', `rotate(${(-a * 0.62).toFixed(2)} 100 100)`)
       root.style.setProperty('--chakra-glow', glowRef.current.toFixed(3))
 
+      // Iridescence — a spectral sheen that only appears while the discus is
+      // *moving*, like the play of hue in sunlight on a curved gold surface.
+      // Its strength tracks rotation speed (invisible at rest, full at spin),
+      // and the spectral gradient sweeps counter to the disc so the colours
+      // travel across the metal rather than turning with it.
+      const irid = iridRef.current
+      if (irid) {
+        const strength = Math.min(1, speedRef.current / SPEED.processing)
+        root.style.setProperty('--chakra-irid', strength.toFixed(3))
+        irid.setAttribute('transform', `rotate(${(-a * 1.7).toFixed(2)} 100 100)`)
+      }
+
       raf = requestAnimationFrame(tick)
     }
 
@@ -153,6 +166,17 @@ export default function SudarshanChakra({
           <stop offset="48%" stopColor="#E8C35A" />
           <stop offset="100%" stopColor="#C88A10" />
         </linearGradient>
+        {/* The spectrum for the moving sheen — a full hue sweep, so as the
+            overlay rotates every part of the rim passes through each colour. */}
+        <linearGradient id={`${uid}-irid`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF4D6D" />
+          <stop offset="18%" stopColor="#FFB84D" />
+          <stop offset="36%" stopColor="#FFF75E" />
+          <stop offset="54%" stopColor="#4DFFA6" />
+          <stop offset="72%" stopColor="#4DD6FF" />
+          <stop offset="88%" stopColor="#8A7DFF" />
+          <stop offset="100%" stopColor="#FF6DE0" />
+        </linearGradient>
       </defs>
 
       {/* Outer disc — blades + rings, turning forward */}
@@ -174,6 +198,22 @@ export default function SudarshanChakra({
             />
           )
         })}
+      </g>
+
+      {/* Iridescent sheen — spectral blades + rim laid over the gold with a
+          screen blend, so the hues add as light rather than repaint the metal.
+          `--chakra-irid` (0 at rest → 1 at full spin) fades the whole thing, so
+          it is only present while the discus turns. */}
+      <g
+        ref={iridRef}
+        style={{
+          mixBlendMode: 'screen',
+          opacity: 'calc(var(--chakra-irid, 0) * 0.7)',
+        }}
+      >
+        <path d={BLADE_PATH} fill={`url(#${uid}-irid)`} />
+        <circle cx="100" cy="100" r="79" fill="none" stroke={`url(#${uid}-irid)`} strokeWidth="5" />
+        <circle cx="100" cy="100" r="60" fill="none" stroke={`url(#${uid}-irid)`} strokeWidth="2" strokeOpacity="0.7" />
       </g>
 
       {/* A whisper of shadow inside the rim so the gold reads on any ground */}
