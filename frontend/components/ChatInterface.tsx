@@ -8,7 +8,7 @@ import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } fr
 import VerseCardComponent from './VerseCard'
 import SpeakButton from './SpeakButton'
 import MicButton from './MicButton'
-import MadhavLight from './MadhavLight'
+import ChatAvatar from './darshan/ChatAvatar'
 import { ChakraLoader } from './darshan/EngineChakra'
 import DivineShadow from './darshan/DivineShadow'
 
@@ -422,12 +422,12 @@ export default function ChatInterface() {
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {/* Madhav's presence — rendered as living light, not a face.
-                    It awakens and pulses with his voice when the reply is read
-                    aloud (see MadhavLight + SpeakButton). */}
+                {/* Madhav's presence — the Sudarshan Chakra, his brand mark.
+                    It turns (the logo's "processing" motion) while this reply is
+                    read aloud, matched by message id off the madhav:voice bus. */}
                 {msg.role === 'assistant' && (
-                  <div className="mr-3 flex-shrink-0 mt-1">
-                    <MadhavLight id={msg.id} size={32} />
+                  <div className="mr-3 flex-shrink-0 mt-0.5">
+                    <ChatAvatar id={msg.id} size={34} />
                   </div>
                 )}
 
@@ -512,7 +512,7 @@ export default function ChatInterface() {
             {loading && (
               <div className="flex justify-start">
                 <div className="mr-3 flex-shrink-0 mt-1">
-                  <MadhavLight thinking size={32} />
+                  <ChatAvatar thinking size={34} />
                 </div>
                 {/* The Sudarshan Chakra is the loader — three bouncing dots
                     read as a generic chatbot, which is exactly what this
@@ -592,7 +592,9 @@ export default function ChatInterface() {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask a life question, or tap the mic to speak..."
                 disabled={loading}
-                className="flex-1 bg-gold-soft/[0.07] border border-gold/22 rounded-xl px-4 py-3 text-moonlight
+                /* min-w-0 lets flex-1 actually shrink the input on narrow
+                   screens — without it the Ask button was pushed off-screen. */
+                className="flex-1 min-w-0 bg-gold-soft/[0.07] border border-gold/22 rounded-xl px-4 py-3 text-moonlight
                            placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60
                            transition-colors disabled:opacity-50 text-sm"
               />
@@ -605,7 +607,7 @@ export default function ChatInterface() {
               <button
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim()}
-                className="px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light
+                className="shrink-0 px-4 sm:px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light
                            transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm
                            hover:scale-105 active:scale-95"
               >

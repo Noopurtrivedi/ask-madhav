@@ -33,8 +33,8 @@ export default function DailyVerse() {
         </h2>
 
         {loading && (
-          <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/25 bg-white shadow-2xl shadow-saffron/10 text-left">
-            <div className="skeleton min-h-[260px] md:min-h-full rounded-none" />
+          <div className="relative grid md:grid-cols-[320px_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/20 bg-white/[0.05] backdrop-blur-md shadow-2xl shadow-black/50 text-left">
+            <div className="skeleton min-h-[280px] md:min-h-full rounded-none" />
             <div className="p-8 space-y-4">
               <div className="flex gap-2">
                 <div className="skeleton h-5 w-16 rounded-full" />
@@ -60,80 +60,83 @@ export default function DailyVerse() {
 
         {verse && !loading && (
           <div className="relative fade-up">
-            {/* Breathing golden aura */}
-            <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-r from-saffron/20 via-gold/15 to-saffron/20 blur-2xl lotus-pulse pointer-events-none" />
+            {/* Breathing aura behind the card */}
+            <div className="absolute -inset-4 rounded-[2.2rem] bg-gradient-to-br from-peacock/20 via-gold/12 to-lotus/15 blur-3xl lotus-pulse pointer-events-none" />
 
-            <div className="relative grid md:grid-cols-[300px_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/25 bg-white shadow-2xl shadow-saffron/10">
+            <div className="relative grid md:grid-cols-[340px_1fr] gap-0 overflow-hidden rounded-[1.75rem] border border-gold/20 bg-white/[0.055] shadow-2xl shadow-black/60 backdrop-blur-xl">
               {/* Krishna teaching Arjuna — the eternal dialogue */}
-              <div className="relative min-h-[260px] md:min-h-full overflow-hidden group">
+              <div className="group relative min-h-[300px] overflow-hidden md:min-h-full">
                 <Image
                   src="/art/scene-1.png"
                   alt="Krishna lovingly teaching the Bhagavad Gita to Arjuna at sunset"
                   fill
-                  sizes="(max-width: 768px) 100vw, 300px"
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 340px"
+                  className="object-cover object-[60%_center] transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                <span className="absolute bottom-4 left-4 px-3 py-1 bg-cosmos-deep/80 text-gold-soft border border-gold/25 text-sm font-medium rounded-full shadow">
-                  Chapter {verse.chapter_number}, Verse {verse.verse_number}
+                {/* Blend the image into the glass on the seam side, darken for the chip */}
+                <div className="absolute inset-0 bg-gradient-to-t from-cosmos-deep/70 via-transparent to-transparent" />
+                <div className="absolute inset-y-0 right-0 hidden w-24 bg-gradient-to-r from-transparent to-[#12142e]/70 md:block" />
+                <span className="absolute bottom-4 left-4 rounded-full border border-gold/30 bg-cosmos-deep/70 px-3 py-1 text-sm font-medium text-gold-soft shadow backdrop-blur-sm">
+                  Chapter {verse.chapter_number} · Verse {verse.verse_number}
                 </span>
               </div>
 
               {/* Verse content */}
-              <div className="p-8 text-left">
-                <div className="flex items-center gap-2 mb-5 flex-wrap">
+              <div className="p-7 text-left sm:p-9">
+                <div className="mb-6 flex flex-wrap items-center gap-2">
                   {verse.themes.slice(0, 3).map((t) => (
                     <span
                       key={t}
-                      className="px-2 py-1 border border-gold/22 text-moonlight/58 text-xs rounded-full capitalize"
+                      className="rounded-full border border-gold/25 bg-gold-soft/[0.06] px-3 py-1 text-xs capitalize tracking-wide text-gold-soft/85"
                     >
                       {t}
                     </span>
                   ))}
                 </div>
 
-                {/* Sanskrit */}
-                <p
-                  className="text-moonlight text-2xl leading-relaxed mb-4"
-                  style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
-                  lang="sa"
-                >
-                  {verse.sanskrit_text}
-                </p>
-
-                {/* Transliteration — recite & meditate */}
-                <div className="mb-6">
-                  <VerseAudio text={verse.transliteration} meditation />
+                {/* Sanskrit — the centrepiece, on a faint inset panel */}
+                <div className="mb-5 rounded-2xl border border-gold/12 bg-gradient-to-b from-white/[0.05] to-transparent px-5 py-4">
+                  <p
+                    className="text-[1.6rem] leading-relaxed text-moonlight"
+                    style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+                    lang="sa"
+                  >
+                    {verse.sanskrit_text}
+                  </p>
+                  {/* Transliteration — recite & meditate */}
+                  <div className="mt-3 border-t border-gold/10 pt-3">
+                    <VerseAudio text={verse.transliteration} meditation />
+                  </div>
                 </div>
 
                 {/* Meanings */}
-                <div className="space-y-4 mb-6">
+                <div className="mb-6 space-y-4">
                   <div>
-                    <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-1">हिंदी अर्थ</p>
-                    <p className="text-moonlight/80 leading-relaxed text-sm" lang="hi">
+                    <p className="mb-1 text-[11px] uppercase tracking-[0.15em] text-gold-soft/70">हिंदी अर्थ</p>
+                    <p className="text-sm leading-relaxed text-moonlight/85" lang="hi">
                       {verse.hindi_meaning}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-1">English Meaning</p>
-                    <p className="text-moonlight/80 leading-relaxed text-sm">{verse.english_meaning}</p>
+                    <p className="mb-1 text-[11px] uppercase tracking-[0.15em] text-gold-soft/70">English Meaning</p>
+                    <p className="text-sm leading-relaxed text-moonlight/85">{verse.english_meaning}</p>
                   </div>
                 </div>
 
-                {/* Practical step — revealed on tap */}
-                <div className="border-t border-gold/15 pt-5">
+                {/* Practical step — revealed on tap, into a warm highlighted panel */}
+                <div className="border-t border-gold/12 pt-5">
                   {showStep ? (
-                    <div className="fade-up">
-                      <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-2">
-                        Today&apos;s Practical Step
+                    <div className="fade-up rounded-2xl border border-gold/25 bg-gold-soft/[0.08] p-4">
+                      <p className="mb-2 text-[11px] uppercase tracking-[0.15em] text-gold-soft/80">
+                        ✨ Today&apos;s Practical Step
                       </p>
-                      <p className="text-moonlight/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
+                      <p className="text-sm leading-relaxed text-moonlight/90">{verse.practical_guidance}</p>
                     </div>
                   ) : (
                     <button
                       onClick={() => setShowStep(true)}
-                      className="text-sm px-4 py-2 rounded-full bg-gold-soft/[0.10] text-saffron border border-gold/28
-                                 hover:bg-saffron/20 transition-colors"
+                      className="rounded-full border border-gold/30 bg-gold-soft/[0.08] px-5 py-2.5 text-sm text-gold-soft
+                                 transition-all hover:scale-[1.03] hover:border-gold hover:bg-gold-soft/[0.16]"
                     >
                       ✨ Reveal today&apos;s practical step
                     </button>
@@ -141,7 +144,7 @@ export default function DailyVerse() {
                 </div>
 
                 {/* Share */}
-                <div className="flex mt-6">
+                <div className="mt-6 flex">
                   <ShareVerse reference={verse.reference} meaning={verse.english_meaning} />
                 </div>
               </div>
