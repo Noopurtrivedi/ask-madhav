@@ -20,6 +20,12 @@ export interface Story {
   moral: string
   chapter_reference: number
   image_placeholder: string
+  /** Full spoken retelling (kept within the TTS character window). */
+  narration?: string
+  /** What to carry from the story into daily life. */
+  lesson?: string
+  /** Gita verses that anchor the story's teaching. */
+  gita_refs?: { ref: string; line: string }[]
 }
 
 export interface VerseCard {

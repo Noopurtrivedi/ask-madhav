@@ -13,7 +13,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/app/` — routes & pages
 | File | Description |
 |---|---|
-| `app/layout.tsx` | Root layout — fonts, metadata, global chrome wrapping every page. |
+| `app/layout.tsx` | Root layout — fonts, metadata, global chrome; wraps every route in `AuthProvider` + `AuthGate` (email-OTP sign-in gate, fail-open without Supabase). |
 | `app/page.tsx` | Single-page home — composes Hero, DailyVerse, ChatInterface, PopularVerses, StoryCards, SubscribeRitual. |
 | `app/globals.css` | Tailwind base + global styles (sacred light theme). |
 | `app/icon.svg` | App favicon / icon. |
@@ -30,6 +30,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `api/verse/route.ts` | Returns one verse (`?ref=`) or many (`?refs=a,b,c`) by reference via `findVerse`; powers the Popular Verses cards. `runtime=nodejs`. |
 | `api/tts/route.ts` | Read-aloud: Gemini TTS (`gemini-2.5-flash-preview-tts`, voice "Charon") → WAV; guaranteed calm male voice (Hindi/English) on `GEMINI_API_KEY`. 503 → client falls back to SpeechSynthesis. |
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
+| `api/verse-insight/route.ts` | "Go deeper" endpoint — per-verse structured deep-dive via `lib/verseInsight.ts`; CDN-cached a day; never hard-fails (template fallback). |
 | `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). `runtime=nodejs`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
 | `api/unsubscribe/route.ts` | Daily Ritual unsubscribe (GET link from email). |
@@ -57,6 +58,8 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `lib/api.ts` | Client-side fetch wrappers for the API routes (`askQuestion`, `getDailyVerse`, …). |
 | `lib/email.ts` | Resend email helpers + `isEmailEnabled()` gate for the Daily Ritual. The daily verse email includes a theme-aware reflection prompt + a "set today's intention & keep your streak" Journal CTA. |
 | `lib/journal.ts` | Sankalpa Journal data ops (saved verses, intentions, moods, streaks) over Supabase. |
+| `lib/verseInsight.ts` | "Go deeper" engine — per-verse structured deep-dive (essence/context/analogy/practice/reflection); Vertex → Gemini → deterministic template fallback; in-memory AI cache. |
+| `lib/useTTS.ts` | Shared client narration hook — server voice (`/api/tts`) with SpeechSynthesis fallback; powers story narration. |
 | `lib/supabase/client.ts` | Browser Supabase client (anon key, RLS) + `isSupabaseConfigured()`. |
 | `lib/supabase/admin.ts` | Server Supabase client (service-role key) for subscriber writes & cron. |
 
@@ -64,16 +67,17 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | File | Description |
 |---|---|
 | `components/Hero.tsx` | **The Darshan** — cosmic-indigo landing hero: `CosmicBackdrop` + `MorPankh` + the arched darshan window (`public/art/scene-2.png`) + the shloka on glass + CTAs. Stays veiled until the chakra lands (`madhav:darshan-ready`), with a 3.5s failsafe reveal. |
-| `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. |
+| `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. Shows a quiet Sign out when a seeker is signed in. |
 | `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen/Copy/Share; **persists the conversation to `localStorage`** (capped 20 turns) with a returning-seeker recap + "Start a new conversation"; rotating suggested prompts; per-answer "Make this my intention" → Journal; always-present crisis helpline line. Calls `/api/ask`. |
 | `components/GuidedPaths.tsx` | "Walk a Path" — 4 curated multi-verse journeys (Letting Go, Facing Fear, Grief, Purpose); steps link to verse pages, CTA prefills the chat. Pure curation, no API. |
 | `components/BackToTop.tsx` | Floating lotus "↑ top" button; appears after ~1 viewport of scroll. |
 | `components/ChapterBridge.tsx` | "Read all of Chapter N" link on a verse card; prefills the chat (or stashes to `sessionStorage` + navigates home when off the home page). |
-| `components/DailyVerse.tsx` | Verse-of-the-day — two-column card with `scene-1` image, breathing aura, reveal-on-tap practical step. |
+| `components/DailyVerse.tsx` | Verse-of-the-day — two-column card with `scene-1` image, breathing aura, reveal-on-tap practical step, and the expandable `VerseInsight` deep-dive. |
 | `components/VerseCard.tsx` | Reusable verse renderer (Sanskrit/transliteration/Hindi/English); `compact` mode; full mode shows Save/Share + a `ChapterBridge` "Read all of Chapter N". |
 | `components/PopularVerses.tsx` | Curated grid; shows Sanskrit, expands (via `/api/verse`) to Hindi+English meaning; AI ("Reflect with Madhav") is optional. |
 | `components/ChapterBrowser.tsx` | 18 chapter cards; expand to read each chapter's essence; AI ("Explore with Madhav") is optional. |
-| `components/StoryCards.tsx` | Mahabharata story cards from `/api/stories`. |
+| `components/StoryCards.tsx` | Mahabharata story cards — expand to the full hand-written narration + lesson + Gita verse anchors; "Hear the story" narrates via `lib/useTTS` (server Gemini voice, browser fallback); unfairness button prefills the chat. |
+| `components/VerseInsight.tsx` | Expandable "Go deeper" study panel for one verse (essence/context/analogy/practice/reflection); lazy-fetches `/api/verse-insight`. Used by DailyVerse + verse pages. |
 | `components/VerseAudio.tsx` | Browser SpeechSynthesis recitation w/ word highlighting + meditation loop. |
 | `components/SpeakButton.tsx` | Reads an answer aloud — server TTS (`/api/tts`, guaranteed male voice) with SpeechSynthesis fallback; `autoPlay` for hands-free/accessible use. Emits `madhav:voice` events (live amplitude via a Web Audio analyser) so the matching `MadhavLight` avatar pulses with the voice. |
 | `components/MadhavLight.tsx` | Madhav rendered as *living light* (not a face) — a luminous orb that breathes at rest and awakens/pulses with his voice via the `madhav:voice` event bus. Fail-open + reduced-motion aware. Used as the chat avatar + "thinking" indicator. |
@@ -104,7 +108,9 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/darshan/SacredSymbols.tsx` | Vector motifs a mood can call for (still water, lamp flame, cosmic mandala, chakra glyph) + `MoodSymbol`. Drawn in code, never loaded from a URL — the licensing guarantee. |
 | `components/darshan/MotionPreferenceToggle.tsx` | The seeker's own motion control (Automatic / Full / Calm / Text only), persisted and outranking the OS setting. In the footer. |
 | `components/darshan/DarshanDebugPanel.tsx` | `?darshan=debug` QA panel — drive all 12 states by hand, inspect tier/energy/mood. Dev-only. |
-| `components/journal/JournalApp.tsx` | Full journal experience (saved verses, daily intention, streak, themes); consumes a `askmadhav_pending_intention` handoff from the chat to prefill today's intention. |
+| `components/journal/JournalApp.tsx` | Full journal experience — Gita check-in (sankalpa/gratitude/dharma/release/lesson/next action/reflection), streaks, saved verses; auth comes from the app-wide `AuthProvider`; consumes the `askmadhav_pending_intention` chat handoff. |
+| `components/auth/AuthProvider.tsx` | App-wide auth context (`useAuth()`) over the browser Supabase client — session, loading, signOut. Fail-open when Supabase is unconfigured. |
+| `components/auth/AuthGate.tsx` | The doorway — full-screen email one-time-code sign-in every seeker passes before the app renders. Invisible without Supabase env vars. |
 
 ### `frontend/` — data, types, config
 | File | Description |
@@ -112,7 +118,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `data/verses.json` | **The dataset bundled into the app — all 701 clean verses** (Sanskrit + IAST transliteration + Hindi + English + keywords/themes/guidance). Generated by `build_verses.py`. |
 | `data/verses.curated.json` | The 30 hand-curated rich verses — stable override source for `build_verses.py` (never overwritten by the build). |
 | `data/quotes.json` | **Gita Quote Reflection seed** — 14 curated quotes across all 9 themes, with mood/theme metadata. Generated by `scripts/gen_quotes.js`; the seed for the `gita_quotes` CMS table. |
-| `data/stories.json` | 5 Mahabharata stories. |
+| `data/stories.json` | 5 Mahabharata stories — short description + full `narration` (TTS-sized), `moral`, `lesson`, and `gita_refs` verse anchors. |
 | `types/index.ts` | Shared client types (`Verse`, `Story`, `VerseCard`, `AskResponse`, `ChatMessage`, …). |
 | `supabase/schema.sql` | Postgres schema for journal/subscribers — run in the Supabase SQL editor. |
 | `supabase/darshan-schema.sql` | **Darshan admin/CMS schema** — the 10 tables (sacred assets, licence records, forms, quotes, categories, moods, animation states, transition settings, review notes, motion prefs), RLS, constraints that block unreviewed/unlicensed content, and the seed. |

@@ -6,6 +6,7 @@ import { getDailyVerse } from '@/lib/api'
 import type { Verse } from '@/types'
 import VerseAudio from './VerseAudio'
 import ShareVerse from './ShareVerse'
+import VerseInsight from './VerseInsight'
 
 export default function DailyVerse() {
   const [verse, setVerse] = useState<Verse | null>(null)
@@ -13,7 +14,6 @@ export default function DailyVerse() {
   const [error, setError] = useState(false)
   // Practical step stays gently hidden until the seeker asks for it.
   const [showStep, setShowStep] = useState(false)
-  const [showDeepening, setShowDeepening] = useState(false)
 
   useEffect(() => {
     getDailyVerse()
@@ -144,47 +144,8 @@ export default function DailyVerse() {
                   )}
                 </div>
 
-                <div className="mt-4 rounded-2xl border border-gold/16 bg-white/[0.035] p-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowDeepening((s) => !s)}
-                    aria-expanded={showDeepening}
-                    className="flex w-full items-center justify-between gap-3 text-left"
-                  >
-                    <span>
-                      <span className="block text-[11px] uppercase tracking-[0.15em] text-gold-soft/70">
-                        Go deeper
-                      </span>
-                      <span className="mt-1 block text-sm text-moonlight/82">
-                        Learn the shloka through meaning, practice, and reflection.
-                      </span>
-                    </span>
-                    <span className={`text-gold-soft/60 transition-transform ${showDeepening ? 'rotate-180' : ''}`}>▾</span>
-                  </button>
-
-                  {showDeepening && (
-                    <div className="fade-up mt-4 grid gap-3 text-sm text-moonlight/76 sm:grid-cols-3">
-                      <div>
-                        <p className="mb-1 text-gold-soft/75 text-xs">Meaning</p>
-                        <p className="leading-relaxed">
-                          Notice the central teaching: {verse.themes[0] || 'steady wisdom'} is not only an idea, but a way to act today.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="mb-1 text-gold-soft/75 text-xs">Practice</p>
-                        <p className="leading-relaxed">
-                          Choose one moment where you can act sincerely and release your grip on the result.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="mb-1 text-gold-soft/75 text-xs">Reflect</p>
-                        <p className="leading-relaxed">
-                          Ask: what is mine to do, what is not mine to control, and what would a steadier self choose?
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* Go deeper — real per-verse study companion (AI with template fallback) */}
+                <VerseInsight reference={verse.reference} />
 
                 {/* Share */}
                 <div className="mt-6 flex flex-wrap gap-3">

@@ -6,6 +6,7 @@ import VerseAudio from '@/components/VerseAudio'
 import ShareVerse from '@/components/ShareVerse'
 import SaveVerseButton from '@/components/SaveVerseButton'
 import ChapterBridge from '@/components/ChapterBridge'
+import VerseInsight from '@/components/VerseInsight'
 
 interface Props {
   params: Promise<{ reference: string }>
@@ -79,6 +80,11 @@ export default async function VersePage({ params }: Props) {
             <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-2">English Meaning</p>
             <p className="text-moonlight/80 leading-relaxed text-sm">{verse.english_meaning}</p>
           </div>
+        </div>
+
+        {/* Go deeper — the same study companion Daily Wisdom uses */}
+        <div className="mb-6">
+          <VerseInsight reference={verse.reference} />
         </div>
 
         <div className="flex items-center justify-between gap-4 flex-wrap border-t border-gold/15 pt-6">

@@ -29,6 +29,9 @@ export interface Story {
   moral: string
   chapter_reference: number
   image_placeholder: string
+  narration?: string
+  lesson?: string
+  gita_refs?: { ref: string; line: string }[]
 }
 
 export interface VerseCard {

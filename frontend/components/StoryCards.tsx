@@ -1,15 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { getStories } from '@/lib/api'
+import { useTTS } from '@/lib/useTTS'
 import type { Story } from '@/types'
 
 /**
- * Card tints. Each story keeps its own hue so the row still reads as five
- * distinct cards, but they are now translucent washes over the cosmos rather
- * than opaque pastels — moonlight text on a pale card is unreadable, which is
- * exactly what happened when the page went dark.
+ * StoryCards — Mahabharata stories, fully told.
+ *
+ * Each card expands into the full narration (data/stories.json carries a
+ * hand-written retelling per story), the moral, a "what to carry" lesson, and
+ * the Gita verses that anchor the teaching. "Hear the story" narrates the full
+ * retelling in Madhav's server voice (the same calm Gemini TTS voice as the
+ * chat, via lib/useTTS — browser voice fallback). When something in a story
+ * feels unfair, one tap hands the tension to Madhav in the chat.
  */
+
 const STORY_BG = [
   'linear-gradient(160deg, rgba(124,92,168,0.20), rgba(255,255,255,0.035))',
   'linear-gradient(160deg, rgba(72,116,180,0.20), rgba(255,255,255,0.035))',
@@ -24,7 +31,8 @@ export default function StoryCards() {
   const [stories, setStories] = useState<Story[]>([])
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState<number | null>(null)
-  const [speaking, setSpeaking] = useState<number | null>(null)
+  const [speakingId, setSpeakingId] = useState<number | null>(null)
+  const { speak, stop, state } = useTTS()
 
   useEffect(() => {
     getStories()
@@ -32,6 +40,11 @@ export default function StoryCards() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  // The hook resets to idle when playback ends — clear the per-card marker too.
+  useEffect(() => {
+    if (state === 'idle') setSpeakingId(null)
+  }, [state])
 
   const askAboutFairness = (story: Story) => {
     document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
@@ -45,21 +58,16 @@ export default function StoryCards() {
   }
 
   const narrate = (story: Story) => {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return
-    if (speaking === story.id) {
-      window.speechSynthesis.cancel()
-      setSpeaking(null)
+    if (speakingId === story.id) {
+      stop()
+      setSpeakingId(null)
       return
     }
-    window.speechSynthesis.cancel()
-    const text = `${story.title}. ${story.description} Moral: ${story.moral}`
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 0.9
-    utterance.pitch = 0.92
-    utterance.onend = () => setSpeaking(null)
-    utterance.onerror = () => setSpeaking(null)
-    setSpeaking(story.id)
-    window.speechSynthesis.speak(utterance)
+    // Narrate the full retelling, closing on the moral — one flowing telling.
+    const text = `${story.title}. ${story.narration || story.description} The moral: ${story.moral}`
+    setSpeakingId(story.id)
+    setOpen(story.id) // hearing and reading travel together
+    speak(text, 'english')
   }
 
   return (
@@ -75,7 +83,7 @@ export default function StoryCards() {
             Stories and Their Lessons
           </h2>
           <p className="text-moonlight/58 mt-3 max-w-xl mx-auto text-sm">
-            Hear the story, expand the moral, and ask Madhav when a moment feels unfair or hard to accept.
+            Hear each story told in full, take its lesson, and when a moment feels unfair — ask Madhav.
           </p>
         </div>
 
@@ -98,6 +106,7 @@ export default function StoryCards() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {stories.map((story, i) => {
             const isOpen = open === story.id
+            const isSpeaking = speakingId === story.id
             return (
               <div
                 key={story.id}
@@ -123,29 +132,51 @@ export default function StoryCards() {
                 {story.title}
               </h3>
 
-              {/* Description */}
-              <p className="text-moonlight/65 text-sm leading-relaxed mb-4">{story.description}</p>
+              {/* Description — the short telling; the full narration lives in the expansion */}
+              {!isOpen && (
+                <p className="text-moonlight/65 text-sm leading-relaxed mb-4">{story.description}</p>
+              )}
 
-              {/* Lesson */}
+              {isOpen && story.narration && (
+                <div className="fade-up mb-4 space-y-3">
+                  {story.narration.split('\n\n').map((para, p) => (
+                    <p key={p} className="text-moonlight/72 text-sm leading-relaxed">{para}</p>
+                  ))}
+                </div>
+              )}
+
+              {/* Moral */}
               <div className="border-t border-white/10 pt-4">
-                <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-1">Lesson</p>
+                <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-1">The Moral</p>
                 <p className="text-moonlight/80 text-sm leading-relaxed">{story.moral}</p>
               </div>
 
               {isOpen && (
-                <div className="fade-up mt-4 space-y-3 rounded-xl border border-gold/16 bg-white/[0.04] p-4">
-                  <div>
-                    <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-1">Narrated Meaning</p>
-                    <p className="text-moonlight/72 text-sm leading-relaxed">
-                      This story is not only about what happened in the Mahabharata; it is about the battlefield inside a person. The Gita asks the seeker to look at dharma, attachment, fear, and action without hiding from discomfort.
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-1">What to Learn</p>
-                    <p className="text-moonlight/72 text-sm leading-relaxed">
-                      Before judging the outcome, ask: what was the right action, what attachment distorted it, and what would steadiness have changed?
-                    </p>
-                  </div>
+                <div className="fade-up mt-4 space-y-4 rounded-xl border border-gold/16 bg-white/[0.04] p-4">
+                  {story.lesson && (
+                    <div>
+                      <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-1">What to Carry</p>
+                      <p className="text-moonlight/72 text-sm leading-relaxed">{story.lesson}</p>
+                    </div>
+                  )}
+                  {story.gita_refs && story.gita_refs.length > 0 && (
+                    <div>
+                      <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-2">In the Gita</p>
+                      <ul className="space-y-2">
+                        {story.gita_refs.map((g) => (
+                          <li key={g.ref} className="text-sm leading-relaxed text-moonlight/72">
+                            <Link
+                              href={`/verse/${g.ref}`}
+                              className="mr-2 inline-block rounded-full border border-gold/30 px-2 py-0.5 text-xs text-gold-soft hover:border-gold hover:bg-gold-soft/[0.08] transition-colors"
+                            >
+                              BG {g.ref}
+                            </Link>
+                            {g.line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -164,14 +195,18 @@ export default function StoryCards() {
                   onClick={() => setOpen(isOpen ? null : story.id)}
                   className="rounded-full border border-gold/30 px-3 py-1.5 text-xs text-gold-soft hover:border-gold hover:bg-gold-soft/[0.08] transition-colors"
                 >
-                  {isOpen ? 'Collapse story' : 'Expand story'}
+                  {isOpen ? 'Close the story' : 'Read the full story'}
                 </button>
                 <button
                   type="button"
                   onClick={() => narrate(story)}
                   className="rounded-full border border-gold/24 px-3 py-1.5 text-xs text-moonlight/68 hover:border-gold/40 hover:text-gold-soft transition-colors"
                 >
-                  {speaking === story.id ? 'Stop narration' : 'Hear story'}
+                  {isSpeaking && state === 'preparing'
+                    ? 'Preparing…'
+                    : isSpeaking
+                      ? '■ Stop narration'
+                      : '▶ Hear the story'}
                 </button>
                 <button
                   type="button"

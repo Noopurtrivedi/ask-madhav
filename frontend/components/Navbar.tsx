@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import EngineChakra from './darshan/EngineChakra'
+import { useAuth } from '@/components/auth/AuthProvider'
 import { CHAKRA_LOGO_ATTR, replayDarshanLaunch } from '@/lib/darshan-launch'
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 
 export default function Navbar({ overlay = false }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { configured, user, signOut } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   // Only surface the WhatsApp channel when a number is configured — otherwise
   // /whatsapp is inert and the link would dead-end.
@@ -89,6 +91,16 @@ export default function Navbar({ overlay = false }: Props) {
         >
           Ask Madhav
         </a>
+        {configured && user && (
+          <button
+            type="button"
+            onClick={signOut}
+            title={user.email || undefined}
+            className="hidden md:inline-block ml-3 text-xs text-moonlight/45 hover:text-moonlight/75 transition-colors"
+          >
+            Sign out
+          </button>
+        )}
 
         {/* Mobile hamburger */}
         <button
@@ -119,6 +131,18 @@ export default function Navbar({ overlay = false }: Props) {
             <a href="/whatsapp" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">WhatsApp</a>
           )}
           <a href="/#chat" onClick={() => setMenuOpen(false)} className="px-4 py-2 bg-saffron text-navy font-medium rounded-full text-center hover:bg-saffron-light transition-colors">Ask Madhav</a>
+          {configured && user && (
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false)
+                signOut()
+              }}
+              className="text-left text-moonlight/45 hover:text-moonlight/75 transition-colors"
+            >
+              Sign out{user.email ? ` (${user.email})` : ''}
+            </button>
+          )}
         </div>
       )}
     </nav>

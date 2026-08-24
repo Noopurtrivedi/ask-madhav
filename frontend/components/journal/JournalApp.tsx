@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import type { User } from '@supabase/supabase-js'
-import { getBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { useAuth } from '@/components/auth/AuthProvider'
 import {
   MOODS,
   fetchSavedVerses,
@@ -17,8 +16,6 @@ import {
 } from '@/lib/journal'
 
 const PENDING_INTENTION_KEY = 'askmadhav_pending_intention'
-
-type AuthMode = 'email' | 'phone'
 
 const PRACTICE_PROMPTS = [
   { title: 'Svadharma', text: 'What is mine to do today, even if it is small, imperfect, or unseen?' },
@@ -38,38 +35,23 @@ const DEFAULT_ENTRY = {
   next_right_action: '',
 }
 
+/**
+ * JournalApp — the Sankalpa Journal.
+ *
+ * Sign-in is handled app-wide by AuthGate (email one-time code), so by the
+ * time this renders the seeker is already signed in — the component only has
+ * to be the journal. Without Supabase configured the whole feature stays
+ * gracefully inert.
+ */
 export default function JournalApp() {
-  const configured = isSupabaseConfigured()
-  const supabase = getBrowserClient()
-
-  const [user, setUser] = useState<User | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
-  const [authMode, setAuthMode] = useState<AuthMode>('email')
-  const [identifier, setIdentifier] = useState('')
-  const [otp, setOtp] = useState('')
-  const [otpSent, setOtpSent] = useState(false)
-  const [authMessage, setAuthMessage] = useState('')
+  const { configured, user, signOut } = useAuth()
 
   const [saved, setSaved] = useState<SavedVerse[]>([])
   const [entries, setEntries] = useState<JournalEntry[]>([])
   const [form, setForm] = useState(DEFAULT_ENTRY)
   const [savedToast, setSavedToast] = useState(false)
+  const [saveFailed, setSaveFailed] = useState(false)
   const [intentionFromChat, setIntentionFromChat] = useState(false)
-
-  useEffect(() => {
-    if (!supabase) {
-      setAuthLoading(false)
-      return
-    }
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-      setAuthLoading(false)
-    })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => sub.subscription.unsubscribe()
-  }, [supabase])
 
   const setField = (field: keyof typeof DEFAULT_ENTRY, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -109,49 +91,10 @@ export default function JournalApp() {
     if (user) loadData()
   }, [user, loadData])
 
-  const sendOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!supabase || !identifier.trim()) return
-    setAuthMessage('')
-    const value = identifier.trim()
-    const { error } =
-      authMode === 'email'
-        ? await supabase.auth.signInWithOtp({
-            email: value,
-            options: { emailRedirectTo: `${window.location.origin}/journal` },
-          })
-        : await supabase.auth.signInWithOtp({ phone: value })
-
-    if (error) {
-      setAuthMessage(error.message)
-      return
-    }
-    setOtpSent(true)
-    setAuthMessage(authMode === 'email' ? 'Check your email for the one-time code or sign-in link.' : 'Check your phone for the one-time code.')
-  }
-
-  const verifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!supabase || !identifier.trim() || !otp.trim()) return
-    const { error } = await supabase.auth.verifyOtp(
-      authMode === 'email'
-        ? { email: identifier.trim(), token: otp.trim(), type: 'email' }
-        : { phone: identifier.trim(), token: otp.trim(), type: 'sms' },
-    )
-    if (error) setAuthMessage(error.message)
-  }
-
-  const signOut = async () => {
-    await supabase?.auth.signOut()
-    setUser(null)
-    setSaved([])
-    setEntries([])
-    setForm(DEFAULT_ENTRY)
-  }
-
   const saveEntry = async () => {
     if (!user) return
     const ok = await upsertTodayEntry(user.id, form)
+    setSaveFailed(!ok)
     if (ok) {
       setSavedToast(true)
       setTimeout(() => setSavedToast(false), 2000)
@@ -175,74 +118,12 @@ export default function JournalApp() {
     )
   }
 
-  if (authLoading) {
-    return (
-      <Shell>
-        <div className="flex justify-center py-10"><span className="text-4xl lotus-pulse">OM</span></div>
-      </Shell>
-    )
-  }
-
+  // AuthGate normally guarantees a user; this is only a quiet hold while the
+  // session hydrates (or if the component is ever rendered outside the gate).
   if (!user) {
     return (
       <Shell>
-        <h1 className="text-3xl font-bold text-moonlight text-center mb-2" style={{ fontFamily: 'Crimson Text, serif' }}>The Final Journal</h1>
-        <p className="text-moonlight/58 text-sm text-center mb-8 max-w-md mx-auto">
-          A private daily practice for sankalpa, gratitude, self-inquiry, and action through the lens of the Bhagavad Gita.
-        </p>
-
-        <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl border border-gold/18 bg-white/[0.04] p-1">
-          {(['email', 'phone'] as AuthMode[]).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => {
-                setAuthMode(mode)
-                setOtpSent(false)
-                setOtp('')
-                setAuthMessage('')
-              }}
-              className={`rounded-lg px-4 py-2 text-sm capitalize transition-colors ${
-                authMode === mode ? 'bg-saffron text-navy' : 'text-moonlight/62 hover:text-gold-soft'
-              }`}
-            >
-              {mode}
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={sendOtp} className="space-y-3">
-          <input
-            type={authMode === 'email' ? 'email' : 'tel'}
-            required
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder={authMode === 'email' ? 'you@example.com' : '+14155550123'}
-            className="w-full bg-saffron/5 border border-gold/22 rounded-xl px-4 py-3 text-moonlight placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60 text-sm"
-          />
-          <button type="submit" className="w-full px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm">Send OTP</button>
-        </form>
-
-        {otpSent && (
-          <form onSubmit={verifyOtp} className="mt-4 flex gap-3">
-            <input
-              inputMode="numeric"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="Enter OTP"
-              className="flex-1 bg-saffron/5 border border-gold/22 rounded-xl px-4 py-3 text-moonlight placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60 text-sm"
-            />
-            <button type="submit" className="px-5 py-3 border border-gold/35 text-gold-soft rounded-xl hover:bg-gold-soft/[0.08] transition-colors text-sm">Verify</button>
-          </form>
-        )}
-
-        {authMessage && <p className="mt-4 text-center text-sm text-gold-soft/85">{authMessage}</p>}
-        <p className="text-moonlight/35 text-xs mt-8 text-center leading-relaxed">
-          Ask Madhav is free. Donations may be added to support sharing the Bhagavad Gita in simple language for this generation and the next.
-        </p>
-        <div className="text-center mt-6">
-          <Link href="/" className="text-gold-soft/75 hover:text-gold-soft text-sm">Back home</Link>
-        </div>
+        <div className="flex justify-center py-10"><span className="text-4xl lotus-pulse">ॐ</span></div>
       </Shell>
     )
   }
@@ -334,6 +215,11 @@ export default function JournalApp() {
           <button onClick={saveEntry} className="px-6 py-2.5 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm">Save today&apos;s journal</button>
           <Link href="/#chat" className="px-4 py-2.5 border border-gold/30 text-gold-soft rounded-xl hover:bg-gold-soft/[0.08] transition-colors text-sm">Ask Madhav about today</Link>
           {savedToast && <span className="text-gold-soft text-sm">Saved</span>}
+          {saveFailed && (
+            <span className="text-lotus text-sm">
+              Could not save — if this persists, the journal tables may need the schema update.
+            </span>
+          )}
         </div>
       </section>
 
