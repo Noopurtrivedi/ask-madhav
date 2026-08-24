@@ -30,9 +30,21 @@ create table if not exists public.journal_entries (
   mood text,
   intention text,
   reflection text,
+  gratitude text,
+  attachment_to_release text,
+  duty_today text,
+  lesson_learned text,
+  next_right_action text,
   created_at timestamptz not null default now(),
   unique (user_id, entry_date)
 );
+
+alter table public.journal_entries
+  add column if not exists gratitude text,
+  add column if not exists attachment_to_release text,
+  add column if not exists duty_today text,
+  add column if not exists lesson_learned text,
+  add column if not exists next_right_action text;
 
 alter table public.journal_entries enable row level security;
 

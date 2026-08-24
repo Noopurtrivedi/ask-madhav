@@ -16,9 +16,14 @@ export interface JournalEntry {
   mood: string | null
   intention: string | null
   reflection: string | null
+  gratitude: string | null
+  attachment_to_release: string | null
+  duty_today: string | null
+  lesson_learned: string | null
+  next_right_action: string | null
 }
 
-export const MOODS = ['😟 Anxious', '😔 Low', '😐 Neutral', '🙂 Calm', '😌 Peaceful', '🔥 Driven']
+export const MOODS = ['Anxious', 'Low', 'Restless', 'Neutral', 'Calm', 'Grateful', 'Driven']
 
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
@@ -63,7 +68,7 @@ export async function fetchJournal(): Promise<JournalEntry[]> {
   if (!supabase) return []
   const { data } = await supabase
     .from('journal_entries')
-    .select('id, entry_date, mood, intention, reflection')
+    .select('id, entry_date, mood, intention, reflection, gratitude, attachment_to_release, duty_today, lesson_learned, next_right_action')
     .order('entry_date', { ascending: false })
   return (data as JournalEntry[]) || []
 }

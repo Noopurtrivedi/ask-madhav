@@ -85,8 +85,12 @@ export default function Home() {
           </p>
 
           {/* Channels */}
-          <div className="flex items-center justify-center gap-5 mt-4 text-sm">
-            <a href="/#chat" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Ask a Question</a>
+          <div className="flex flex-wrap items-center justify-center gap-5 mt-4 text-sm">
+            <a href="/#paths" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Walk a Path</a>
+            <a href="/#daily-verse" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Daily Wisdom</a>
+            <a href="/#chapters" className="text-gold-soft/80 hover:text-gold-soft transition-colors">18 Chapters</a>
+            <a href="/#stories" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Stories</a>
+            <a href="/#chat" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Ask Madhav</a>
             <a href="/journal" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Journal</a>
             {process.env.NEXT_PUBLIC_WHATSAPP_NUMBER && (
               <a href="/whatsapp" className="text-gold-soft/80 hover:text-gold-soft transition-colors">WhatsApp</a>
@@ -106,9 +110,10 @@ export default function Home() {
           </p>
 
           <p className="text-moonlight/35 text-xs mt-4 max-w-lg mx-auto leading-relaxed">
-            This application provides spiritual guidance inspired by the Bhagavad Gita.
-            It is not a religious authority, does not represent the divine Krishna,
-            and is not a substitute for medical, legal, or financial advice.
+            This application offers reflections through the lens of the Bhagavad Gita.
+            It is not a professional coach, therapist, religious authority, legal,
+            medical, or financial advisor; it is an effort to bring shlokas into
+            simple language for daily reflection.
           </p>
           <p className="text-moonlight/25 text-xs mt-6">
             Built with reverence for timeless wisdom

@@ -9,6 +9,13 @@ import MorPankh from './darshan/MorPankh'
 import QuoteReflection from './darshan/QuoteReflection'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
 
+const ENTRY_POINTS = [
+  { label: 'Guide me', href: '#paths', note: 'Walk a guided Gita path' },
+  { label: 'Explain this shloka', href: '#daily-verse', note: 'Open Daily Wisdom' },
+  { label: 'Teach me', href: '#chapters', note: 'Study all 18 chapters' },
+  { label: 'Ask Madhav', href: '#chat', note: 'Ask as Parth, receive guidance' },
+]
+
 /**
  * Hero — the Darshan.
  *
@@ -44,8 +51,8 @@ export default function Hero() {
 
   const revealed = landed || failsafe
 
-  const scrollToChat = () => {
-    document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
+  const scrollTo = (target: string) => {
+    document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
@@ -99,19 +106,32 @@ export default function Hero() {
               <div className="order-3 text-center lg:text-left lg:mt-8">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <button
-                    onClick={scrollToChat}
+                    onClick={() => scrollTo('#chat')}
                     className="px-8 py-4 bg-saffron text-navy font-semibold rounded-full text-lg
                                hover:bg-saffron-light transition-all hover:scale-105 shadow-lg shadow-saffron/25"
                   >
-                    Ask a Question
+                    Ask Madhav
                   </button>
                   <a
-                    href="#daily-verse"
+                    href="#paths"
                     className="px-8 py-4 border border-gold/40 text-moonlight rounded-full text-lg bg-white/[0.06]
                                backdrop-blur-sm hover:border-gold hover:bg-white/[0.12] transition-all hover:scale-105 inline-block"
                   >
-                    Today&apos;s Verse
+                    Walk a Path
                   </a>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-2 max-w-lg mx-auto lg:mx-0">
+                  {ENTRY_POINTS.map((item) => (
+                    <a
+                      key={item.label}
+                      href={item.href}
+                      className="rounded-xl border border-gold/18 bg-white/[0.045] px-3 py-3 text-left transition-colors hover:border-gold/40 hover:bg-white/[0.08]"
+                    >
+                      <span className="block text-sm font-medium text-moonlight">{item.label}</span>
+                      <span className="mt-1 block text-xs leading-snug text-moonlight/42">{item.note}</span>
+                    </a>
+                  ))}
                 </div>
 
                 <p className="mt-6 text-moonlight/35 text-xs max-w-lg mx-auto lg:mx-0 leading-relaxed">

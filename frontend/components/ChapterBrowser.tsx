@@ -50,7 +50,7 @@ export default function ChapterBrowser() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="py-14 sm:py-20 px-6" >
+    <section id="chapters" className="py-14 sm:py-20 px-6" >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -115,6 +115,16 @@ export default function ChapterBrowser() {
                   <div className="overflow-hidden">
                     <div className="px-4 pb-4 pt-1 space-y-3 border-t border-gold/15">
                       <p className="text-moonlight/75 text-sm leading-relaxed">{ch.summary}</p>
+                      <div className="grid gap-2 text-xs text-moonlight/58 sm:grid-cols-2">
+                        <p className="rounded-lg border border-gold/12 bg-white/[0.035] p-3">
+                          <span className="block text-gold-soft/70">Study scope</span>
+                          {ch.verses} verses to explore, from the chapter&apos;s crisis to its practice.
+                        </p>
+                        <p className="rounded-lg border border-gold/12 bg-white/[0.035] p-3">
+                          <span className="block text-gold-soft/70">Modern analogy</span>
+                          Ask Madhav to translate this yoga into work, family, friendship, duty, and inner conflict.
+                        </p>
+                      </div>
                       <button
                         onClick={() =>
                           askMadhav(`Tell me the essence of Chapter ${ch.n} of the Bhagavad Gita — ${ch.yoga} — and how it applies to my life.`)

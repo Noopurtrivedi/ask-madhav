@@ -11,9 +11,8 @@
  * declaration. Add a quote to the JSON and it simply appears, correctly styled.
  *
  * Four intents sit under the verse — Teach me · Guide me · Explain this shloka ·
- * Ask Madhav. Each one hands a fully-formed question to the existing chat via
- * the `madhav:prefill` event bus (or `sessionStorage` when we are not on the
- * home page), so the hero is a doorway into the product rather than decoration.
+ * Ask Madhav. They open the right product surface directly: chapter study,
+ * guided journeys, daily wisdom, or the live Ask Madhav dialogue.
  *
  * Readability is the hard constraint: the Sanskrit sits at a comfortable size on
  * a backdrop-blurred card, the reflection beneath it is `aria-hidden` decoration
@@ -29,37 +28,15 @@ import { loadQuotes, moodForQuote } from '@/lib/darshan/quotes'
 import { QUOTE_CATEGORIES } from '@/lib/darshan/registry'
 import type { GitaQuote } from '@/lib/darshan/types'
 
-const PREFILL_EVENT = 'madhav:prefill'
-const PREFILL_KEY = 'madhav:prefill'
-
 /**
- * The four ways in. Each builds a real question from the quote in view — the
- * seeker never has to know what to type to get a good first answer.
+ * The four ways in. These are navigation commitments, not disguised chat
+ * prompts: each intent takes the seeker to the product area that fulfills it.
  */
-const INTENTS: { id: string; label: string; build: (q: GitaQuote) => string }[] = [
-  {
-    id: 'teach',
-    label: 'Teach me',
-    build: (q) =>
-      `Teach me what Bhagavad Gita ${q.reference} means, simply, as if I am new to the Gita.`,
-  },
-  {
-    id: 'guide',
-    label: 'Guide me',
-    build: (q) =>
-      `I am struggling with ${QUOTE_CATEGORIES[q.theme]?.display_name.split(' — ')[1]?.toLowerCase() || q.theme}. Guide me using Bhagavad Gita ${q.reference}.`,
-  },
-  {
-    id: 'explain',
-    label: 'Explain this shloka',
-    build: (q) =>
-      `Explain the shloka "${q.transliteration.split(',')[0]}" (Bhagavad Gita ${q.reference}) word by word, then give me its heart in one line.`,
-  },
-  {
-    id: 'ask',
-    label: 'Ask Madhav',
-    build: () => '',
-  },
+const INTENTS: { id: string; label: string; target: string }[] = [
+  { id: 'teach', label: 'Teach me', target: '#chapters' },
+  { id: 'guide', label: 'Guide me', target: '#paths' },
+  { id: 'explain', label: 'Explain this shloka', target: '#daily-verse' },
+  { id: 'ask', label: 'Ask Madhav', target: '#chat' },
 ]
 
 interface Props {
@@ -119,24 +96,13 @@ export default function QuoteReflection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quote])
 
-  const prefill = useCallback((text: string) => {
-    // Same idiom the verse cards and Guided Paths already use.
+  const openIntent = useCallback((target: string) => {
     if (typeof window === 'undefined') return
     const onHome = window.location.pathname === '/'
     if (onHome) {
-      // An empty string means "just take me there" (the Ask Madhav intent) —
-      // the seeker brings their own question.
-      if (text) window.dispatchEvent(new CustomEvent(PREFILL_EVENT, { detail: text }))
-      document.getElementById('chat')?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' })
-    } else if (!text) {
-      window.location.href = '/#chat'
+      document.querySelector(target)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' })
     } else {
-      try {
-        window.sessionStorage.setItem(PREFILL_KEY, text)
-      } catch {
-        /* storage blocked — the chat simply opens empty */
-      }
-      window.location.href = '/#chat'
+      window.location.href = `/${target}`
     }
   }, [reduced])
 
@@ -271,7 +237,7 @@ export default function QuoteReflection({
           <button
             key={intent.id}
             type="button"
-            onClick={() => prefill(intent.build(quote))}
+            onClick={() => openIntent(intent.target)}
             className={`rounded-full px-4 py-2 text-sm transition-all hover:scale-[1.03] ${
               cosmic
                 ? 'border border-gold/30 bg-white/[0.06] text-moonlight/85 backdrop-blur-sm hover:border-gold hover:bg-white/[0.12]'
