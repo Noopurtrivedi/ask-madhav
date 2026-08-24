@@ -60,6 +60,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `lib/email.ts` | Resend email helpers + `isEmailEnabled()` gate for the Daily Ritual. The daily verse email includes a theme-aware reflection prompt + a "set today's intention & keep your streak" Journal CTA. |
 | `lib/journal.ts` | Sankalpa Journal data ops (saved verses, intentions, moods, streaks) over Supabase. |
 | `lib/verseInsight.ts` | "Go deeper" engine — per-verse structured deep-dive (essence/context/analogy/practice/reflection); Vertex → Gemini → deterministic template fallback; in-memory AI cache. |
+| `lib/profileSync.ts` | Mirrors the seeker profile (age band + language) into Supabase auth user_metadata for signed-in seekers; localStorage stays the synchronous source of truth. Fail-open. |
 | `lib/useTTS.ts` | Shared client narration hook — server voice (`/api/tts`) with SpeechSynthesis fallback; powers story narration. |
 | `lib/supabase/client.ts` | Browser Supabase client (anon key, RLS) + `isSupabaseConfigured()`. |
 | `lib/supabase/admin.ts` | Server Supabase client (service-role key) for subscriber writes & cron. |

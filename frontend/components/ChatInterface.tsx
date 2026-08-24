@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { askQuestion, type ChatTurn } from '@/lib/api'
 import { darshan } from '@/lib/darshan/events'
 import type { AgeGroup, AnswerLanguage, ChatMessage, UserProfile, VerseCard } from '@/types'
+import { loadProfileFromAccount, saveProfileToAccount } from '@/lib/profileSync'
 import VerseCardComponent from './VerseCard'
 import SpeakButton from './SpeakButton'
 import MicButton from './MicButton'
@@ -110,6 +111,28 @@ export default function ChatInterface() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [profile, setProfile] = useState<UserProfile>({ language: 'english' })
+
+  // On a new device the account remembers the seeker's profile: hydrate once,
+  // but never override a profile this browser has already chosen.
+  useEffect(() => {
+    let hasLocal = false
+    try {
+      hasLocal = Boolean(window.localStorage.getItem(PROFILE_KEY))
+    } catch {
+      /* storage blocked */
+    }
+    if (hasLocal) return
+    loadProfileFromAccount().then((remote) => {
+      if (remote) {
+        setProfile(remote)
+        try {
+          window.localStorage.setItem(PROFILE_KEY, JSON.stringify(remote))
+        } catch {
+          /* storage blocked */
+        }
+      }
+    })
+  }, [])
   // Auto-read each new answer aloud — hands-free, and accessible for blind /
   // low-vision seekers who want every reply spoken without tapping "Listen".
   const [autoRead, setAutoRead] = useState(false)
@@ -164,6 +187,8 @@ export default function ChatInterface() {
     } catch {
       // Storage blocked (private mode) — the in-memory choice still applies.
     }
+    // Signed-in seekers carry their profile across devices (fail-open).
+    saveProfileToAccount(next)
   }
 
   const toggleAutoRead = () => {
