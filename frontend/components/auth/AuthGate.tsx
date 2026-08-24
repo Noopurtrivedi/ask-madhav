@@ -24,8 +24,13 @@ import { useAuth } from './AuthProvider'
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const { configured, loading, user } = useAuth()
 
-  // No Supabase → open app (dev / unconfigured deploys keep working).
-  if (!configured) return <>{children}</>
+  // Launch kill-switch: with NEXT_PUBLIC_REQUIRE_SIGNIN=false the gate stays
+  // dormant even though Supabase is configured — used to ship features while
+  // the sign-in email delivery (auth-email hook) is still being wired up.
+  const required = process.env.NEXT_PUBLIC_REQUIRE_SIGNIN !== 'false'
+
+  // No Supabase (or gate disabled) → open app.
+  if (!configured || !required) return <>{children}</>
 
   if (loading) {
     return (
@@ -64,7 +69,7 @@ function SignIn() {
       return
     }
     setSent(true)
-    setMessage('Sent. Enter the one-time code from the email — or simply tap its sign-in link.')
+    setMessage('Sent. Open the email and tap its sign-in link — or enter the one-time code if your email shows one.')
   }
 
   const verifyCode = async (e: React.FormEvent) => {

@@ -30,6 +30,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `api/verse/route.ts` | Returns one verse (`?ref=`) or many (`?refs=a,b,c`) by reference via `findVerse`; powers the Popular Verses cards. `runtime=nodejs`. |
 | `api/tts/route.ts` | Read-aloud: Gemini TTS (`gemini-2.5-flash-preview-tts`, voice "Charon") → WAV; guaranteed calm male voice (Hindi/English) on `GEMINI_API_KEY`. 503 → client falls back to SpeechSynthesis. |
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
+| `api/auth-email/route.ts` | Supabase **Send Email Hook** receiver — verifies the Standard-Webhooks signature, composes the branded sign-in email (one-time code + link), sends via Resend. Env-gated by `SEND_EMAIL_HOOK_SECRET`/`RESEND_API_KEY`/`AUTH_EMAIL_FROM`. |
 | `api/verse-insight/route.ts` | "Go deeper" endpoint — per-verse structured deep-dive via `lib/verseInsight.ts`; CDN-cached a day; never hard-fails (template fallback). |
 | `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). `runtime=nodejs`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
