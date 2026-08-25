@@ -25,8 +25,17 @@ export interface JournalEntry {
 
 export const MOODS = ['Anxious', 'Low', 'Restless', 'Neutral', 'Calm', 'Grateful', 'Driven']
 
+/** The seeker's LOCAL calendar date (YYYY-MM-DD) — never UTC. An evening
+ *  entry in California must not land on tomorrow's row. */
+export function localISODate(d: Date = new Date()): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 function todayISO(): string {
-  return new Date().toISOString().slice(0, 10)
+  return localISODate()
 }
 
 export async function fetchSavedVerses(): Promise<SavedVerse[]> {
@@ -95,10 +104,10 @@ export function computeStreak(entries: JournalEntry[]): number {
   let streak = 0
   const cursor = new Date()
   // Allow the streak to count from today; if no entry today, start from yesterday.
-  if (!dates.has(cursor.toISOString().slice(0, 10))) {
+  if (!dates.has(localISODate(cursor))) {
     cursor.setDate(cursor.getDate() - 1)
   }
-  while (dates.has(cursor.toISOString().slice(0, 10))) {
+  while (dates.has(localISODate(cursor))) {
     streak++
     cursor.setDate(cursor.getDate() - 1)
   }
