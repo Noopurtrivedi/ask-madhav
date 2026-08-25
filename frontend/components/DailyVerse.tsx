@@ -6,6 +6,7 @@ import { getDailyVerse } from '@/lib/api'
 import type { Verse } from '@/types'
 import VerseAudio from './VerseAudio'
 import ShareVerse from './ShareVerse'
+import SaveVerseButton from './SaveVerseButton'
 import VerseInsight from './VerseInsight'
 
 export default function DailyVerse() {
@@ -148,7 +149,12 @@ export default function DailyVerse() {
                 <VerseInsight reference={verse.reference} />
 
                 {/* Share */}
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-6 flex flex-wrap items-center gap-3">
+                  <SaveVerseButton
+                    reference={verse.reference}
+                    englishMeaning={verse.english_meaning}
+                    themes={verse.themes}
+                  />
                   <ShareVerse reference={verse.reference} meaning={verse.english_meaning} />
                   <button
                     type="button"

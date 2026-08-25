@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { getVerses } from '@/lib/api'
+import SaveVerseButton from './SaveVerseButton'
 import type { Verse } from '@/types'
 
 // Curated from the most-loved Gita verses. The Sanskrit + meanings are fetched
@@ -133,16 +134,23 @@ export default function PopularVerses() {
                           <p className="text-moonlight/72 text-sm leading-relaxed">{verse.english_meaning}</p>
                         </div>
 
-                        {/* AI is optional — only if deeper reflection is wanted */}
-                        <button
-                          onClick={() =>
-                            askMadhav(`Help me understand Bhagavad Gita ${meta.reference} and how to live it.`)
-                          }
-                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
-                                     border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
-                        >
-                          🪷 Reflect on this with Madhav →
-                        </button>
+                        {/* Actions: keep the verse, or reflect deeper with Madhav */}
+                        <div className="flex flex-wrap items-center gap-4">
+                          <SaveVerseButton
+                            reference={meta.reference}
+                            englishMeaning={verse.english_meaning}
+                            themes={verse.themes}
+                          />
+                          <button
+                            onClick={() =>
+                              askMadhav(`Help me understand Bhagavad Gita ${meta.reference} and how to live it.`)
+                            }
+                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
+                                       border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
+                          >
+                            🪷 Reflect on this with Madhav →
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
