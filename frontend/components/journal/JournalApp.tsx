@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/auth/AuthProvider'
+import JournalMadhav from '@/components/journal/JournalMadhav'
 import {
   MOODS,
   fetchSavedVerses,
@@ -74,6 +75,7 @@ export default function JournalApp() {
   const [savedToast, setSavedToast] = useState(false)
   const [saveFailed, setSaveFailed] = useState(false)
   const [intentionFromChat, setIntentionFromChat] = useState(false)
+  const [assistantSeed, setAssistantSeed] = useState<string | null>(null)
 
   const setField = (field: keyof typeof DEFAULT_ENTRY, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -132,8 +134,21 @@ export default function JournalApp() {
     setSaved((prev) => prev.filter((v) => v.reference !== reference))
   }
 
-  // Hand today's check-in to Madhav in the chat (sessionStorage prefill is the
-  // cross-page idiom ChatInterface already consumes on mount).
+  // Compact one-line summary of today's check-in — rides with every question
+  // the seeker asks the in-journal Madhav, so replies are grounded in the day.
+  const journalContext = [
+    form.mood && `mood: ${form.mood}`,
+    form.intention && `sankalpa: ${form.intention}`,
+    form.duty_today && `dharma today: ${form.duty_today}`,
+    form.attachment_to_release && `releasing: ${form.attachment_to_release}`,
+    form.lesson_learned && `lesson: ${form.lesson_learned}`,
+    form.next_right_action && `next right action: ${form.next_right_action}`,
+  ]
+    .filter(Boolean)
+    .join('; ')
+
+  // "Ask Madhav about today" opens the in-journal assistant with a composed
+  // question about the seeker's actual day (no detour to the home-page chat).
   const askMadhavAboutToday = () => {
     const parts: string[] = []
     if (form.mood) parts.push(`my heart feels ${form.mood.toLowerCase()}`)
@@ -143,11 +158,8 @@ export default function JournalApp() {
     const question = parts.length
       ? `Madhav, today ${parts.join('; ')}. Looking at my day through the Gita, what should I understand, and what one step should I take?`
       : 'Madhav, help me reflect on my day through the lens of the Gita — what should I ask myself tonight?'
-    try {
-      sessionStorage.setItem('madhav:prefill', question)
-    } catch {
-      /* storage blocked — the link still lands on the chat */
-    }
+    setAssistantSeed(question)
+    document.getElementById('journal-madhav')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
   if (!configured) {
@@ -268,13 +280,13 @@ export default function JournalApp() {
           >
             {saving ? 'Saving…' : 'Save today’s journal'}
           </button>
-          <Link
-            href="/#chat"
+          <button
+            type="button"
             onClick={askMadhavAboutToday}
             className="px-4 py-2.5 border border-gold/30 text-gold-soft rounded-xl hover:bg-gold-soft/[0.08] transition-colors text-sm"
           >
             Ask Madhav about today
-          </Link>
+          </button>
           {savedToast && <span className="text-gold-soft text-sm">Saved ✓</span>}
           {saveFailed && (
             <span className="text-lotus text-sm">
@@ -283,6 +295,9 @@ export default function JournalApp() {
           )}
         </div>
       </section>
+
+      {/* Madhav lives inside the journal — chat grounded in today's check-in */}
+      <JournalMadhav seed={assistantSeed} journalContext={journalContext} />
 
       {pastEntries.length > 0 && (
         <section className="border border-gold/18 rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.04)' }}>

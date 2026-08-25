@@ -111,6 +111,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/darshan/MotionPreferenceToggle.tsx` | The seeker's own motion control (Automatic / Full / Calm / Text only), persisted and outranking the OS setting. In the footer. |
 | `components/darshan/DarshanDebugPanel.tsx` | `?darshan=debug` QA panel — drive all 12 states by hand, inspect tier/energy/mood. Dev-only. |
 | `components/journal/JournalApp.tsx` | Sankalpa Journal — Gita check-in (sankalpa/gratitude/dharma/release/lesson/next action/reflection) upserted onto the seeker's LOCAL calendar day, streaks, **Past Reflections** history, saved verses; "Ask Madhav about today" prefills the chat with today's check-in; auth from the app-wide `AuthProvider`; consumes the `askmadhav_pending_intention` handoff. |
+| `components/journal/JournalMadhav.tsx` | Madhav as the Journal's in-page assistant — chat window on the /journal page; every question carries today's check-in as grounding context into the shared `/api/ask` pipeline; "Ask Madhav about today" auto-seeds it. |
 | `components/auth/AuthProvider.tsx` | App-wide auth context (`useAuth()`) over the browser Supabase client — session, loading, signOut. Fail-open when Supabase is unconfigured. |
 | `components/auth/AuthGate.tsx` | The doorway — full-screen email one-time-code sign-in every seeker passes before the app renders. Invisible without Supabase env vars. |
 
