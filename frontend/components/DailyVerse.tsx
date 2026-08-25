@@ -24,7 +24,7 @@ export default function DailyVerse() {
 
   return (
     <section id="daily-verse" className="py-14 sm:py-20 px-6" >
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-6xl mx-auto text-center">
         <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Daily Wisdom</p>
         <h2
           className="text-4xl font-bold text-moonlight mb-12"
@@ -34,7 +34,7 @@ export default function DailyVerse() {
         </h2>
 
         {loading && (
-          <div className="relative grid md:grid-cols-[320px_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/20 bg-white/[0.05] backdrop-blur-md shadow-2xl shadow-black/50 text-left">
+          <div className="relative grid md:grid-cols-[minmax(380px,44%)_1fr] gap-0 rounded-3xl overflow-hidden border border-gold/20 bg-white/[0.05] backdrop-blur-md shadow-2xl shadow-black/50 text-left">
             <div className="skeleton min-h-[280px] md:min-h-full rounded-none" />
             <div className="p-8 space-y-4">
               <div className="flex gap-2">
@@ -64,14 +64,14 @@ export default function DailyVerse() {
             {/* Breathing aura behind the card */}
             <div className="absolute -inset-4 rounded-[2.2rem] bg-gradient-to-br from-peacock/20 via-gold/12 to-lotus/15 blur-3xl lotus-pulse pointer-events-none" />
 
-            <div className="relative grid md:grid-cols-[340px_1fr] gap-0 overflow-hidden rounded-[1.75rem] border border-gold/20 bg-white/[0.055] shadow-2xl shadow-black/60 backdrop-blur-xl">
+            <div className="relative grid md:grid-cols-[minmax(380px,44%)_1fr] gap-0 overflow-hidden rounded-[1.75rem] border border-gold/20 bg-white/[0.055] shadow-2xl shadow-black/60 backdrop-blur-xl">
               {/* Krishna teaching Arjuna — the eternal dialogue */}
-              <div className="group relative min-h-[300px] overflow-hidden md:min-h-full">
+              <div className="group relative min-h-[400px] overflow-hidden md:min-h-full">
                 <Image
                   src="/art/scene-1.png"
                   alt="Krishna lovingly teaching the Bhagavad Gita to Arjuna at sunset"
                   fill
-                  sizes="(max-width: 768px) 100vw, 340px"
+                  sizes="(max-width: 768px) 100vw, 560px"
                   className="object-cover object-[60%_center] transition-transform duration-[1200ms] ease-out group-hover:scale-105"
                 />
                 {/* Blend the image into the glass on the seam side, darken for the chip */}
