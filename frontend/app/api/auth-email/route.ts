@@ -57,6 +57,8 @@ function actionSubject(type?: string): string {
       return 'Reset your Ask Madhav access'
     case 'email_change':
       return 'Confirm your new email — Ask Madhav'
+    case 'signup':
+      return 'Confirm your email — Ask Madhav'
     default:
       return 'Your Ask Madhav sign-in code'
   }
