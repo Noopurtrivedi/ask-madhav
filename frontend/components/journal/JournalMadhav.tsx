@@ -157,7 +157,7 @@ export default function JournalMadhav({ seed, journalContext }: Props) {
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="px-5 py-2.5 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-50"
+          className="px-5 py-2.5 btn-leaf rounded-xl transition-all text-sm disabled:opacity-50"
         >
           Ask
         </button>

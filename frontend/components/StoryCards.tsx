@@ -25,7 +25,8 @@ const STORY_BG = [
   'linear-gradient(160deg, rgba(56,150,150,0.18), rgba(255,255,255,0.035))',
 ]
 
-const STORY_ICONS = ['⚔️', '🏹', '👑', '🌺', '🪷']
+// Each story is numbered like a chapter of a book — set in gold leaf, not emoji.
+const NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII']
 
 export default function StoryCards() {
   const [stories, setStories] = useState<Story[]>([])
@@ -114,12 +115,14 @@ export default function StoryCards() {
                          transition-all hover:-translate-y-1 cursor-default"
               style={{ background: STORY_BG[i % STORY_BG.length] }}
             >
-              {/* Icon */}
-              <div className="text-4xl mb-4 select-none">{STORY_ICONS[i % STORY_ICONS.length]}</div>
+              {/* Numeral */}
+              <div className="gold-leaf font-display text-5xl font-light leading-none mb-5 select-none" aria-hidden="true">
+                {NUMERALS[i] ?? i + 1}
+              </div>
 
               {/* Chapter badge */}
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-0.5 bg-saffron/20 text-saffron text-xs rounded-full">
+                <span className="font-caps px-2.5 py-0.5 border border-gold/30 text-gold-soft/85 text-[0.62rem] tracking-[0.18em] uppercase rounded-full">
                   Ch. {story.chapter_reference}
                 </span>
               </div>

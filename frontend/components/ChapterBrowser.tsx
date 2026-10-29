@@ -132,7 +132,7 @@ export default function ChapterBrowser() {
                         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
                                    border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
                       >
-                        🪷 Explore this chapter with Madhav →
+                        Explore this chapter with Madhav →
                       </button>
                     </div>
                   </div>

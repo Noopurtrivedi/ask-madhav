@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { findVerse } from '@/lib/verseEngine'
+import { findVerse, VERSES } from '@/lib/verseEngine'
+import Navbar from '@/components/Navbar'
 import VerseAudio from '@/components/VerseAudio'
 import ShareVerse from '@/components/ShareVerse'
 import SaveVerseButton from '@/components/SaveVerseButton'
@@ -43,64 +44,99 @@ export default async function VersePage({ params }: Props) {
   const verse = findVerse(decodeURIComponent(reference))
   if (!verse) notFound()
 
+  // Neighbours in reading order, so a seeker who lands from a shared link can
+  // keep reading the Gita instead of hitting a dead end.
+  const i = VERSES.findIndex((v) => v.reference === verse.reference)
+  const prev = i > 0 ? VERSES[i - 1] : null
+  const next = i >= 0 && i < VERSES.length - 1 ? VERSES[i + 1] : null
+
   return (
-    <main className="darshan-page min-h-screen flex flex-col items-center justify-center px-6 py-20" >
-      <div className="max-w-2xl w-full border border-gold/22 rounded-2xl p-8 backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.05)' }}>
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
-          <span className="px-3 py-1 bg-saffron/20 text-saffron text-sm font-medium rounded-full">
-            Chapter {verse.chapter_number}, Verse {verse.verse_number}
-          </span>
-          {(verse.themes || []).slice(0, 2).map((t) => (
-            <span key={t} className="px-2 py-1 border border-gold/22 text-moonlight/58 text-xs rounded-full capitalize">
-              {t}
-            </span>
-          ))}
-        </div>
+    <main className="darshan-page min-h-screen px-6 pb-24 pt-32">
+      <Navbar />
 
-        {/* Practical step FIRST — guidance for the moment, then the scripture. */}
-        <div className="mb-6 border-l-2 border-gold/35 pl-4">
-          <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-2">Practical Step</p>
-          <p className="text-moonlight/90 text-sm leading-relaxed">{verse.practical_guidance}</p>
-        </div>
+      <div className="mx-auto max-w-3xl">
+        {/* Title */}
+        <header className="text-center">
+          <p className="eyebrow mb-5">
+            Bhagavad Gita · Chapter {verse.chapter_number}
+          </p>
+          <h1 className="section-title">
+            Verse <em className="gold-leaf">{verse.reference}</em>
+          </h1>
+          {(verse.themes || []).length > 0 && (
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
+              {(verse.themes || []).slice(0, 3).map((t) => (
+                <span key={t} className="rounded-full border border-gold/25 px-3 py-1 text-xs capitalize text-gold-soft/85">
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+        </header>
 
-        <p className="text-moonlight text-2xl leading-relaxed mb-4 text-center" style={{ fontFamily: 'serif' }} lang="sa">
-          {verse.sanskrit_text}
-        </p>
-
-        <div className="flex justify-center mb-8">
-          <VerseAudio text={verse.transliteration} meditation />
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-2">हिंदी अर्थ</p>
-            <p className="text-moonlight/80 leading-relaxed text-sm" lang="hi">{verse.hindi_meaning}</p>
+        {/* The shloka itself — the centrepiece, set large on the sky. */}
+        <section className="mt-12 text-center">
+          <p className="font-sanskrit text-[1.7rem] leading-[1.75] text-moonlight sm:text-[2.1rem]" lang="sa">
+            {verse.sanskrit_text}
+          </p>
+          <div className="mt-6 flex justify-center">
+            <VerseAudio text={verse.transliteration} meditation />
           </div>
-          <div>
-            <p className="text-gold-soft/65 text-xs tracking-wider uppercase mb-2">English Meaning</p>
-            <p className="text-moonlight/80 leading-relaxed text-sm">{verse.english_meaning}</p>
+          <div className="ornament-rule mt-10" aria-hidden="true">
+            <span className="h-1.5 w-1.5 rotate-45 bg-gold-soft/60" />
           </div>
-        </div>
+        </section>
 
-        {/* Go deeper — the same study companion Daily Wisdom uses */}
-        <div className="mb-6">
-          <VerseInsight reference={verse.reference} />
-        </div>
+        <div className="sacred-card mt-10 rounded-3xl p-7 sm:p-10">
+          {/* Practical step first — guidance for the moment, then the meaning. */}
+          <div className="mb-8 border-l-2 border-gold/40 pl-5">
+            <p className="font-caps mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">Practical step</p>
+            <p className="font-display text-xl leading-relaxed text-moonlight/90">{verse.practical_guidance}</p>
+          </div>
 
-        <div className="flex items-center justify-between gap-4 flex-wrap border-t border-gold/15 pt-6">
-          <div className="flex items-center gap-4">
+          <div className="mb-8 grid gap-8 md:grid-cols-2">
+            <div>
+              <p className="mb-2 text-xs uppercase tracking-wider text-gold-soft/75" lang="hi">हिंदी अर्थ</p>
+              <p className="font-hindi text-[0.95rem] leading-relaxed text-moonlight/80" lang="hi">{verse.hindi_meaning}</p>
+            </div>
+            <div>
+              <p className="font-caps mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">English meaning</p>
+              <p className="text-[0.95rem] leading-relaxed text-moonlight/80">{verse.english_meaning}</p>
+            </div>
+          </div>
+
+          {/* Go deeper — the same study companion Daily Wisdom uses */}
+          <div className="mb-8">
+            <VerseInsight reference={verse.reference} />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 border-t border-gold/15 pt-6">
             <ShareVerse reference={verse.reference} meaning={verse.english_meaning} />
-            <SaveVerseButton
-              reference={verse.reference}
-              englishMeaning={verse.english_meaning}
-              themes={verse.themes}
-            />
+            <SaveVerseButton reference={verse.reference} englishMeaning={verse.english_meaning} themes={verse.themes} />
             <ChapterBridge chapter={verse.chapter_number} />
           </div>
-          <Link href="/" className="text-gold-soft/75 hover:text-saffron text-sm transition-colors">
-            ← Ask your own question
-          </Link>
         </div>
+
+        {/* Keep reading */}
+        <nav aria-label="Verse navigation" className="mt-10 flex items-center justify-between gap-4">
+          {prev ? (
+            <Link href={`/verse/${prev.reference}`} className="caps-link">
+              ← Verse {prev.reference}
+            </Link>
+          ) : (
+            <span />
+          )}
+          <Link href="/#chat" className="btn-ghost px-5 py-2.5 text-sm">
+            Ask your own question
+          </Link>
+          {next ? (
+            <Link href={`/verse/${next.reference}`} className="caps-link">
+              Verse {next.reference} →
+            </Link>
+          ) : (
+            <span />
+          )}
+        </nav>
       </div>
     </main>
   )

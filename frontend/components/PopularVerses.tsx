@@ -147,7 +147,7 @@ export default function PopularVerses() {
                             className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
                                        border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors"
                           >
-                            🪷 Reflect on this with Madhav →
+                            Reflect on this with Madhav →
                           </button>
                         </div>
                       </div>

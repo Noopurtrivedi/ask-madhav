@@ -276,7 +276,7 @@ export default function JournalApp() {
           <button
             onClick={saveEntry}
             disabled={saving}
-            className="px-6 py-2.5 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-60"
+            className="px-6 py-2.5 btn-leaf rounded-xl transition-all text-sm disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save today’s journal'}
           </button>

@@ -34,14 +34,125 @@ function clip(text: string, max: number): string {
   return text.length > max ? text.slice(0, max - 1).trimEnd() + '…' : text
 }
 
+// ── Brand ────────────────────────────────────────────────────────
+// Same "Midnight & Gold Leaf" language as the site: Cormorant for the words,
+// Cinzel for the inscriptional caps, gold hairlines on a midnight sky.
+const MOON = '#F6F1E4'
+const GOLD = '#E3B65C'
+const GOLD_SOFT = 'rgba(232,195,90,0.75)'
+const SKY =
+  'radial-gradient(900px 520px at 88% 0%, rgba(227,182,92,0.20), transparent 60%), radial-gradient(800px 600px at 0% 100%, rgba(70,44,128,0.45), transparent 60%), linear-gradient(160deg, #05070F 0%, #0A0E2A 55%, #131A3E 100%)'
+
+type OgFont = { name: string; data: ArrayBuffer; weight: 400 | 500; style: 'normal' | 'italic' }
+
+/**
+ * Satori needs raw TTF data. Google serves TTF to a non-browser user agent, so
+ * the fonts are fetched once per server instance and memoised. Any failure
+ * resolves to [] — the card then renders in the default serif rather than 500.
+ */
+async function loadGoogleFont(family: string, weight: 400 | 500, italic: boolean): Promise<ArrayBuffer | null> {
+  const axis = italic ? `ital,wght@1,${weight}` : `wght@${weight}`
+  const css = await fetch(`https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:${axis}`).then((r) => r.text())
+  const url = css.match(/src: url\(([^)]+)\) format\('(?:opentype|truetype)'\)/)?.[1]
+  return url ? fetch(url).then((r) => r.arrayBuffer()) : null
+}
+
+const FONT_SPECS: { family: string; name: string; weight: 400 | 500; style: 'normal' | 'italic' }[] = [
+  { family: 'Cormorant Garamond', name: 'Cormorant', weight: 500, style: 'normal' },
+  { family: 'Cormorant Garamond', name: 'Cormorant', weight: 400, style: 'italic' },
+  { family: 'Cinzel', name: 'Cinzel', weight: 500, style: 'normal' },
+]
+
+let fontsPromise: Promise<OgFont[]> | null = null
+function brandFonts(): Promise<OgFont[]> {
+  if (!fontsPromise) {
+    fontsPromise = Promise.all(
+      FONT_SPECS.map(async ({ family, name, weight, style }): Promise<OgFont | null> => {
+        const data = await loadGoogleFont(family, weight, style === 'italic')
+        return data ? { name, data, weight, style } : null
+      }),
+    )
+      .then((fonts) => fonts.filter((f): f is OgFont => f !== null))
+      .catch(() => {
+        fontsPromise = null // try again on the next request
+        return []
+      })
+  }
+  return fontsPromise
+}
+
+/** The Sudarshan Chakra mark, drawn — eight spokes in a double ring. */
+function Chakra({ size = 40 }: { size?: number }) {
+  const spokes = Array.from({ length: 8 }, (_, i) => {
+    const a = (i * Math.PI) / 4
+    return (
+      <line key={i} x1={20 + Math.cos(a) * 5} y1={20 + Math.sin(a) * 5} x2={20 + Math.cos(a) * 15} y2={20 + Math.sin(a) * 15} stroke={GOLD} strokeWidth="1.4" />
+    )
+  })
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40">
+      <circle cx="20" cy="20" r="18.5" fill="none" stroke={GOLD} strokeWidth="1.4" />
+      <circle cx="20" cy="20" r="15" fill="none" stroke={GOLD} strokeWidth="0.8" opacity="0.6" />
+      {spokes}
+      <circle cx="20" cy="20" r="3.2" fill={GOLD} />
+    </svg>
+  )
+}
+
+/** Frame shared by every card: sky, hairline border, brand row, footer rule. */
+function Frame({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', background: SKY, padding: 28, fontFamily: 'Cormorant, serif' }}>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          border: '1px solid rgba(232,195,90,0.32)',
+          borderRadius: 18,
+          padding: '44px 56px 38px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <Chakra />
+          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 24, letterSpacing: 7, color: MOON }}>ASK MADHAV</div>
+          <div style={{ marginLeft: 'auto', fontFamily: 'Cinzel, serif', fontSize: 18, letterSpacing: 5, color: GOLD_SOFT }}>
+            {label}
+          </div>
+        </div>
+
+        {children}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div style={{ display: 'flex', flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(232,195,90,0.55))' }} />
+          <div style={{ display: 'flex', width: 9, height: 9, background: GOLD, transform: 'rotate(45deg)' }} />
+          <div style={{ display: 'flex', flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(232,195,90,0.55), transparent)' }} />
+          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 17, letterSpacing: 5, color: 'rgba(246,241,228,0.55)' }}>
+            ASKMADHAV.WORLD
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Shrink long lines so a card never overflows. */
+function quoteSize(text: string): number {
+  if (text.length > 170) return 44
+  if (text.length > 110) return 52
+  return 62
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
+    const fonts = await brandFonts()
     // A free-form quote (e.g. Madhav's one-line truth from a conversation) gets
     // its own card; otherwise fall back to the verse card.
     const quote = searchParams.get('quote')
-    if (quote) return renderQuoteCard(quote, searchParams.get('q'))
-    return renderCard(req)
+    if (quote) return renderQuoteCard(quote, searchParams.get('q'), fonts)
+    return renderCard(req, fonts)
   } catch (err) {
     console.error('og render error', err)
     // Minimal branded fallback so a share link never returns a 500.
@@ -54,13 +165,14 @@ export async function GET(req: Request) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#0A0F2E',
-            color: '#E8A620',
+            background: '#0A0E2A',
+            color: GOLD,
             fontSize: 64,
+            letterSpacing: 12,
             fontFamily: 'serif',
           }}
         >
-          🪷 Ask Madhav
+          ASK MADHAV
         </div>
       ),
       { width: 1200, height: 630 },
@@ -70,112 +182,45 @@ export async function GET(req: Request) {
 
 // A shareable card carrying a line of guidance — the most viral artifact the
 // app can produce. Optionally shows the question that prompted it.
-function renderQuoteCard(quote: string, question: string | null) {
+function renderQuoteCard(quote: string, question: string | null, fonts: OgFont[]) {
+  const line = clip(quote, 220)
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '70px',
-          background: 'linear-gradient(160deg, #050A1E 0%, #0A0F2E 55%, #111827 100%)',
-          fontFamily: 'serif',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: 44 }}>🪷</div>
-          <div style={{ fontSize: 30, color: '#E8A620', letterSpacing: 2 }}>Ask Madhav</div>
+      <Frame label="WORDS FROM MADHAV">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
           {question && (
-            <div
-              style={{
-                marginLeft: 'auto',
-                fontSize: 22,
-                color: 'rgba(255,248,231,0.55)',
-                fontStyle: 'italic',
-                maxWidth: 520,
-                textAlign: 'right',
-              }}
-            >
-              {`“${clip(question, 80)}”`}
+            <div style={{ display: 'flex', fontSize: 26, color: 'rgba(246,241,228,0.5)', fontStyle: 'italic' }}>
+              {`You asked: “${clip(question, 90)}”`}
             </div>
           )}
+          <div style={{ display: 'flex', fontSize: quoteSize(line), fontStyle: 'italic', color: MOON, lineHeight: 1.2 }}>
+            {`“${line}”`}
+          </div>
         </div>
-
-        <div style={{ display: 'flex', fontSize: 48, color: '#FFF8E7', lineHeight: 1.35 }}>
-          {`“${clip(quote, 220)}”`}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', fontSize: 24, color: 'rgba(255,248,231,0.4)' }}>
-          <div style={{ display: 'flex' }}>Guidance inspired by the Bhagavad Gita</div>
-          <div style={{ marginLeft: 'auto', color: '#E8A620' }}>Seek wisdom. Find peace.</div>
-        </div>
-      </div>
+      </Frame>
     ),
-    { width: 1200, height: 630 },
+    { width: 1200, height: 630, fonts },
   )
 }
 
-function renderCard(req: Request) {
+function renderCard(req: Request, fonts: OgFont[]) {
   const { searchParams } = new URL(req.url)
   const verse = pickVerse(searchParams.get('ref'))
-  const meaning =
-    verse.english_meaning.length > 200
-      ? verse.english_meaning.slice(0, 197).trimEnd() + '…'
-      : verse.english_meaning
+  const meaning = clip(verse.english_meaning, 200)
 
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '70px',
-          background: 'linear-gradient(160deg, #050A1E 0%, #0A0F2E 55%, #111827 100%)',
-          fontFamily: 'serif',
-        }}
-      >
-        {/* top brand row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ fontSize: 44 }}>🪷</div>
-          <div style={{ fontSize: 30, color: '#E8A620', letterSpacing: 2 }}>Ask Madhav</div>
-          <div
-            style={{
-              marginLeft: 'auto',
-              fontSize: 24,
-              color: '#E8A620',
-              background: 'rgba(232,166,32,0.15)',
-              border: '1px solid rgba(232,166,32,0.4)',
-              borderRadius: 999,
-              padding: '8px 22px',
-            }}
-          >
-            {`Chapter ${verse.chapter_number} · Verse ${verse.verse_number}`}
+      <Frame label={`BHAGAVAD GITA ${verse.reference}`}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', fontSize: quoteSize(meaning), fontStyle: 'italic', color: MOON, lineHeight: 1.2 }}>
+            {`“${meaning}”`}
+          </div>
+          <div style={{ display: 'flex', fontSize: 25, fontStyle: 'italic', color: GOLD_SOFT }}>
+            {clip(verse.transliteration, 120)}
           </div>
         </div>
-
-        {/* meaning */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-          <div style={{ fontSize: 46, color: '#FFF8E7', lineHeight: 1.3 }}>{`“${meaning}”`}</div>
-          <div style={{ fontSize: 26, color: 'rgba(255,248,231,0.55)', fontStyle: 'italic' }}>
-            {verse.transliteration.length > 130
-              ? verse.transliteration.slice(0, 127) + '…'
-              : verse.transliteration}
-          </div>
-        </div>
-
-        {/* footer */}
-        <div style={{ display: 'flex', alignItems: 'center', fontSize: 24, color: 'rgba(255,248,231,0.4)' }}>
-          <div style={{ display: 'flex' }}>{`Bhagavad Gita ${verse.reference}`}</div>
-          <div style={{ marginLeft: 'auto', color: '#E8A620' }}>Seek wisdom. Find peace.</div>
-        </div>
-      </div>
+      </Frame>
     ),
-    { width: 1200, height: 630 },
+    { width: 1200, height: 630, fonts },
   )
 }

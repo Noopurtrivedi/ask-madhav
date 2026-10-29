@@ -193,7 +193,7 @@ export default function GuidedPaths() {
                         className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
                                    border border-gold/35 text-saffron hover:bg-gold-soft/[0.10] transition-colors mt-2"
                       >
-                        🪷 Walk this path with Madhav →
+                        Walk this path with Madhav →
                       </button>
                     </div>
                   </div>

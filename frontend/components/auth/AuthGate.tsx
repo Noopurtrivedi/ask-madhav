@@ -208,9 +208,9 @@ function SignIn() {
     <main className="darshan-page min-h-screen flex items-center justify-center px-6 py-16">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <span className="text-4xl select-none">🪷</span>
-          <h1 className="mt-3 text-3xl font-bold text-moonlight" style={{ fontFamily: 'var(--font-display), serif' }}>
-            Ask Madhav
+          <p className="eyebrow mb-5">Ask Madhav</p>
+          <h1 className="section-title">
+            Your Sankalpa <em className="gold-leaf">Journal</em>
           </h1>
           <p className="mt-3 text-moonlight/58 text-sm leading-relaxed max-w-sm mx-auto">
             Sign in to keep your Sankalpa Journal — your reflections, streaks, and saved verses stay yours alone.
@@ -229,7 +229,7 @@ function SignIn() {
                 type="button"
                 onClick={() => switchMode(m)}
                 className={`rounded-lg px-4 py-2 text-sm transition-colors ${
-                  mode === m ? 'bg-saffron text-navy font-medium' : 'text-moonlight/62 hover:text-gold-soft'
+                  mode === m ? 'leaf-fill font-medium' : 'text-moonlight/62 hover:text-gold-soft'
                 }`}
               >
                 {m === 'code' ? 'One-time code' : 'Password'}
@@ -256,7 +256,7 @@ function SignIn() {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="w-full px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-60"
+                  className="w-full px-6 py-3 btn-leaf rounded-xl transition-all text-sm disabled:opacity-60"
                 >
                   {busy && !sent ? 'Sending…' : sent ? 'Resend code' : 'Email me a sign-in code'}
                 </button>
@@ -301,7 +301,7 @@ function SignIn() {
                   type="button"
                   onClick={signIn}
                   disabled={busy}
-                  className="px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-60"
+                  className="px-6 py-3 btn-leaf rounded-xl transition-all text-sm disabled:opacity-60"
                 >
                   Sign in
                 </button>
@@ -338,7 +338,7 @@ function SignIn() {
               <button
                 type="submit"
                 disabled={busy}
-                className="px-5 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-60"
+                className="px-5 py-3 btn-leaf rounded-xl transition-all text-sm disabled:opacity-60"
               >
                 Confirm
               </button>
@@ -358,7 +358,7 @@ function SignIn() {
               <button
                 type="submit"
                 disabled={busy}
-                className="px-5 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-60"
+                className="px-5 py-3 btn-leaf rounded-xl transition-all text-sm disabled:opacity-60"
               >
                 Verify
               </button>
@@ -381,7 +381,7 @@ function SignIn() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light transition-all text-sm disabled:opacity-60"
+                className="w-full px-6 py-3 btn-leaf rounded-xl transition-all text-sm disabled:opacity-60"
               >
                 Save password & enter
               </button>

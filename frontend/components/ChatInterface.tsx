@@ -469,7 +469,7 @@ export default function ChatInterface() {
 
                 <div className={msg.role === 'user' ? 'max-w-[70%]' : 'max-w-[90%] space-y-3'}>
                   {msg.role === 'user' ? (
-                    <div className="bg-saffron text-navy rounded-2xl rounded-tr-sm px-4 py-3 text-sm font-medium">
+                    <div className="leaf-fill rounded-2xl rounded-tr-sm px-4 py-3 text-sm font-medium">
                       {msg.content}
                     </div>
                   ) : (
@@ -643,7 +643,7 @@ export default function ChatInterface() {
               <button
                 onClick={() => handleSend()}
                 disabled={loading || !input.trim()}
-                className="shrink-0 px-4 sm:px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light
+                className="shrink-0 px-4 sm:px-6 py-3 btn-leaf rounded-xl
                            transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm
                            hover:scale-105 active:scale-95"
               >

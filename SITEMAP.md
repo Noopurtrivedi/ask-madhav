@@ -18,7 +18,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `app/globals.css` | Tailwind base + global styles. Holds the **brand system** (`@layer components`: `.eyebrow`, `.section-title`, `.section-lede`, `.hero-title`, `.gold-leaf`, `.btn-leaf`, `.btn-ghost`, `.caps-link`, `.ask-bar`, `.ornament-rule`), `.sacred-card`, and the Darshan/cosmic layers. |
 | `app/icon.svg` | App favicon / icon. |
 | `app/journal/page.tsx` | `/journal` route — renders the Sankalpa Journal wrapped in `AuthGate` (the only sign-in-gated route). |
-| `app/verse/[reference]/page.tsx` | `/verse/2.47` deep-link page; `generateMetadata` produces share/OG tags per verse. |
+| `app/verse/[reference]/page.tsx` | `/verse/2.47` deep-link reading page (navbar, shloka centrepiece, meaning card, prev/next verse navigation); `generateMetadata` produces share/OG tags per verse. |
 | `app/whatsapp/page.tsx` | `/whatsapp` — QR code + "Open WhatsApp chat" deep link (`wa.me`) to chat with Madhav in WhatsApp. Gated on `NEXT_PUBLIC_WHATSAPP_NUMBER`. |
 
 ### `frontend/app/api/` — server routes (verse engine + integrations)
@@ -32,7 +32,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
 | `api/auth-email/route.ts` | Supabase **Send Email Hook** receiver — verifies the Standard-Webhooks signature, composes the branded sign-in email (one-time code + link), sends via Resend. Env-gated by `SEND_EMAIL_HOOK_SECRET`/`RESEND_API_KEY`/`AUTH_EMAIL_FROM`. |
 | `api/verse-insight/route.ts` | "Go deeper" endpoint — per-verse structured deep-dive via `lib/verseInsight.ts`; CDN-cached a day; never hard-fails (template fallback). |
-| `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). `runtime=nodejs`. |
+| `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). Brand-styled (Cormorant/Cinzel TTFs fetched from Google once per instance, falls back to serif). `runtime=nodejs`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
 | `api/unsubscribe/route.ts` | Daily Ritual unsubscribe (GET link from email). |
 | `api/cron/daily-ritual/route.ts` | Sends the daily verse email to subscribers; guarded by `CRON_SECRET`. Vercel Cron @ 13:00 UTC. |

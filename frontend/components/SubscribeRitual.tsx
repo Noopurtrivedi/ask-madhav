@@ -64,7 +64,7 @@ export default function SubscribeRitual() {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="px-6 py-3 bg-saffron text-navy font-medium rounded-xl hover:bg-saffron-light
+              className="px-6 py-3 btn-leaf rounded-xl
                          transition-all disabled:opacity-40 text-sm whitespace-nowrap"
             >
               {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
