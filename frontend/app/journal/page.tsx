@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import AuthGate from '@/components/auth/AuthGate'
 import JournalApp from '@/components/journal/JournalApp'
 
 export const metadata: Metadata = {
@@ -7,5 +8,11 @@ export const metadata: Metadata = {
 }
 
 export default function JournalPage() {
-  return <JournalApp />
+  // The Journal is account-bound (saved verses, streaks, reflections), so it is
+  // the one route behind sign-in; verses, chat and stories stay open.
+  return (
+    <AuthGate>
+      <JournalApp />
+    </AuthGate>
+  )
 }

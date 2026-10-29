@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import AuthProvider from '@/components/auth/AuthProvider'
-import AuthGate from '@/components/auth/AuthGate'
 import DarshanProvider from '@/components/darshan/DarshanProvider'
 import CosmicJourney from '@/components/darshan/CosmicJourney'
 import DarshanDebugPanel from '@/components/darshan/DarshanDebugPanel'
@@ -57,12 +56,10 @@ export default function RootLayout({
           {/* One sky behind every route — fixed, scroll-driven, and the only
               background the site has. See components/darshan/CosmicJourney.tsx. */}
           <CosmicJourney />
-          {/* The doorway: every seeker signs in with an email one-time code
-              before the app reveals itself. Fail-open — without Supabase env
-              vars the gate is invisible and the app runs open as before. */}
-          <AuthProvider>
-            <AuthGate>{children}</AuthGate>
-          </AuthProvider>
+          {/* Session context for every route. The app itself stays open —
+              only account-bound features (the Journal) wrap themselves in
+              <AuthGate>. Fail-open without Supabase env vars. */}
+          <AuthProvider>{children}</AuthProvider>
           <DarshanDebugPanel />
         </DarshanProvider>
       </body>

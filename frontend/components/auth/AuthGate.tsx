@@ -1,10 +1,12 @@
 'use client'
 
 /**
- * AuthGate — the darshan's doorway.
+ * AuthGate — the doorway to account-bound features.
  *
- * Every seeker signs in before the app reveals itself, choosing between two
- * equal paths on one screen:
+ * The app itself is open (verses, chat, stories, daily wisdom). Only features
+ * that store something for the seeker wrap themselves in <AuthGate> — today
+ * that is the Sankalpa Journal (app/journal/page.tsx). The seeker chooses
+ * between two equal paths on one screen:
  *   - One-time code: email → 6-digit code (the email's sign-in link works too)
  *   - Password:     classic register / sign in, with email confirmation and a
  *                   forgot-password recovery flow (code → new password)
@@ -17,6 +19,7 @@
  */
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { getBrowserClient } from '@/lib/supabase/client'
 import { useAuth } from './AuthProvider'
 
@@ -83,7 +86,7 @@ function SignIn() {
     setMessage('')
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: window.location.href },
     })
     setBusy(false)
     if (error) return fail(error.message)
@@ -133,7 +136,7 @@ function SignIn() {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
-      options: { emailRedirectTo: window.location.origin },
+      options: { emailRedirectTo: window.location.href },
     })
     setBusy(false)
     if (error) return fail(error.message)
@@ -163,7 +166,7 @@ function SignIn() {
     setBusy(true)
     setMessage('')
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: window.location.origin,
+      redirectTo: window.location.href,
     })
     setBusy(false)
     if (error) return fail(error.message)
@@ -210,7 +213,7 @@ function SignIn() {
             Ask Madhav
           </h1>
           <p className="mt-3 text-moonlight/58 text-sm leading-relaxed max-w-sm mx-auto">
-            Enter as Parth — your questions, journal, and saved verses stay yours alone.
+            Sign in to keep your Sankalpa Journal — your reflections, streaks, and saved verses stay yours alone.
           </p>
         </div>
 
@@ -388,7 +391,13 @@ function SignIn() {
           {message && <p className="mt-4 text-center text-sm text-gold-soft/85">{message}</p>}
         </div>
 
-        <p className="mt-8 text-moonlight/35 text-xs text-center leading-relaxed max-w-sm mx-auto">
+        <div className="mt-6 text-center">
+          <Link href="/" className="text-gold-soft/75 hover:text-gold-soft text-sm">
+            ← Continue without signing in
+          </Link>
+        </div>
+
+        <p className="mt-6 text-moonlight/35 text-xs text-center leading-relaxed max-w-sm mx-auto">
           Everything here is free. Guidance is offered through the lens of the
           Bhagavad Gita only — not professional, medical, legal, or financial advice.
         </p>

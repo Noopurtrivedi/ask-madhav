@@ -60,7 +60,7 @@ function formatDay(iso: string): string {
 /**
  * JournalApp — the Sankalpa Journal.
  *
- * Sign-in is handled app-wide by AuthGate, so this component only has to BE
+ * Sign-in is handled by the AuthGate wrapping /journal, so this component only has to BE
  * the journal: today's Gita check-in (upserted onto the seeker's LOCAL
  * calendar day), streaks, past reflections, and saved verses. Without
  * Supabase configured the whole feature stays gracefully inert.

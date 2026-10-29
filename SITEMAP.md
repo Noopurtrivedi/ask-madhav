@@ -13,11 +13,11 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/app/` — routes & pages
 | File | Description |
 |---|---|
-| `app/layout.tsx` | Root layout — fonts, metadata, global chrome; wraps every route in `AuthProvider` + `AuthGate` (email-OTP sign-in gate, fail-open without Supabase). |
+| `app/layout.tsx` | Root layout — fonts, metadata, global chrome; wraps every route in `AuthProvider` (session context only — the app is open; gated features use `AuthGate` themselves). |
 | `app/page.tsx` | Single-page home — composes Hero, DailyVerse, ChatInterface, PopularVerses, StoryCards, SubscribeRitual. |
 | `app/globals.css` | Tailwind base + global styles (sacred light theme). |
 | `app/icon.svg` | App favicon / icon. |
-| `app/journal/page.tsx` | `/journal` route — renders the Sankalpa Journal (auth-gated). |
+| `app/journal/page.tsx` | `/journal` route — renders the Sankalpa Journal wrapped in `AuthGate` (the only sign-in-gated route). |
 | `app/verse/[reference]/page.tsx` | `/verse/2.47` deep-link page; `generateMetadata` produces share/OG tags per verse. |
 | `app/whatsapp/page.tsx` | `/whatsapp` — QR code + "Open WhatsApp chat" deep link (`wa.me`) to chat with Madhav in WhatsApp. Gated on `NEXT_PUBLIC_WHATSAPP_NUMBER`. |
 
@@ -113,7 +113,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/journal/JournalApp.tsx` | Sankalpa Journal — Gita check-in (sankalpa/gratitude/dharma/release/lesson/next action/reflection) upserted onto the seeker's LOCAL calendar day, streaks, **Past Reflections** history, saved verses; "Ask Madhav about today" prefills the chat with today's check-in; auth from the app-wide `AuthProvider`; consumes the `askmadhav_pending_intention` handoff. |
 | `components/journal/JournalMadhav.tsx` | Madhav as the Journal's in-page assistant — chat window on the /journal page; every question carries today's check-in as grounding context into the shared `/api/ask` pipeline; "Ask Madhav about today" auto-seeds it. |
 | `components/auth/AuthProvider.tsx` | App-wide auth context (`useAuth()`) over the browser Supabase client — session, loading, signOut. Fail-open when Supabase is unconfigured. |
-| `components/auth/AuthGate.tsx` | The doorway — full-screen email one-time-code sign-in every seeker passes before the app renders. Invisible without Supabase env vars. |
+| `components/auth/AuthGate.tsx` | Per-feature sign-in wrapper (one-time code or password) — wrap any account-bound route in it; currently only `/journal`. Has a "continue without signing in" link. Invisible without Supabase env vars. |
 
 ### `frontend/` — data, types, config
 | File | Description |
