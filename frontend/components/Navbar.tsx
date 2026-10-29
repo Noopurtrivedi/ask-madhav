@@ -57,17 +57,18 @@ export default function Navbar({ overlay = false }: Props) {
   }, [])
 
   // On the cosmic hero (not scrolled, menu closed) the bar is invisible chrome.
-  const onDark = overlay && !scrolled && !menuOpen
-  // The page is cosmic top to bottom now, so the scrolled state is darker glass
-  // rather than a different palette — only the surface changes, never the ink.
+  // Over the home film's ivory first frame the bar is transparent with dark
+  // ink (`nav-on-light`); once the seeker scrolls it becomes a solid obsidian
+  // bar with moonlight ink — the Beyond pattern.
+  const onHero = overlay && !scrolled && !menuOpen
   const link = 'caps-link'
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
-        onDark
-          ? 'bg-transparent border-b border-white/5'
-          : 'bg-cosmos-deep/80 backdrop-blur-md border-b border-white/[0.07]'
+        onHero
+          ? 'nav-on-light bg-transparent border-b border-black/5'
+          : 'bg-[#07080F]/92 backdrop-blur-md border-b border-gold-soft/10'
       }`}
     >
       <div ref={progressRef} className="scroll-progress" aria-hidden="true" />
@@ -93,7 +94,7 @@ export default function Navbar({ overlay = false }: Props) {
           </button>
           <Link
             href="/"
-            className="font-caps text-[1rem] font-semibold tracking-[0.26em] text-moonlight transition-colors hover:text-gold-soft"
+            className="nav-wordmark font-caps text-[1rem] font-semibold tracking-[0.26em] text-moonlight transition-colors hover:text-gold-soft"
           >
             ASK MADHAV
           </Link>
@@ -112,9 +113,9 @@ export default function Navbar({ overlay = false }: Props) {
         {/* CTA */}
         <a
           href="/#chat"
-          className="btn-leaf hidden md:inline-flex px-5 py-2.5 text-xs uppercase tracking-[0.14em]"
+          className="btn-outline-gold hidden md:inline-flex px-5 py-2.5"
         >
-          Ask Madhav
+          Ask Madhav <span aria-hidden="true">→</span>
         </a>
         {configured && user && (
           <button
@@ -129,7 +130,7 @@ export default function Navbar({ overlay = false }: Props) {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden text-moonlight/80 transition-colors hover:text-gold-soft"
+          className="nav-burger md:hidden text-moonlight/80 transition-colors hover:text-gold-soft"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle menu"
           aria-expanded={menuOpen}

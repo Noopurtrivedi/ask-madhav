@@ -10,12 +10,16 @@ The live application is everything under `frontend/`. The repo root holds data-g
 
 ## `frontend/` — the live Next.js 16 app (App Router)
 
+- `docs/AVATAR.md` — provenance, licences, prompt and seed of the hero's Krishna avatar (`public/art/krishna-avatar.jpg`).
+
 ### `frontend/app/` — routes & pages
 | File | Description |
 |---|---|
 | `app/layout.tsx` | Root layout — loads the brand fonts via `next/font` (Playfair Display, DM Sans, Cinzel, Tiro Devanagari Sanskrit, Noto Serif Devanagari → `--font-*` vars), metadata, global chrome; wraps every route in `AuthProvider` (session context only — the app is open; gated features use `AuthGate` themselves). |
 | `app/page.tsx` | Single-page home — composes Hero, DailyVerse, ChatInterface, PopularVerses, StoryCards, SubscribeRitual. |
 | `app/globals.css` | Tailwind base + global styles. Holds the **brand system** (`@layer components`: `.eyebrow`, `.section-title`, `.section-lede`, `.hero-title`, `.gold-leaf`, `.btn-leaf`, `.btn-ghost`, `.caps-link`, `.ask-bar`, `.ornament-rule`), `.sacred-card`, and the Darshan/cosmic layers. |
+| `app/sitemap.ts` | `/sitemap.xml` — home, journal and all 701 `/verse/[ref]` pages. |
+| `app/robots.ts` | `/robots.txt` — allow all, disallow `/api/` except `/api/og` (share images). |
 | `app/icon.svg` | App favicon / icon. |
 | `app/journal/page.tsx` | `/journal` route — renders the Sankalpa Journal wrapped in `AuthGate` (the only sign-in-gated route). |
 | `app/verse/[reference]/page.tsx` | `/verse/2.47` deep-link reading page (navbar, shloka centrepiece, meaning card, prev/next verse navigation); `generateMetadata` produces share/OG tags per verse. |
@@ -68,7 +72,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
-| `components/Hero.tsx` | **The Darshan film** — pinned three-act scroll hero: Kurukshetra painting + chakra on Krishna's fingertip (headline, ask bar) → dive into the chakra → galaxy burst (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
+| `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: ivory first frame with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra → whiteout → galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
 | `components/ThreePaths.tsx` | Karma / Jnana / Bhakti yoga as three tall illustrated cards (verse link + hand the path to the chat). Follows the hero. |
 | `components/darshan/GalaxyCanvas.tsx` | Code-generated spiral galaxy on a 2D canvas (additive stars, glints, nebula), driven by a ref (`burst`, `active`) from the hero; sleeps off-screen. |
 | `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. Shows a quiet Sign out when a seeker is signed in. |

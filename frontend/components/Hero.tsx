@@ -19,9 +19,19 @@ const ENTRY_POINTS = [
 // One tap from the hero to a real answer — the questions people most often bring.
 const STARTERS = ['I feel anxious about the future', 'I am afraid of failing', 'What is my purpose?']
 
-// The opening painting, and where Krishna's raised fingertip sits in it
-// (as fractions of the image) — the Sudarshan Chakra forms just above it.
-const ART = { src: '/art/scene-1.png', w: 1122, h: 1402, fx: 0.488, fy: 0.425 }
+// The opening frame: an original Shree Krishna avatar (FLUX.1 [schnell],
+// Apache-2.0, generated locally — see docs/AVATAR.md), and where his raised
+// fingertip sits in it as fractions of the image. The Sudarshan Chakra forms
+// just above the fingertip. `x`/`mobileX` place that point on screen.
+const ART = {
+  src: '/art/krishna-avatar.jpg',
+  w: 2560,
+  h: 1440,
+  fx: 0.522,
+  fy: 0.29,
+  x: 0.58,
+  mobileX: 0.36,
+}
 
 /** Hand a question to the chat below and send it there. */
 function askMadhav(raw: string) {
@@ -91,19 +101,15 @@ export default function Hero() {
     const layout = () => {
       const W = stage.clientWidth
       const H = stage.clientHeight
-      const wide = W >= 1024
-      // Desktop: the painting owns the right two-thirds and its left edge is
-      // feathered into the dark (see .journey-art-feather), so the fingertip
-      // sits clear of the headline. Phones: cover, a little larger, so the
-      // fingertip can rise above the copy at the bottom of the frame.
-      const s = wide ? Math.max((H * 1.25) / ART.h, (W * 0.6) / ART.w) : Math.max(W / ART.w, H / ART.h) * 1.25
+      // Cover the frame. The avatar is composed with open ivory mist on the
+      // left for the headline, so desktop keeps him right of centre and a
+      // phone slides the frame so his face and the fingertip both stay in.
+      const s = Math.max(W / ART.w, H / ART.h)
       const dw = ART.w * s
       const dh = ART.h * s
-      const wantX = wide ? 0.68 : 0.56
-      const wantY = wide ? 0.42 : 0.24
-      const left = Math.min(wide ? W : 0, Math.max(W - dw, W * wantX - ART.fx * dw))
-      const top = Math.min(0, Math.max(H - dh, H * wantY - ART.fy * dh))
-      art.classList.toggle('journey-art-feather', wide && left > 0)
+      const wantX = W >= 1024 ? ART.x : ART.mobileX
+      const left = Math.min(0, Math.max(W - dw, W * wantX - ART.fx * dw))
+      const top = Math.min(0, Math.max(H - dh, H * 0.27 - ART.fy * dh))
       Object.assign(art.style, { left: `${left}px`, top: `${top}px`, width: `${dw}px`, height: `${dh}px` })
       stage.style.setProperty('--fx', `${left + ART.fx * dw}px`)
       stage.style.setProperty('--fy', `${top + ART.fy * dh}px`)
@@ -134,19 +140,23 @@ export default function Hero() {
 
       set('--zoom', 1 + 1.55 * t)
       set('--blur', 12 * smooth(0.3, 0.52, p))
-      set('--art', 1 - smooth(0.44, 0.58, p))
+      set('--art', 1 - smooth(0.46, 0.53, p))
       set('--cs', 0.12 + 4.6 * t * t * t)
-      set('--ca', 1 - smooth(0.5, 0.6, p))
-      set('--flash', Math.max(0, 1 - Math.abs(p - 0.53) / 0.08))
+      set('--ca', 1 - smooth(0.5, 0.535, p))
+      // A true whiteout: the light builds, holds fully opaque while the
+      // painting and chakra are swapped for the galaxy, then fades to reveal it.
+      set('--flash', smooth(0.45, 0.52, p) * (1 - smooth(0.56, 0.66, p)))
       set('--b1', 1 - smooth(0.04, 0.14, p))
       set('--b2', smooth(0.17, 0.24, p) * (1 - smooth(0.38, 0.45, p)))
       set('--b3', smooth(0.7, 0.8, p))
-      set('--gal', smooth(0.47, 0.58, p))
+      // The galaxy is placed only behind the fully opaque light (0.52–0.56),
+      // so the cut between the two worlds is never seen.
+      set('--gal', smooth(0.525, 0.545, p))
       stage.dataset.act = p < 0.12 ? '1' : p > 0.68 ? '3' : '2'
 
-      const burst = smooth(0.5, 0.72, p)
+      const burst = smooth(0.545, 0.78, p)
       galaxy.current.burst = 1 - Math.pow(1 - burst, 3)
-      galaxy.current.active = inView && p > 0.44
+      galaxy.current.active = inView && p > 0.52
 
       const nowDiving = p > 0.1 && p < 0.6
       if (nowDiving !== wasDiving) {
@@ -178,11 +188,11 @@ export default function Hero() {
       <ChakraLaunch />
 
       <section id="darshan" ref={sectionRef} className={`journey ${still ? 'journey-still' : ''}`}>
-        <div ref={stageRef} className="journey-stage" data-act="1">
+        <div ref={stageRef} className="journey-stage journey-light" data-act="1">
           {/* ── Act I/II: the painting, zooming toward the fingertip ── */}
           <div className="journey-art-zoom" aria-hidden="true">
             <div ref={artRef} className="absolute">
-              <Image src={ART.src} alt="" fill priority sizes="(min-width: 1024px) 100vw, 160vw" className="object-cover" />
+              <Image src={ART.src} alt="" fill priority sizes="(min-width: 1024px) 100vw, 260vw" className="object-cover" />
             </div>
           </div>
           <div className="journey-shade" aria-hidden="true" />
@@ -214,7 +224,7 @@ export default function Hero() {
                 <br />
                 <em className="shimmer-text">Find peace.</em>
               </h1>
-              <p className="mb-8 max-w-[33rem] text-base leading-[1.8] text-moonlight/80 md:text-[1.075rem]">
+              <p className="journey-lede mb-8 max-w-[33rem] text-base leading-[1.8] text-moonlight/80 md:text-[1.075rem]">
                 Bring the question you carry. Madhav answers from the Bhagavad Gita &mdash; one verse,
                 one truth, and one step you can take today.
               </p>
@@ -254,7 +264,7 @@ export default function Hero() {
                     key={s}
                     type="button"
                     onClick={() => askMadhav(s)}
-                    className="rounded-full border border-white/15 bg-black/25 px-3.5 py-1.5 text-xs text-moonlight/75 backdrop-blur-sm transition-colors hover:border-gold-soft/60 hover:text-moonlight"
+                    className="journey-chip rounded-full border border-white/15 bg-black/25 px-3.5 py-1.5 text-xs text-moonlight/75 backdrop-blur-sm transition-colors hover:border-gold-soft/60 hover:text-moonlight"
                   >
                     {s}
                   </button>
@@ -295,6 +305,9 @@ export default function Hero() {
                   Between two armies, one conversation turned a warrior&rsquo;s despair into clarity.
                   It still does.
                 </p>
+                <a href="#daily-verse" className="btn-leaf mt-8 px-6 py-3">
+                  Read today&rsquo;s verse <span aria-hidden="true">→</span>
+                </a>
               </div>
             </div>
           )}

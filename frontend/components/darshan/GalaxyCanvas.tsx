@@ -104,7 +104,7 @@ export default function GalaxyCanvas({ drive, count }: { drive: RefObject<Galaxy
       const burst = d.burst
       const cx = w / 2
       const cy = h / 2
-      const R = Math.max(w, h) * 0.44 * (0.04 + 0.96 * burst)
+      const R = Math.max(w, h) * 0.44 * (0.12 + 0.88 * burst)
       const spin = t * 0.000045
 
       ctx.globalCompositeOperation = 'source-over'

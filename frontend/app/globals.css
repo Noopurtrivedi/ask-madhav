@@ -182,6 +182,36 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
   box-shadow: inset 0 1px 0 rgba(255, 250, 230, 0.55);
 }
 
+/* Beyond's nav CTA: a gold hairline pill. */
+.btn-outline-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(227, 182, 92, 0.75);
+  color: #E9C46A;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.btn-outline-gold:hover { background: rgba(227, 182, 92, 0.12); border-color: #E9C46A; color: #F7E3A6; }
+
+/* Navbar over the ivory first frame: dark ink. */
+.nav-on-light .caps-link,
+.nav-on-light .nav-burger { color: rgba(38, 32, 24, 0.78); }
+.nav-on-light .caps-link:hover { color: #8A6420; }
+.nav-on-light .nav-wordmark { color: #221D16; }
+.nav-on-light .btn-outline-gold {
+  color: #6E4F16;
+  border-color: rgba(138, 100, 32, 0.55);
+  background: rgba(250, 246, 236, 0.78);
+  backdrop-filter: blur(8px);
+}
+.nav-on-light .btn-outline-gold:hover { background: rgba(138, 100, 32, 0.08); }
+
 /* Small tracked caps link — navbar and footer. */
 .caps-link {
   font-family: var(--font-sans), system-ui, sans-serif;
@@ -949,9 +979,10 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
   -webkit-mask-image: linear-gradient(to bottom, transparent 8%, rgba(0, 0, 0, 0.65) 100%);
 }
 
-/* The gold shimmer needs more light to read against the cosmos */
+/* The hero opens on ivory: its shimmer is deep, burnished gold so the accent
+   word holds its contrast (the light sweep stays a warm amber, never pale). */
 #darshan .shimmer-text {
-  background-image: linear-gradient(100deg, var(--gold-soft) 18%, #FFF3C4 42%, var(--gold-soft) 62%);
+  background-image: linear-gradient(100deg, #8A6420 15%, #C99A3E 42%, #8A6420 70%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1078,7 +1109,8 @@ section[id] { scroll-margin-top: 5rem; }
   inset: 0;
   pointer-events: none;
   opacity: var(--flash);
-  background: radial-gradient(circle at var(--fx) var(--fy), #FFF7E2 0%, rgba(255, 226, 160, 0.85) 30%, rgba(255, 200, 120, 0.35) 60%, rgba(255, 200, 120, 0) 90%);
+  /* Opaque at its peak — it must fully hide the cut to the galaxy. */
+  background: radial-gradient(circle at var(--fx) var(--fy), #FFFFFF 0%, #EEF4FF 22%, #FFF1CF 50%, #F3D9A4 80%, #E6C489 100%);
 }
 
 /* The three acts' copy. Only the active act takes pointer events. */
@@ -1113,6 +1145,7 @@ section[id] { scroll-margin-top: 5rem; }
   text-shadow: 0 2px 30px rgba(4, 5, 12, 0.9);
 }
 .journey-stage[data-act='1'] .journey-beat-1 .journey-copy,
+.journey-stage[data-act='2'] .journey-beat-2 .journey-copy,
 .journey-stage[data-act='3'] .journey-beat-3 { pointer-events: auto; }
 @media (max-width: 1023px) {
   .journey-beat-1 { align-items: flex-end; padding-bottom: 2.25rem; }
@@ -1182,18 +1215,71 @@ section[id] { scroll-margin-top: 5rem; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 1.25rem;
+  border-radius: 1.1rem;
   background: #06070F;
-  border: 1px solid rgba(232, 195, 90, 0.18);
-  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.95);
+  /* A double gold rule — the frame Beyond puts around its class cards. */
+  border: 1px solid rgba(227, 182, 92, 0.55);
+  box-shadow: inset 0 0 0 5px #06070F, inset 0 0 0 6px rgba(227, 182, 92, 0.28), 0 40px 80px -40px rgba(0, 0, 0, 0.95);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease, box-shadow 0.5s ease;
 }
 .path-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(232, 195, 90, 0.55);
-  box-shadow: 0 50px 90px -40px rgba(0, 0, 0, 0.95), 0 0 40px -10px rgba(227, 182, 92, 0.25);
+  border-color: #E9C46A;
+  box-shadow: inset 0 0 0 5px #06070F, inset 0 0 0 6px rgba(233, 196, 106, 0.55), 0 50px 90px -40px rgba(0, 0, 0, 0.95), 0 0 50px -10px rgba(227, 182, 92, 0.3);
 }
 .journey-art-feather {
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%);
   mask-image: linear-gradient(90deg, transparent 0%, #000 34%);
 }
+
+/* ── Ivory first frame (Beyond) ───────────────────────────────────
+   With the light avatar art the film opens on warm ivory mist: Acts I and II
+   are set in charcoal and deep gold; the film goes dark only through the
+   chakra into the galaxy. Gated by .journey-light on the stage. */
+.journey-light { background: #E9E3D6; }
+.journey-light .journey-shade {
+  background:
+    linear-gradient(90deg, rgba(236, 230, 218, 0.94) 0%, rgba(236, 230, 218, 0.72) 30%, rgba(236, 230, 218, 0.12) 56%, rgba(236, 230, 218, 0) 72%),
+    linear-gradient(180deg, rgba(236, 230, 218, 0.35) 0%, rgba(236, 230, 218, 0) 16%);
+}
+@media (max-width: 1023px) {
+  .journey-light .journey-shade {
+    background: linear-gradient(180deg, rgba(236, 230, 218, 0.4) 0%, rgba(236, 230, 218, 0) 22%, rgba(236, 230, 218, 0.4) 44%, rgba(236, 230, 218, 0.95) 64%, #ECE6DA 100%);
+  }
+}
+.journey-light .journey-beat-1 .hero-title,
+.journey-light .journey-beat-2 .hero-title { color: #221D16; }
+.journey-light .journey-beat-1 .hero-title em,
+.journey-light .journey-beat-2 .hero-title em {
+  background: linear-gradient(100deg, #9A7224 10%, #C9973E 45%, #8A6420 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.journey-light .journey-beat-1 .eyebrow,
+.journey-light .journey-beat-2 .eyebrow { color: #8A6420; }
+.journey-light .journey-beat-1 .eyebrow::before,
+.journey-light .journey-beat-1 .eyebrow::after,
+.journey-light .journey-beat-2 .eyebrow::before,
+.journey-light .journey-beat-2 .eyebrow::after { background: linear-gradient(90deg, transparent, #8A6420); }
+.journey-light .journey-lede,
+.journey-light .journey-beat-2 .section-lede { color: rgba(34, 29, 22, 0.74); }
+.journey-light .journey-beat-1 .caps-link { color: rgba(34, 29, 22, 0.72); }
+.journey-light .journey-beat-1 .caps-link:hover { color: #8A6420; }
+.journey-light .ask-bar {
+  background: rgba(255, 252, 245, 0.62);
+  border-color: rgba(138, 100, 32, 0.32);
+  box-shadow: 0 24px 60px -30px rgba(80, 60, 20, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+.journey-light .ask-bar:focus-within { border-color: rgba(138, 100, 32, 0.7); box-shadow: 0 0 0 4px rgba(184, 134, 47, 0.12); }
+.darshan-page .journey-light .ask-bar input { color: #221D16; }
+.darshan-page .journey-light .ask-bar input::placeholder { color: rgba(34, 29, 22, 0.45); }
+.journey-light .journey-chip {
+  border-color: rgba(34, 29, 22, 0.16);
+  background: rgba(255, 252, 245, 0.5);
+  color: rgba(34, 29, 22, 0.72);
+}
+.journey-light .journey-chip:hover { border-color: rgba(138, 100, 32, 0.6); color: #221D16; }
+.journey-light .journey-scroll-cue { color: rgba(34, 29, 22, 0.55); }
+.journey-light .journey-scroll-line { background: linear-gradient(180deg, #8A6420, transparent); }
