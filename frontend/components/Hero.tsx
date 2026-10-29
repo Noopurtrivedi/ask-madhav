@@ -8,6 +8,7 @@ import GalaxyCanvas, { type GalaxyDrive } from './darshan/GalaxyCanvas'
 import { useDarshanOptional } from './darshan/DarshanProvider'
 import { useReducedMotion } from '@/lib/motion'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
+import { AVATAR_LOOP, FINGERTIP_DX, FINGERTIP_DY, sourceFrame } from '@/lib/darshan/avatarTrack'
 
 const ENTRY_POINTS = [
   { label: 'Walk a path', href: '#paths' },
@@ -40,6 +41,16 @@ const ART = {
 // disc's far half sits behind it, the near half covers the rest of the finger.
 const TIP = { src: '/art/krishna-fingertip.png', x: 1300, y: 440, w: 86, h: 56 }
 
+// The living portrait (Wan 2.2, Apache-2.0 — docs/AVATAR.md): a seamless
+// ping-pong loop of the same frame. It covers image rows 15..1423 of 1440.
+const LOOP = {
+  webm: '/art/krishna-avatar.webm',
+  mp4: '/art/krishna-avatar.mp4',
+  poster: '/art/krishna-avatar-poster.jpg',
+  top: 15 / 1440,
+  height: 1408 / 1440,
+}
+
 /** Hand a question to the chat below and send it there. */
 function askMadhav(raw: string) {
   const question = raw.trim()
@@ -47,6 +58,10 @@ function askMadhav(raw: string) {
   if (!question) return
   window.dispatchEvent(new CustomEvent('madhav:prefill', { detail: { question, send: true } }))
 }
+
+const noSubscribe = () => () => {}
+const readSaveData = () =>
+  Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData)
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 const smooth = (a: number, b: number, x: number) => {
@@ -91,6 +106,12 @@ export default function Hero() {
   const reduced = useReducedMotion()
   const still = reduced || engine?.tier === 'still'
   const starCount = engine?.tier === 'lite' ? 1600 : 3200
+  // The living portrait only where it is cheap and welcome: full tier, no
+  // reduced motion, no data-saver. Everyone else gets the still.
+  const saveData = useSyncExternalStore(noSubscribe, readSaveData, () => false)
+  const useLoop = !still && engine?.tier === 'full' && !saveData
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const artSize = useRef({ dw: 0, dh: 0 })
 
   const sectionRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
@@ -122,6 +143,7 @@ export default function Hero() {
       const rect = { left: `${left}px`, top: `${top}px`, width: `${dw}px`, height: `${dh}px` }
       Object.assign(art.style, rect)
       Object.assign(tip.style, rect)
+      artSize.current = { dw, dh }
       stage.style.setProperty('--fx', `${left + ART.fx * dw}px`)
       stage.style.setProperty('--fy', `${top + ART.fy * dh}px`)
     }
@@ -178,6 +200,15 @@ export default function Hero() {
       set('--tumble', Math.sin(u * Math.PI * 4) * 26 * (1 - u))
       // The cut-out fingertip exists only while the disc sits on it.
       set('--tip', 1 - smooth(0.115, 0.13, p))
+      // The living portrait plays through Act I, then hands over to the sharp
+      // 2560px still as the camera pushes in. Paused once it is invisible.
+      const vid = smooth(0.05, 0.11, p)
+      set('--vid', 1 - vid)
+      const video = videoRef.current
+      if (video) {
+        if (vid < 1 && inView && video.paused) video.play().catch(() => {})
+        else if ((vid >= 1 || !inView) && !video.paused) video.pause()
+      }
       set('--art', 1 - smooth(0.46, 0.53, p))
       // A phone frames him smaller, so the disc starts a little smaller too.
       const base = window.innerWidth >= 1024 ? 0.34 : 0.27
@@ -230,6 +261,44 @@ export default function Hero() {
     }
   }, [still])
 
+  // ── Match-move: keep the chakra on the fingertip while the portrait moves.
+  //    Per decoded video frame (requestVideoFrameCallback where available),
+  //    look up the fingertip's tracked offset and hand it to the stage.
+  useEffect(() => {
+    const video = videoRef.current
+    const stage = stageRef.current
+    if (!useLoop || !video || !stage) return
+    type RVFC = (cb: (now: number, meta: { mediaTime: number }) => void) => number
+    const rvfc = (video as HTMLVideoElement & { requestVideoFrameCallback?: RVFC }).requestVideoFrameCallback?.bind(video)
+    let handle = 0
+    let stopped = false
+    const apply = (mediaTime: number) => {
+      const f = sourceFrame(Math.round(mediaTime * AVATAR_LOOP.fps))
+      const { dw, dh } = artSize.current
+      stage.style.setProperty('--tx', `${(FINGERTIP_DX[f] * dw).toFixed(2)}px`)
+      stage.style.setProperty('--ty', `${(FINGERTIP_DY[f] * dh).toFixed(2)}px`)
+    }
+    if (rvfc) {
+      const onFrame = (_: number, meta: { mediaTime: number }) => {
+        if (stopped) return
+        apply(meta.mediaTime)
+        handle = rvfc(onFrame)
+      }
+      handle = rvfc(onFrame)
+    } else {
+      const tick = () => {
+        if (stopped) return
+        if (!video.paused) apply(video.currentTime)
+        handle = requestAnimationFrame(tick)
+      }
+      handle = requestAnimationFrame(tick)
+    }
+    return () => {
+      stopped = true
+      if (!rvfc) cancelAnimationFrame(handle)
+    }
+  }, [useLoop])
+
   return (
     <>
       <ChakraLaunch />
@@ -240,6 +309,23 @@ export default function Hero() {
           <div className="journey-art-zoom" aria-hidden="true">
             <div ref={artRef} className="absolute">
               <Image src={ART.src} alt="" fill priority sizes="(min-width: 1024px) 100vw, 260vw" className="object-cover" />
+              {useLoop && (
+                <video
+                  ref={videoRef}
+                  className="journey-loop"
+                  style={{ top: `${LOOP.top * 100}%`, height: `${LOOP.height * 100}%` }}
+                  poster={LOOP.poster}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  disablePictureInPicture
+                >
+                  <source src={LOOP.webm} type="video/webm" />
+                  <source src={LOOP.mp4} type="video/mp4" />
+                </video>
+              )}
             </div>
           </div>
           <div className="journey-shade" aria-hidden="true" />
@@ -258,7 +344,7 @@ export default function Hero() {
           <div className="journey-tip" aria-hidden="true">
             <div ref={tipRef} className="absolute">
               <span
-                className="absolute"
+                className="journey-tip-patch absolute"
                 style={{
                   left: `${(TIP.x / ART.w) * 100}%`,
                   top: `${(TIP.y / ART.h) * 100}%`,

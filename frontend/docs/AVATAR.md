@@ -17,11 +17,40 @@ Settings: 1536×864, 4 steps, cfg 1.0, euler / simple, **seed 7777**. Prompt bel
 
 ## How the film uses it
 
-`components/Hero.tsx` → `ART`: the fingertip sits at **(0.522, 0.29)** of the image
-(the point just above the raised index finger). The Sudarshan Chakra is positioned
-there and the dive zooms around it. If the art is replaced, re-measure that point.
+`components/Hero.tsx` → `ART`: the chakra's centre sits at **(0.5242, 0.3444)** of
+the image — on the index finger a little below the tip (tip at y ≈ 455/1440), so the
+fingertip rises through the flat-lying disc. The take-off arc and the dive zoom are
+measured from that point. If the art is replaced, re-measure it and re-cut the tip.
 
 Review criteria used when choosing among 16 candidates: adult and serene (not
 doll-like, not stern), an anatomically correct hand with an unambiguous gesture,
 open ivory space on the left for the headline. Reject any candidate whose raised
 hand could be misread.
+
+## The living portrait (`public/art/krishna-avatar.{webm,mp4}`)
+
+Wan 2.2 TI2V 5B (Apache-2.0) via local ComfyUI, image-to-video from the avatar
+(centre-cropped 1536×845 → 1280×704, i.e. image rows 15..1423 of 1440), 81 frames,
+20 steps, cfg 5, uni_pc, shift 8, seed 4242 — about 73 min on an M4 Max. Motion
+prompt: breeze in the hair and navy shawl, light on the crown, a slow blink, the
+raised hand still, locked-off camera. Encoded as a **ping-pong loop** (frames
+0..80 then 79..1 = 160 frames @ 24 fps, 6.7 s, seamless): VP9/WebM ~1.1 MB and
+H.264/MP4 ~1.3 MB; `krishna-avatar-poster.jpg` is frame 1.
+
+**Fingertip match-move.** The model let the hand drift ~6 px over the clip. The
+fingertip was tracked in all 81 frames (colour-distance silhouette, top-24-row
+centroid, 5-frame smoothing) into `lib/darshan/avatarTrack.ts`; Hero moves the
+chakra, its rings and the fingertip cut-out by that offset per decoded frame
+(`requestVideoFrameCallback`), so the disc never slips off the finger. If the clip
+is re-rendered, re-run the tracker and regenerate that file.
+
+**When it plays.** Full tier only — never under reduced motion, the `still`/`lite`
+tiers or data-saver. It fades to the 2560px still as the dive begins (sharper for
+the zoom) and pauses itself once hidden or off-screen.
+
+## Fingertip cut-out (`public/art/krishna-fingertip.png`)
+
+Image px (1300, 440)–(1386, 496): the index fingertip above the disc's centre
+line, alpha from colour distance to the ivory backdrop. Layered over the
+flat-lying chakra so the finger passes through its hole. **Regenerate it if the
+avatar's background changes** (e.g. the planned dark theme).

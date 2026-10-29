@@ -1048,6 +1048,7 @@ section[id] { scroll-margin-top: 5rem; }
 .journey-stage {
   --zoom: 1; --art: 1; --cs: 0.34; --ca: 1; --flash: 0; --tilt: 70; --tip: 1;
   --cx: 0; --cy: 0; --tumble: 0; --gather: 0; --ring1: 0; --ring2: 0;
+  --vid: 1; --tx: 0px; --ty: 0px;
   --b1: 1; --b2: 0; --b3: 0; --gal: 0; --fx: 64vw; --fy: 42svh;
   position: sticky;
   top: 0;
@@ -1097,7 +1098,7 @@ section[id] { scroll-margin-top: 5rem; }
   /* Flat on the fingertip (rotateX ≈ 70°), so its own spin reads as a
      horizontal turn. The throw carries it along an arc (--cx/--cy), opening
      toward the viewer with a tumble (--tumble) — the logo ritual's flight. */
-  transform: translate(calc(var(--cx) * 1px), calc(var(--cy) * 1px)) perspective(1100px)
+  transform: translate(calc(var(--cx) * 1px + var(--tx) * var(--vid)), calc(var(--cy) * 1px + var(--ty) * var(--vid))) perspective(1100px)
     rotateX(calc(var(--tilt) * 1deg)) rotateY(calc(var(--tumble) * 1deg)) scale(var(--cs));
   opacity: var(--ca);
   pointer-events: none;
@@ -1257,7 +1258,9 @@ section[id] { scroll-margin-top: 5rem; }
 .journey-light .journey-shade {
   background:
     linear-gradient(90deg, rgba(236, 230, 218, 0.94) 0%, rgba(236, 230, 218, 0.72) 30%, rgba(236, 230, 218, 0.12) 56%, rgba(236, 230, 218, 0) 72%),
-    linear-gradient(180deg, rgba(236, 230, 218, 0.35) 0%, rgba(236, 230, 218, 0) 16%);
+    linear-gradient(180deg, rgba(236, 230, 218, 0.35) 0%, rgba(236, 230, 218, 0) 16%),
+    /* A soft floor: grounds the figure and hides the loop's last rows. */
+    linear-gradient(0deg, #E8DEC8 0%, #E8DEC8 2.5%, rgba(232, 222, 200, 0.6) 6%, rgba(232, 222, 200, 0) 13%);
 }
 @media (max-width: 1023px) {
   .journey-light .journey-shade {
@@ -1322,11 +1325,24 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
   will-change: transform, opacity;
 }
 .journey-ring-1 {
-  transform: perspective(1100px) rotateX(70deg) scale(calc(0.6 + 2.6 * var(--ring1)));
+  transform: translate(calc(var(--tx) * var(--vid)), calc(var(--ty) * var(--vid))) perspective(1100px) rotateX(70deg) scale(calc(0.6 + 2.6 * var(--ring1)));
   opacity: calc(min(1, var(--ring1) * 8) * (1 - var(--ring1)) * var(--art));
 }
 .journey-ring-2 {
   border-color: rgba(70, 170, 190, 0.85);
-  transform: perspective(1100px) rotateX(70deg) scale(calc(0.6 + 3.2 * var(--ring2)));
+  transform: translate(calc(var(--tx) * var(--vid)), calc(var(--ty) * var(--vid))) perspective(1100px) rotateX(70deg) scale(calc(0.6 + 3.2 * var(--ring2)));
   opacity: calc(min(1, var(--ring2) * 8) * (1 - var(--ring2)) * var(--art));
 }
+
+/* The living portrait (Hero.tsx LOOP): sits exactly over its rows of the
+   still and hands over to it as the dive begins (--vid). */
+.journey-loop {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  object-fit: cover;
+  opacity: var(--vid);
+  pointer-events: none;
+}
+/* The fingertip cut-out follows the tracked finger while the loop plays. */
+.journey-tip-patch { transform: translate(calc(var(--tx) * var(--vid)), calc(var(--ty) * var(--vid))); }

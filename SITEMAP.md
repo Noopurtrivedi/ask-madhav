@@ -10,7 +10,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 
 ## `frontend/` — the live Next.js 16 app (App Router)
 
-- `docs/AVATAR.md` — provenance, licences, prompt and seed of the hero's Krishna avatar (`public/art/krishna-avatar.jpg`).
+- `docs/AVATAR.md` — provenance, licences, prompts and seeds of the hero's Krishna avatar: still (`krishna-avatar.jpg`), living loop (`krishna-avatar.webm/.mp4` + poster), fingertip cut-out (`krishna-fingertip.png`).
 
 ### `frontend/app/` — routes & pages
 | File | Description |
@@ -75,6 +75,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: ivory first frame with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra → whiteout → galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
 | `components/ThreePaths.tsx` | Karma / Jnana / Bhakti yoga as three tall illustrated cards (verse link + hand the path to the chat). Follows the hero. |
 | `components/darshan/GalaxyCanvas.tsx` | Code-generated spiral galaxy on a 2D canvas (additive stars, glints, nebula), driven by a ref (`burst`, `active`) from the hero; sleeps off-screen. |
+| `lib/darshan/avatarTrack.ts` | Per-frame fingertip offsets for the hero's looping avatar video (match-move), plus `sourceFrame()` to undo the ping-pong. |
 | `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. Shows a quiet Sign out when a seeker is signed in. |
 | `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen/Copy/Share; **persists the conversation to `localStorage`** (capped 20 turns) with a returning-seeker recap + "Start a new conversation"; rotating suggested prompts; per-answer "Make this my intention" → Journal; always-present crisis helpline line. Calls `/api/ask`. |
 | `components/GuidedPaths.tsx` | "Walk a Path" — 4 curated multi-verse journeys (Letting Go, Facing Fear, Grief, Purpose); steps link to verse pages, CTA prefills the chat. Pure curation, no API. |
