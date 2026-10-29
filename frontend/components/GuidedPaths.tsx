@@ -152,7 +152,7 @@ export default function GuidedPaths() {
                       >
                         {path.title}
                       </p>
-                      <p className="font-caps text-[0.62rem] tracking-[0.2em] uppercase text-gold-soft/70 mt-0.5">{path.yoga} · {path.steps.length} verses</p>
+                      <p className="font-sans font-bold text-[0.62rem] tracking-[0.2em] uppercase text-gold-soft/70 mt-0.5">{path.yoga} · {path.steps.length} verses</p>
                     </div>
                     <span
                       className={`ml-auto text-gold-soft/55 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}

@@ -3,27 +3,28 @@ import AuthProvider from '@/components/auth/AuthProvider'
 import DarshanProvider from '@/components/darshan/DarshanProvider'
 import CosmicJourney from '@/components/darshan/CosmicJourney'
 import DarshanDebugPanel from '@/components/darshan/DarshanDebugPanel'
-import { Cinzel, Cormorant_Garamond, Manrope, Tiro_Devanagari_Sanskrit, Noto_Serif_Devanagari } from 'next/font/google'
+import { Cinzel, Playfair_Display, DM_Sans, Tiro_Devanagari_Sanskrit, Noto_Serif_Devanagari } from 'next/font/google'
 import './globals.css'
 
 // The type system — all free Google fonts, self-hosted by next/font so nothing
 // is fetched from Google at runtime and there is no layout shift.
-//  · Cinzel — inscriptional capitals (wordmark, eyebrows): temple stone.
-//  · Cormorant Garamond — the editorial display serif for every heading.
-//  · Manrope — the quiet, modern sans for reading and UI.
+//  · Playfair Display — the high-contrast editorial serif for every heading:
+//    set semibold, with bold italic accents. Strong enough to carry the brand.
+//  · DM Sans — crisp, sturdy sans for reading, UI, eyebrows and buttons.
+//  · Cinzel — the wordmark only: inscriptional temple capitals.
 //  · Tiro Devanagari Sanskrit — the shloka itself; Noto Serif for Hindi prose.
-const cinzel = Cinzel({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-caps', display: 'swap' })
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['400', '500', '600', '700', '800'],
   style: ['normal', 'italic'],
   variable: '--font-display',
   display: 'swap',
 })
-const manrope = Manrope({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-sans', display: 'swap' })
+const dmSans = DM_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700'], variable: '--font-sans', display: 'swap' })
+const cinzel = Cinzel({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-caps', display: 'swap' })
 const tiro = Tiro_Devanagari_Sanskrit({ subsets: ['devanagari', 'latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-sanskrit', display: 'swap' })
 const notoDeva = Noto_Serif_Devanagari({ subsets: ['devanagari'], weight: ['400', '500'], variable: '--font-hindi', display: 'swap' })
-const fontVars = [cinzel, cormorant, manrope, tiro, notoDeva].map((f) => f.variable).join(' ')
+const fontVars = [playfair, dmSans, cinzel, tiro, notoDeva].map((f) => f.variable).join(' ')
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 

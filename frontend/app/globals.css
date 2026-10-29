@@ -28,16 +28,16 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Cormorant is a display face with a small x-height: it wants medium weight
-   (never bold) and a touch of negative tracking to read as luxury, not book. */
+/* Playfair Display carries every heading at semibold — high contrast, with
+   real presence. Bold italic is reserved for the gold accent word. */
 h1, h2, h3 {
   font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  letter-spacing: -0.012em;
 }
-/* Cormorant defaults to old-style figures ("18" reads as "I8") — use lining. */
+/* Display figures stay lining (never old-style) so "18" never reads as "I8". */
 h1, h2, h3, .font-display, .gold-leaf { font-variant-numeric: lining-nums; }
-h1.font-bold, h2.font-bold, h3.font-bold { font-weight: 500; }
+h1.font-bold, h2.font-bold, h3.font-bold { font-weight: 700; }
 h3.font-semibold, h2.font-semibold { font-weight: 600; }
 
 ::selection { background: rgba(232, 195, 90, 0.32); color: #fff8e6; }
@@ -45,7 +45,7 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
 /* In the components layer so Tailwind utilities (e.g. `hidden md:inline-flex`)
    still override these on a per-element basis. */
 @layer components {
-/* ── Brand system: Midnight & Gold Leaf ─────────────────────────
+/* ── Brand system: Midnight & Gold Leaf (Kintaro × Arise) ────────
    One vocabulary for the whole site. Sections compose these classes rather
    than restyling their own headings, buttons and cards. */
 :root {
@@ -57,45 +57,45 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
   --moonlight: #F6F1E4;
 }
 
-/* Inscriptional eyebrow: Cinzel caps between two hairlines of gold. */
+/* Eyebrow: bold gold sans caps between two short rules of gold. */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.9rem;
-  font-family: var(--font-caps), serif;
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.32em;
+  gap: 0.85rem;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: rgba(232, 195, 90, 0.85);
+  color: #E9C46A;
 }
 .eyebrow::before,
 .eyebrow::after {
   content: '';
-  width: 2.25rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(232, 195, 90, 0.7));
+  width: 2rem;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #E3B65C);
 }
 .eyebrow::after { transform: scaleX(-1); }
 .eyebrow-left::before { display: none; }
 
 .section-title {
   font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  font-size: clamp(2.35rem, 4.6vw, 3.6rem);
-  line-height: 1.04;
-  letter-spacing: -0.015em;
-  color: var(--moonlight);
+  font-weight: 600;
+  font-size: clamp(2.3rem, 4.4vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: #FBF6EA;
 }
 .section-title em,
 .display-italic {
   font-style: italic;
-  font-weight: 400;
+  font-weight: 700;
 }
 .section-lede {
-  font-size: 0.98rem;
+  font-size: 1.02rem;
   line-height: 1.75;
-  color: rgba(246, 241, 228, 0.6);
+  color: rgba(246, 241, 228, 0.72);
 }
 
 /* Gold leaf as ink — static (the shimmer variant below animates). */
@@ -132,8 +132,11 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
   justify-content: center;
   gap: 0.6rem;
   border-radius: 9999px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease,
     background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
@@ -179,12 +182,12 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
 
 /* Small tracked caps link — navbar and footer. */
 .caps-link {
-  font-family: var(--font-caps), serif;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(246, 241, 228, 0.72);
+  color: rgba(246, 241, 228, 0.78);
   transition: color 0.3s ease;
 }
 .caps-link:hover { color: var(--leaf-1); }
@@ -192,13 +195,13 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
 /* The hero headline — light Cormorant at poster scale. */
 .hero-title {
   font-family: var(--font-display), Georgia, serif;
-  font-weight: 400;
-  font-size: clamp(3.1rem, 7.4vw, 6.4rem);
-  line-height: 0.96;
-  letter-spacing: -0.025em;
-  color: var(--moonlight);
+  font-weight: 600;
+  font-size: clamp(3rem, 6.6vw, 5.6rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #FBF6EA;
 }
-.hero-title em { font-weight: 400; font-style: italic; padding-right: 0.06em; }
+.hero-title em { font-weight: 700; font-style: italic; padding-right: 0.06em; }
 
 /* The hero's ask bar — the first thing a seeker can touch. */
 .ask-bar {
@@ -221,7 +224,7 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
 
 /* Phones: the eyebrow keeps one line. */
 @media (max-width: 640px) {
-  .eyebrow { letter-spacing: 0.22em; gap: 0.6rem; font-size: 0.66rem; }
+  .eyebrow { letter-spacing: 0.2em; gap: 0.6rem; font-size: 0.68rem; }
   .eyebrow::before, .eyebrow::after { width: 1.25rem; }
 }
 
@@ -997,3 +1000,26 @@ section[id] { scroll-margin-top: 6rem; }
 
 /* Anchored sections clear the fixed navbar when jumped to. */
 section[id] { scroll-margin-top: 5rem; }
+
+/* ── Hero chakra — the darshan centrepiece ───────────────────────── */
+.hero-chakra {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(400px, 78vw);
+  aspect-ratio: 1;
+}
+.hero-chakra-glow {
+  position: absolute;
+  inset: -22%;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle, rgba(255, 226, 150, 0.30) 0%, rgba(227, 182, 92, 0.14) 32%, rgba(70, 44, 128, 0.10) 55%, transparent 70%);
+  filter: blur(6px);
+}
+.hero-chakra-mark,
+.hero-chakra svg {
+  position: relative;
+  width: 100% !important;
+  height: auto !important;
+}

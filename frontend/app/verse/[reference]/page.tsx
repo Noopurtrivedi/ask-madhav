@@ -90,7 +90,7 @@ export default async function VersePage({ params }: Props) {
         <div className="sacred-card mt-10 rounded-3xl p-7 sm:p-10">
           {/* Practical step first — guidance for the moment, then the meaning. */}
           <div className="mb-8 border-l-2 border-gold/40 pl-5">
-            <p className="font-caps mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">Practical step</p>
+            <p className="font-sans font-bold mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">Practical step</p>
             <p className="font-display text-xl leading-relaxed text-moonlight/90">{verse.practical_guidance}</p>
           </div>
 
@@ -100,7 +100,7 @@ export default async function VersePage({ params }: Props) {
               <p className="font-hindi text-[0.95rem] leading-relaxed text-moonlight/80" lang="hi">{verse.hindi_meaning}</p>
             </div>
             <div>
-              <p className="font-caps mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">English meaning</p>
+              <p className="font-sans font-bold mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">English meaning</p>
               <p className="text-[0.95rem] leading-relaxed text-moonlight/80">{verse.english_meaning}</p>
             </div>
           </div>

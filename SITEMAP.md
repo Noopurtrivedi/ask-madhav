@@ -13,7 +13,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/app/` — routes & pages
 | File | Description |
 |---|---|
-| `app/layout.tsx` | Root layout — loads the brand fonts via `next/font` (Cinzel, Cormorant Garamond, Manrope, Tiro Devanagari Sanskrit, Noto Serif Devanagari → `--font-*` vars), metadata, global chrome; wraps every route in `AuthProvider` (session context only — the app is open; gated features use `AuthGate` themselves). |
+| `app/layout.tsx` | Root layout — loads the brand fonts via `next/font` (Playfair Display, DM Sans, Cinzel, Tiro Devanagari Sanskrit, Noto Serif Devanagari → `--font-*` vars), metadata, global chrome; wraps every route in `AuthProvider` (session context only — the app is open; gated features use `AuthGate` themselves). |
 | `app/page.tsx` | Single-page home — composes Hero, DailyVerse, ChatInterface, PopularVerses, StoryCards, SubscribeRitual. |
 | `app/globals.css` | Tailwind base + global styles. Holds the **brand system** (`@layer components`: `.eyebrow`, `.section-title`, `.section-lede`, `.hero-title`, `.gold-leaf`, `.btn-leaf`, `.btn-ghost`, `.caps-link`, `.ask-bar`, `.ornament-rule`), `.sacred-card`, and the Darshan/cosmic layers. |
 | `app/icon.svg` | App favicon / icon. |
@@ -32,7 +32,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `api/stories/route.ts` | Returns Mahabharata stories from `data/stories.json`. |
 | `api/auth-email/route.ts` | Supabase **Send Email Hook** receiver — verifies the Standard-Webhooks signature, composes the branded sign-in email (one-time code + link), sends via Resend. Env-gated by `SEND_EMAIL_HOOK_SECRET`/`RESEND_API_KEY`/`AUTH_EMAIL_FROM`. |
 | `api/verse-insight/route.ts` | "Go deeper" endpoint — per-verse structured deep-dive via `lib/verseInsight.ts`; CDN-cached a day; never hard-fails (template fallback). |
-| `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). Brand-styled (Cormorant/Cinzel TTFs fetched from Google once per instance, falls back to serif). `runtime=nodejs`. |
+| `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). Brand-styled (Playfair/DM Sans/Cinzel TTFs fetched from Google once per instance, falls back to serif). `runtime=nodejs`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
 | `api/unsubscribe/route.ts` | Daily Ritual unsubscribe (GET link from email). |
 | `api/cron/daily-ritual/route.ts` | Sends the daily verse email to subscribers; guarded by `CRON_SECRET`. Vercel Cron @ 13:00 UTC. |
@@ -68,7 +68,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
-| `components/Hero.tsx` | **The Darshan** — cosmic-indigo landing hero: `CosmicBackdrop` + `MorPankh` + the arched darshan window (`public/art/scene-2.png`) + the shloka on glass + CTAs. Stays veiled until the chakra lands (`madhav:darshan-ready`), with a 3.5s failsafe reveal. |
+| `components/Hero.tsx` | **The Darshan** — cosmic-indigo landing hero: `CosmicBackdrop` + `MorPankh` + the full-scale engine-driven Sudarshan Chakra + the shloka on glass + editorial headline and an ask bar that sends straight to the chat. Stays veiled until the chakra lands (`madhav:darshan-ready`), with a 3.5s failsafe reveal. |
 | `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. Shows a quiet Sign out when a seeker is signed in. |
 | `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen/Copy/Share; **persists the conversation to `localStorage`** (capped 20 turns) with a returning-seeker recap + "Start a new conversation"; rotating suggested prompts; per-answer "Make this my intention" → Journal; always-present crisis helpline line. Calls `/api/ask`. |
 | `components/GuidedPaths.tsx` | "Walk a Path" — 4 curated multi-verse journeys (Letting Go, Facing Fear, Grief, Purpose); steps link to verse pages, CTA prefills the chat. Pure curation, no API. |

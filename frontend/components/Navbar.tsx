@@ -67,7 +67,7 @@ export default function Navbar({ overlay = false }: Props) {
           </button>
           <Link
             href="/"
-            className="font-caps text-[0.95rem] font-medium tracking-[0.28em] text-moonlight transition-colors hover:text-gold-soft"
+            className="font-caps text-[1rem] font-semibold tracking-[0.26em] text-moonlight transition-colors hover:text-gold-soft"
           >
             ASK MADHAV
           </Link>

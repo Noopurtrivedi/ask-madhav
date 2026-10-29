@@ -3,8 +3,8 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import ChakraLaunch from './darshan/ChakraLaunch'
 import CosmicBackdrop from './darshan/CosmicBackdrop'
-import MadhavPresence from './darshan/MadhavPresence'
-import { DivineSilhouette, TempleSkyline } from './darshan/CosmicForms'
+import EngineChakra from './darshan/EngineChakra'
+import { TempleSkyline } from './darshan/CosmicForms'
 import MorPankh from './darshan/MorPankh'
 import QuoteReflection from './darshan/QuoteReflection'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
@@ -31,9 +31,8 @@ function askMadhav(raw: string) {
  * Hero — the Darshan.
  *
  * Three layers, as designed:
- *  1. **Presence** — Madhav seen through an arched darshan window, lit from
- *     within, dissolving at its edges into the cosmos. `MadhavPresence` decides
- *     whether that is the 3D scene or the static artwork, from the device tier.
+ *  1. **Presence** — the Sudarshan Chakra at full scale, lit from within and
+ *     driven by the Darshan engine (it turns faster while Madhav thinks).
  *  2. **Reflection** — the shloka on glass, mirrored on the surface below it,
  *     with the four ways in (Teach me · Guide me · Explain · Ask).
  *  3. **Sacred interaction** — the Sudarshan Chakra launch ritual and the
@@ -124,7 +123,7 @@ export default function Hero() {
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     maxLength={1000}
-                    placeholder="What weighs on your heart, Parth?"
+                    placeholder="What weighs on your heart?"
                     className="min-w-0 flex-1 bg-transparent py-3 text-[0.95rem] text-moonlight placeholder:text-moonlight/40 focus:outline-none"
                   />
                   <button type="submit" className="btn-leaf shrink-0 px-5 py-3 text-sm sm:px-6">
@@ -178,18 +177,13 @@ export default function Hero() {
                 {/* Turning halo of light behind the window */}
                 <div className="darshan-halo halo-turn" aria-hidden="true" />
 
-                {/* The form behind the form — a translucent divine silhouette
-                    rising out of the cosmos behind Madhav. Rendered for every
-                    tier (pure SVG), so it is not gated on WebGL. */}
-                <DivineSilhouette className="divine-behind" opacity={0.28} />
-
-                <div className="darshan-window">
-                  {/* The presence itself: the procedural 3D darshan on capable
-                      devices, the Kurukshetra artwork everywhere else. The
-                      component owns that decision — see MadhavPresence. */}
-                  {/* No frame: Madhav is masked to a soft ellipse and dissolves
-                      straight into the sky. See `.darshan-window` in globals.css. */}
-                  <MadhavPresence />
+                {/* The Sudarshan Chakra is the darshan: the brand mark at full
+                    scale, engine-driven, so it gathers speed while Madhav is
+                    thinking and settles when he answers — the same motion as the
+                    navbar logo. Aniconic by design: light, not likeness. */}
+                <div className="hero-chakra" aria-hidden="true">
+                  <div className="hero-chakra-glow" />
+                  <EngineChakra size={380} className="hero-chakra-mark" />
                 </div>
               </div>
 

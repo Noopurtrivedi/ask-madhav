@@ -35,32 +35,34 @@ function clip(text: string, max: number): string {
 }
 
 // ── Brand ────────────────────────────────────────────────────────
-// Same "Midnight & Gold Leaf" language as the site: Cormorant for the words,
-// Cinzel for the inscriptional caps, gold hairlines on a midnight sky.
+// Same "Midnight & Gold Leaf" language as the site: Playfair for the words,
+// DM Sans caps for labels, Cinzel for the wordmark, gold hairlines on a midnight sky.
 const MOON = '#F6F1E4'
 const GOLD = '#E3B65C'
 const GOLD_SOFT = 'rgba(232,195,90,0.75)'
 const SKY =
   'radial-gradient(900px 520px at 88% 0%, rgba(227,182,92,0.20), transparent 60%), radial-gradient(800px 600px at 0% 100%, rgba(70,44,128,0.45), transparent 60%), linear-gradient(160deg, #05070F 0%, #0A0E2A 55%, #131A3E 100%)'
 
-type OgFont = { name: string; data: ArrayBuffer; weight: 400 | 500; style: 'normal' | 'italic' }
+type Weight = 400 | 500 | 600 | 700
+type OgFont = { name: string; data: ArrayBuffer; weight: Weight; style: 'normal' | 'italic' }
 
 /**
  * Satori needs raw TTF data. Google serves TTF to a non-browser user agent, so
  * the fonts are fetched once per server instance and memoised. Any failure
  * resolves to [] — the card then renders in the default serif rather than 500.
  */
-async function loadGoogleFont(family: string, weight: 400 | 500, italic: boolean): Promise<ArrayBuffer | null> {
+async function loadGoogleFont(family: string, weight: Weight, italic: boolean): Promise<ArrayBuffer | null> {
   const axis = italic ? `ital,wght@1,${weight}` : `wght@${weight}`
   const css = await fetch(`https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:${axis}`).then((r) => r.text())
   const url = css.match(/src: url\(([^)]+)\) format\('(?:opentype|truetype)'\)/)?.[1]
   return url ? fetch(url).then((r) => r.arrayBuffer()) : null
 }
 
-const FONT_SPECS: { family: string; name: string; weight: 400 | 500; style: 'normal' | 'italic' }[] = [
-  { family: 'Cormorant Garamond', name: 'Cormorant', weight: 500, style: 'normal' },
-  { family: 'Cormorant Garamond', name: 'Cormorant', weight: 400, style: 'italic' },
-  { family: 'Cinzel', name: 'Cinzel', weight: 500, style: 'normal' },
+const FONT_SPECS: { family: string; name: string; weight: Weight; style: 'normal' | 'italic' }[] = [
+  { family: 'Playfair Display', name: 'Playfair', weight: 600, style: 'normal' },
+  { family: 'Playfair Display', name: 'Playfair', weight: 500, style: 'italic' },
+  { family: 'DM Sans', name: 'DM Sans', weight: 700, style: 'normal' },
+  { family: 'Cinzel', name: 'Cinzel', weight: 600, style: 'normal' },
 ]
 
 let fontsPromise: Promise<OgFont[]> | null = null
@@ -102,7 +104,7 @@ function Chakra({ size = 40 }: { size?: number }) {
 /** Frame shared by every card: sky, hairline border, brand row, footer rule. */
 function Frame({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', background: SKY, padding: 28, fontFamily: 'Cormorant, serif' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', background: SKY, padding: 28, fontFamily: 'Playfair, serif' }}>
       <div
         style={{
           flex: 1,
@@ -116,8 +118,8 @@ function Frame({ label, children }: { label: string; children: React.ReactNode }
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
           <Chakra />
-          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 24, letterSpacing: 7, color: MOON }}>ASK MADHAV</div>
-          <div style={{ marginLeft: 'auto', fontFamily: 'Cinzel, serif', fontSize: 18, letterSpacing: 5, color: GOLD_SOFT }}>
+          <div style={{ fontFamily: 'Cinzel, serif', fontWeight: 600, fontSize: 25, letterSpacing: 7, color: MOON }}>ASK MADHAV</div>
+          <div style={{ marginLeft: 'auto', fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: 4, color: GOLD }}>
             {label}
           </div>
         </div>
@@ -128,7 +130,7 @@ function Frame({ label, children }: { label: string; children: React.ReactNode }
           <div style={{ display: 'flex', flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(232,195,90,0.55))' }} />
           <div style={{ display: 'flex', width: 9, height: 9, background: GOLD, transform: 'rotate(45deg)' }} />
           <div style={{ display: 'flex', flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(232,195,90,0.55), transparent)' }} />
-          <div style={{ fontFamily: 'Cinzel, serif', fontSize: 17, letterSpacing: 5, color: 'rgba(246,241,228,0.55)' }}>
+          <div style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: 4, color: 'rgba(246,241,228,0.6)' }}>
             ASKMADHAV.WORLD
           </div>
         </div>
@@ -139,9 +141,9 @@ function Frame({ label, children }: { label: string; children: React.ReactNode }
 
 /** Shrink long lines so a card never overflows. */
 function quoteSize(text: string): number {
-  if (text.length > 170) return 44
-  if (text.length > 110) return 52
-  return 62
+  if (text.length > 170) return 40
+  if (text.length > 110) return 48
+  return 58
 }
 
 export async function GET(req: Request) {

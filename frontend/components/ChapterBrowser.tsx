@@ -87,12 +87,12 @@ export default function ChapterBrowser() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <span
-                      className="gold-leaf text-[2.6rem] font-light leading-none opacity-80"
+                      className="gold-leaf font-display text-[2.6rem] font-semibold leading-none opacity-90"
                       style={{ fontFamily: 'var(--font-display), serif' }}
                     >
                       {ch.n}
                     </span>
-                    <span className="font-caps text-[0.6rem] tracking-[0.2em] uppercase text-moonlight/40 mt-1">{ch.verses} verses</span>
+                    <span className="font-sans font-bold text-[0.6rem] tracking-[0.2em] uppercase text-moonlight/40 mt-1">{ch.verses} verses</span>
                   </div>
                   <p
                     className="text-moonlight/90 text-lg font-semibold mb-0.5 group-hover:text-gold-soft transition-colors leading-snug"

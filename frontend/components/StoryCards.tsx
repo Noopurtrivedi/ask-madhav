@@ -116,13 +116,13 @@ export default function StoryCards() {
               style={{ background: STORY_BG[i % STORY_BG.length] }}
             >
               {/* Numeral */}
-              <div className="gold-leaf font-display text-5xl font-light leading-none mb-5 select-none" aria-hidden="true">
+              <div className="gold-leaf font-display text-5xl font-semibold leading-none mb-5 select-none" aria-hidden="true">
                 {NUMERALS[i] ?? i + 1}
               </div>
 
               {/* Chapter badge */}
               <div className="flex items-center gap-2 mb-3">
-                <span className="font-caps px-2.5 py-0.5 border border-gold/30 text-gold-soft/85 text-[0.62rem] tracking-[0.18em] uppercase rounded-full">
+                <span className="font-sans font-bold px-2.5 py-0.5 border border-gold/30 text-gold-soft/85 text-[0.62rem] tracking-[0.18em] uppercase rounded-full">
                   Ch. {story.chapter_reference}
                 </span>
               </div>

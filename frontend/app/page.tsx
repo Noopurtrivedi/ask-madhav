@@ -70,10 +70,10 @@ export default function Home() {
           <div className="grid border-y border-gold-soft/15 md:grid-cols-3 md:divide-x md:divide-gold-soft/15">
             {STATS.map((item) => (
               <div key={item.label} className="px-8 py-10 text-center">
-                <p className="gold-leaf font-display text-6xl font-light leading-none md:text-7xl">
+                <p className="gold-leaf font-display text-6xl font-semibold leading-none md:text-7xl">
                   {item.number}
                 </p>
-                <p className="mt-4 font-caps text-[0.7rem] tracking-[0.3em] text-moonlight/80 uppercase">
+                <p className="mt-4 font-sans font-bold text-[0.7rem] tracking-[0.3em] text-moonlight/80 uppercase">
                   {item.label}
                 </p>
                 <p className="mx-auto mt-3 max-w-[16rem] text-sm leading-relaxed text-moonlight/50">{item.desc}</p>
@@ -103,15 +103,15 @@ export default function Home() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
             <div>
-              <p className="font-caps text-lg tracking-[0.3em] text-moonlight">ASK MADHAV</p>
+              <p className="font-caps text-lg font-semibold tracking-[0.28em] text-moonlight">ASK MADHAV</p>
               <p className="mt-4 max-w-xs font-display text-xl italic leading-snug text-moonlight/70">
                 &ldquo;You have a right to your actions, never to their fruits.&rdquo;
               </p>
-              <p className="mt-2 font-caps text-[0.65rem] tracking-[0.28em] text-gold-soft/70">Bhagavad Gita 2.47</p>
+              <p className="mt-2 font-sans font-bold text-[0.65rem] tracking-[0.28em] text-gold-soft/70">Bhagavad Gita 2.47</p>
             </div>
             {FOOTER_COLUMNS.map((col) => (
               <div key={col.title}>
-                <p className="font-caps text-[0.68rem] tracking-[0.28em] text-gold-soft/80 uppercase">{col.title}</p>
+                <p className="font-sans font-bold text-[0.68rem] tracking-[0.28em] text-gold-soft/80 uppercase">{col.title}</p>
                 <ul className="mt-5 space-y-3 text-sm">
                   {col.links.map((l) => (
                     <li key={l.href}>
@@ -157,7 +157,7 @@ export default function Home() {
             </div>
           </div>
 
-          <p className="mt-10 text-center font-caps text-[0.62rem] tracking-[0.3em] text-moonlight/30 uppercase">
+          <p className="mt-10 text-center font-sans font-bold text-[0.62rem] tracking-[0.3em] text-moonlight/30 uppercase">
             Built with reverence for timeless wisdom
           </p>
         </div>

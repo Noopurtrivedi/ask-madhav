@@ -156,7 +156,7 @@ export default function VishwaroopDarshan() {
           ref={returnFocus}
           type="button"
           onClick={enter}
-          className="btn-ghost px-9 py-4 font-caps text-sm tracking-[0.22em] uppercase"
+          className="btn-ghost px-9 py-4"
         >
           Behold the Cosmic Form
         </button>
