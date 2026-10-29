@@ -10,7 +10,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import BackToTop from '@/components/BackToTop'
 import GuidedPaths from '@/components/GuidedPaths'
 import VishwaroopDarshan from '@/components/darshan/VishwaroopDarshan'
-import KurukshetraMoment from '@/components/darshan/KurukshetraMoment'
+import ThreePaths from '@/components/ThreePaths'
 import MotionPreferenceToggle from '@/components/darshan/MotionPreferenceToggle'
 
 const STATS = [
@@ -63,6 +63,7 @@ export default function Home() {
           bar starts transparent and only takes on its cream glass on scroll. */}
       <Navbar overlay />
       <Hero />
+      <div data-reveal><ThreePaths /></div>
 
       {/* Pillars — three numbers between hairlines, set like an inscription. */}
       <section className="px-6 py-20" data-reveal>
@@ -83,8 +84,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* The wide Kurukshetra artwork that left the hero now lives here. */}
-      <div data-reveal><KurukshetraMoment /></div>
       <div data-reveal><DailyVerse /></div>
       <div data-reveal><ChatInterface /></div>
       <div data-reveal><GuidedPaths /></div>

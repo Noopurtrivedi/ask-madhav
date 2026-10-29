@@ -5,7 +5,9 @@
 /* Prevent any decorative aura / absolute element from causing a horizontal
    scrollbar on small screens. */
 html, body {
-  overflow-x: hidden;
+  /* `clip`, not `hidden`: hidden makes <body> a scroll container, which
+     silently breaks every `position: sticky` (the hero film pins with it). */
+  overflow-x: clip;
   max-width: 100%;
 }
 
@@ -1001,25 +1003,197 @@ section[id] { scroll-margin-top: 6rem; }
 /* Anchored sections clear the fixed navbar when jumped to. */
 section[id] { scroll-margin-top: 5rem; }
 
-/* ── Hero chakra — the darshan centrepiece ───────────────────────── */
-.hero-chakra {
+/* ══════════════════════════════════════════════════════════════
+   THE JOURNEY — the home hero as a scroll-driven film (Hero.tsx).
+   The stage is sticky inside a tall section; Hero writes these vars
+   once per frame from scroll position:
+     --zoom --blur --art   painting push-in, blur, fade
+     --cs --ca             chakra scale, opacity
+     --flash --gal         the light, the galaxy
+     --b1 --b2 --b3        the three acts' copy
+     --fx --fy             Krishna's fingertip, in stage px (zoom origin)
+   Only transform / opacity / filter animate.
+   ══════════════════════════════════════════════════════════════ */
+.journey {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: min(400px, 78vw);
-  aspect-ratio: 1;
+  height: 420svh;
 }
-.hero-chakra-glow {
+.journey-stage {
+  --zoom: 1; --blur: 0; --art: 1; --cs: 0.12; --ca: 1; --flash: 0;
+  --b1: 1; --b2: 0; --b3: 0; --gal: 0; --fx: 64vw; --fy: 42svh;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  background: #04050C;
+}
+.journey-art-zoom {
   position: absolute;
-  inset: -22%;
-  border-radius: 9999px;
-  background:
-    radial-gradient(circle, rgba(255, 226, 150, 0.30) 0%, rgba(227, 182, 92, 0.14) 32%, rgba(70, 44, 128, 0.10) 55%, transparent 70%);
-  filter: blur(6px);
+  inset: 0;
+  transform-origin: var(--fx) var(--fy);
+  transform: scale(var(--zoom));
+  filter: blur(calc(var(--blur) * 1px)) saturate(1.05);
+  opacity: var(--art);
 }
-.hero-chakra-mark,
-.hero-chakra svg {
+/* Text side darkens toward the copy; the base melts into the page. */
+.journey-shade {
+  position: absolute;
+  inset: 0;
+  opacity: var(--art);
+  background:
+    linear-gradient(90deg, rgba(4, 5, 12, 0.92) 0%, rgba(4, 5, 12, 0.72) 30%, rgba(4, 5, 12, 0.18) 58%, rgba(4, 5, 12, 0) 75%),
+    linear-gradient(180deg, rgba(4, 5, 12, 0.55) 0%, rgba(4, 5, 12, 0) 18%, rgba(4, 5, 12, 0) 70%, rgba(4, 5, 12, 0.9) 100%);
+}
+@media (max-width: 1023px) {
+  .journey-shade {
+    background: linear-gradient(180deg, rgba(4, 5, 12, 0.6) 0%, rgba(4, 5, 12, 0.05) 22%, rgba(4, 5, 12, 0.35) 46%, rgba(4, 5, 12, 0.94) 66%, #04050C 100%);
+  }
+}
+.journey-chakra {
+  position: absolute;
+  left: var(--fx);
+  top: var(--fy);
+  width: 600px;
+  height: 600px;
+  margin: -300px 0 0 -300px;
+  transform: scale(var(--cs));
+  opacity: var(--ca);
+  pointer-events: none;
+}
+.journey-chakra > svg { position: relative; width: 100%; height: 100%; }
+.journey-chakra-glow {
+  position: absolute;
+  inset: -30%;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgba(255, 232, 170, 0.55) 0%, rgba(240, 190, 100, 0.22) 30%, transparent 62%);
+}
+.journey-galaxy {
+  position: absolute;
+  inset: 0;
+  opacity: var(--gal);
+  background: radial-gradient(ellipse at center, #0B0A24 0%, #04050C 70%);
+}
+.journey-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--flash);
+  background: radial-gradient(circle at var(--fx) var(--fy), #FFF7E2 0%, rgba(255, 226, 160, 0.85) 30%, rgba(255, 200, 120, 0.35) 60%, rgba(255, 200, 120, 0) 90%);
+}
+
+/* The three acts' copy. Only the active act takes pointer events. */
+.journey-beat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+.journey-beat-1 {
+  opacity: var(--b1);
+  transform: translateY(calc((1 - var(--b1)) * -40px));
+  align-items: center;
+  padding: 6rem 1.5rem 3rem;
+}
+.journey-copy { width: 100%; max-width: 72rem; margin: 0 auto; }
+.journey-copy > * { max-width: 36rem; }
+.journey-beat-2 {
+  opacity: var(--b2);
+  transform: translateY(calc((1 - var(--b2)) * 30px));
+  align-items: center;
+  padding: 6rem 1.5rem 3rem;
+}
+.journey-beat-3 {
+  opacity: var(--b3);
+  transform: scale(calc(0.94 + 0.06 * var(--b3)));
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem;
+  text-shadow: 0 2px 30px rgba(4, 5, 12, 0.9);
+}
+.journey-stage[data-act='1'] .journey-beat-1 .journey-copy,
+.journey-stage[data-act='3'] .journey-beat-3 { pointer-events: auto; }
+@media (max-width: 1023px) {
+  .journey-beat-1 { align-items: flex-end; padding-bottom: 2.25rem; }
+  .journey-beat-2 { align-items: flex-end; padding-bottom: 3rem; }
+}
+
+.journey-scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 1.4rem;
+  transform: translateX(-50%);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(246, 241, 228, 0.6);
+}
+@media (min-width: 1024px) { .journey-scroll-cue { display: flex; } }
+.journey-scroll-line {
+  width: 1px;
+  height: 38px;
+  background: linear-gradient(180deg, #E3B65C, transparent);
+  animation: journey-cue 2.4s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes journey-cue {
+  0% { transform: scaleY(0); opacity: 0; }
+  40% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+/* Still counterpart: no pinning, no film — Act I as a hero, Act III below it. */
+.journey-still { height: auto; }
+.journey-still .journey-stage { position: relative; height: auto; min-height: 100svh; }
+.journey-still .journey-beat-1 { position: relative; min-height: 100svh; }
+.journey-still .journey-beat-1 .journey-copy { pointer-events: auto; }
+.journey-still .journey-beat-3 {
   position: relative;
-  width: 100% !important;
-  height: auto !important;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  background: radial-gradient(ellipse at center, rgba(120, 80, 220, 0.18), transparent 70%), #04050C;
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-scroll-line { animation: none; }
+}
+
+/* Reading progress along the top of the navbar. */
+.scroll-progress {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: linear-gradient(90deg, #B8862F, #F7E3A6, #E3B65C);
+  box-shadow: 0 0 12px rgba(227, 182, 92, 0.6);
+}
+
+/* Three Paths — tall illustrated cards (ThreePaths.tsx). */
+.path-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: #06070F;
+  border: 1px solid rgba(232, 195, 90, 0.18);
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.95);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.path-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(232, 195, 90, 0.55);
+  box-shadow: 0 50px 90px -40px rgba(0, 0, 0, 0.95), 0 0 40px -10px rgba(227, 182, 92, 0.25);
+}
+.journey-art-feather {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 34%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 34%);
 }

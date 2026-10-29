@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import EngineChakra from './darshan/EngineChakra'
 import { useAuth } from '@/components/auth/AuthProvider'
 import { CHAKRA_LOGO_ATTR, replayDarshanLaunch } from '@/lib/darshan-launch'
@@ -19,6 +19,7 @@ export default function Navbar({ overlay = false }: Props) {
   const [menuOpen, setMenuOpen] = useState(false)
   const { configured, user, signOut } = useAuth()
   const [scrolled, setScrolled] = useState(false)
+  const progressRef = useRef<HTMLDivElement>(null)
   // Only surface the WhatsApp channel when a number is configured — otherwise
   // /whatsapp is inert and the link would dead-end.
   const whatsappEnabled = Boolean(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER)
@@ -30,6 +31,30 @@ export default function Navbar({ overlay = false }: Props) {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [overlay])
+
+  // Reading progress — a gold line along the bar's lower edge. Written straight
+  // to the element's transform: it changes every scroll frame and must never
+  // cause a React render.
+  useEffect(() => {
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const p = max > 0 ? Math.min(1, window.scrollY / max) : 0
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${p})`
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [])
 
   // On the cosmic hero (not scrolled, menu closed) the bar is invisible chrome.
   const onDark = overlay && !scrolled && !menuOpen
@@ -45,6 +70,7 @@ export default function Navbar({ overlay = false }: Props) {
           : 'bg-cosmos-deep/80 backdrop-blur-md border-b border-white/[0.07]'
       }`}
     >
+      <div ref={progressRef} className="scroll-progress" aria-hidden="true" />
       <div className="max-w-6xl mx-auto px-6 py-[1.1rem] flex items-center justify-between">
         {/* Logo — the Sudarshan Chakra lands here at the end of the launch ritual.
             The chakra is its own control rather than part of the home link:

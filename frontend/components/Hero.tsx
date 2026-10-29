@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import Image from 'next/image'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import ChakraLaunch from './darshan/ChakraLaunch'
-import CosmicBackdrop from './darshan/CosmicBackdrop'
 import EngineChakra from './darshan/EngineChakra'
-import { TempleSkyline } from './darshan/CosmicForms'
-import MorPankh from './darshan/MorPankh'
-import QuoteReflection from './darshan/QuoteReflection'
+import GalaxyCanvas, { type GalaxyDrive } from './darshan/GalaxyCanvas'
+import { useDarshanOptional } from './darshan/DarshanProvider'
+import { useReducedMotion } from '@/lib/motion'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
 
 const ENTRY_POINTS = [
@@ -19,6 +19,10 @@ const ENTRY_POINTS = [
 // One tap from the hero to a real answer — the questions people most often bring.
 const STARTERS = ['I feel anxious about the future', 'I am afraid of failing', 'What is my purpose?']
 
+// The opening painting, and where Krishna's raised fingertip sits in it
+// (as fractions of the image) — the Sudarshan Chakra forms just above it.
+const ART = { src: '/art/scene-1.png', w: 1122, h: 1402, fx: 0.488, fy: 0.425 }
+
 /** Hand a question to the chat below and send it there. */
 function askMadhav(raw: string) {
   const question = raw.trim()
@@ -27,173 +31,293 @@ function askMadhav(raw: string) {
   window.dispatchEvent(new CustomEvent('madhav:prefill', { detail: { question, send: true } }))
 }
 
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
+const smooth = (a: number, b: number, x: number) => {
+  const t = clamp01((x - a) / (b - a))
+  return t * t * (3 - 2 * t)
+}
+
 /**
- * Hero — the Darshan.
+ * Hero — the Darshan, told as one scroll-driven film in three acts.
  *
- * Three layers, as designed:
- *  1. **Presence** — the Sudarshan Chakra at full scale, lit from within and
- *     driven by the Darshan engine (it turns faster while Madhav thinks).
- *  2. **Reflection** — the shloka on glass, mirrored on the surface below it,
- *     with the four ways in (Teach me · Guide me · Explain · Ask).
- *  3. **Sacred interaction** — the Sudarshan Chakra launch ritual and the
- *     drifting mor pankh, both once and both reduced-motion aware.
+ *  I.   **The field.** The Kurukshetra painting, full-bleed, with the Sudarshan
+ *       Chakra forming on Krishna's raised fingertip. The headline and the ask
+ *       bar live here.
+ *  II.  **The dive.** Scrolling pushes the camera toward the fingertip: the
+ *       painting zooms and blurs past, the chakra grows and turns faster —
+ *       "a single verse changes everything".
+ *  III. **Vishwaroop.** A flash of light, and a galaxy bursts out of the
+ *       chakra's centre — the universe in one form (Gita 11.7).
  *
- * The content stays veiled until the chakra lands in the logo
- * (`madhav:darshan-ready`). A 3.5s failsafe reveals it regardless, so a broken
- * or blocked animation can never leave the page empty.
+ * The section is tall and the stage is sticky; one rAF-throttled scroll
+ * listener turns scroll position into a handful of CSS variables on the stage,
+ * so the whole film runs on transform/opacity/filter with no React renders.
+ * The chakra stays engine-driven (it races while Madhav thinks) except during
+ * the dive, where it is pinned to `processing`.
+ *
+ * Still counterpart: under reduced motion (or the `still` tier) there is no
+ * pinning and no film — Act I as a normal hero, then Act III as a quiet block.
+ * The launch ritual still unveils Act I; a 9s failsafe reveals it regardless.
  */
 export default function Hero() {
-  // Subscribed rather than event-listened by hand: ChakraLaunch is a child, so
-  // its effect (and the landing it announces) runs *before* this component's
-  // effects. `useSyncExternalStore` re-reads the snapshot on subscribe and so
-  // never misses that announcement.
   const landed = useSyncExternalStore(subscribeDarshanReady, isDarshanReady, darshanNotReady)
   const [failsafe, setFailsafe] = useState(false)
-
   useEffect(() => {
-    // The hero reveals itself even if the ritual never reports back.
-    // Must outlast the launch ritual (~7s). If this fires first, the hero
-    // reveals — and Madhav's arrival plays — while the veil is still up, and the
-    // seeker misses the entire descent. It is a failsafe, not a schedule.
+    // Must outlast the launch ritual (~7s) — a failsafe, not a schedule.
     const t = window.setTimeout(() => setFailsafe(true), 9000)
     return () => clearTimeout(t)
   }, [])
-
   const revealed = landed || failsafe
+
   const [question, setQuestion] = useState('')
+  const engine = useDarshanOptional()
+  const reduced = useReducedMotion()
+  const still = reduced || engine?.tier === 'still'
+  const starCount = engine?.tier === 'lite' ? 1800 : 4200
+
+  const sectionRef = useRef<HTMLElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const artRef = useRef<HTMLDivElement>(null)
+  const galaxy = useRef<GalaxyDrive>({ burst: 0, active: false })
+  const [diving, setDiving] = useState(false)
+
+  // ── Frame the painting so the fingertip lands where the composition wants it
+  //    (right of centre on desktop, upper-centre on a phone), and tell the stage
+  //    where that is so the zoom origin and the chakra sit on it exactly.
+  useEffect(() => {
+    const stage = stageRef.current
+    const art = artRef.current
+    if (!stage || !art) return
+    const layout = () => {
+      const W = stage.clientWidth
+      const H = stage.clientHeight
+      const wide = W >= 1024
+      // Desktop: the painting owns the right two-thirds and its left edge is
+      // feathered into the dark (see .journey-art-feather), so the fingertip
+      // sits clear of the headline. Phones: cover, a little larger, so the
+      // fingertip can rise above the copy at the bottom of the frame.
+      const s = wide ? Math.max((H * 1.25) / ART.h, (W * 0.6) / ART.w) : Math.max(W / ART.w, H / ART.h) * 1.25
+      const dw = ART.w * s
+      const dh = ART.h * s
+      const wantX = wide ? 0.68 : 0.56
+      const wantY = wide ? 0.42 : 0.24
+      const left = Math.min(wide ? W : 0, Math.max(W - dw, W * wantX - ART.fx * dw))
+      const top = Math.min(0, Math.max(H - dh, H * wantY - ART.fy * dh))
+      art.classList.toggle('journey-art-feather', wide && left > 0)
+      Object.assign(art.style, { left: `${left}px`, top: `${top}px`, width: `${dw}px`, height: `${dh}px` })
+      stage.style.setProperty('--fx', `${left + ART.fx * dw}px`)
+      stage.style.setProperty('--fy', `${top + ART.fy * dh}px`)
+    }
+    layout()
+    const ro = new ResizeObserver(layout)
+    ro.observe(stage)
+    return () => ro.disconnect()
+  }, [])
+
+  // ── The film: scroll → CSS variables, once per frame at most.
+  useEffect(() => {
+    if (still) return
+    const section = sectionRef.current
+    const stage = stageRef.current
+    if (!section || !stage) return
+    let raf = 0
+    let inView = true
+    let wasDiving = false
+    const set = (k: string, v: number) => stage.style.setProperty(k, v.toFixed(4))
+
+    const update = () => {
+      raf = 0
+      const rect = section.getBoundingClientRect()
+      const total = Math.max(1, rect.height - window.innerHeight)
+      const p = clamp01(-rect.top / total)
+      const t = smooth(0.06, 0.5, p)
+
+      set('--zoom', 1 + 1.55 * t)
+      set('--blur', 12 * smooth(0.3, 0.52, p))
+      set('--art', 1 - smooth(0.44, 0.58, p))
+      set('--cs', 0.12 + 4.6 * t * t * t)
+      set('--ca', 1 - smooth(0.5, 0.6, p))
+      set('--flash', Math.max(0, 1 - Math.abs(p - 0.53) / 0.08))
+      set('--b1', 1 - smooth(0.04, 0.14, p))
+      set('--b2', smooth(0.17, 0.24, p) * (1 - smooth(0.38, 0.45, p)))
+      set('--b3', smooth(0.7, 0.8, p))
+      set('--gal', smooth(0.47, 0.58, p))
+      stage.dataset.act = p < 0.12 ? '1' : p > 0.68 ? '3' : '2'
+
+      const burst = smooth(0.5, 0.72, p)
+      galaxy.current.burst = 1 - Math.pow(1 - burst, 3)
+      galaxy.current.active = inView && p > 0.44
+
+      const nowDiving = p > 0.1 && p < 0.6
+      if (nowDiving !== wasDiving) {
+        wasDiving = nowDiving
+        setDiving(nowDiving)
+      }
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    const io = new IntersectionObserver(([e]) => {
+      inView = e.isIntersecting
+      onScroll()
+    })
+    io.observe(section)
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => {
+      cancelAnimationFrame(raf)
+      io.disconnect()
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [still])
 
   return (
     <>
       <ChakraLaunch />
 
-      <section
-        id="darshan"
-        className="relative min-h-screen flex items-center px-6 overflow-hidden pt-24 pb-16"
-      >
-        <CosmicBackdrop />
-        <MorPankh />
+      <section id="darshan" ref={sectionRef} className={`journey ${still ? 'journey-still' : ''}`}>
+        <div ref={stageRef} className="journey-stage" data-act="1">
+          {/* ── Act I/II: the painting, zooming toward the fingertip ── */}
+          <div className="journey-art-zoom" aria-hidden="true">
+            <div ref={artRef} className="absolute">
+              <Image src={ART.src} alt="" fill priority sizes="(min-width: 1024px) 100vw, 160vw" className="object-cover" />
+            </div>
+          </div>
+          <div className="journey-shade" aria-hidden="true" />
 
-        {/* The city, silhouetted along the base — foreground world, cosmos behind.
-            Custom vector (components/darshan/CosmicForms.tsx), never sourced art. */}
-        <TempleSkyline className="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[74px] w-full opacity-90 md:h-[112px]" />
+          {/* The Sudarshan Chakra on Krishna's fingertip — the door we dive through. */}
+          <div className="journey-chakra" aria-hidden="true">
+            <div className="journey-chakra-glow" />
+            <EngineChakra size={600} override={diving ? 'processing' : undefined} />
+          </div>
 
-        <div
-          className={`relative z-10 mx-auto w-full max-w-6xl transition-[opacity,transform] duration-1000 ease-out ${
-            revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-        >
-          {/* Mobile is one column ordered word → invitation → darshan, so the ask
-              bar sits in a phone's first fold; desktop is two columns with the
-              word and the invitation stacked on the left. `contents` dissolves
-              the left wrapper on mobile so its halves order around the darshan. */}
-          <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:items-center">
-            <div className="contents lg:block lg:text-left">
-              {/* ── Word ───────────────────────────────────────── */}
-              <div className="order-1 text-center lg:text-left">
-                <p className="eyebrow mb-6">The Bhagavad Gita · 700 Verses</p>
+          {/* ── Act III: the universe in one form ── */}
+          {!still && (
+            <div className="journey-galaxy" aria-hidden="true">
+              <GalaxyCanvas drive={galaxy} count={starCount} />
+            </div>
+          )}
+          <div className="journey-flash" aria-hidden="true" />
 
-                <h1 className="hero-title mb-6">
-                  Seek wisdom.
-                  <br />
-                  <em className="shimmer-text">Find peace.</em>
-                </h1>
+          {/* ── Act I copy: the word and the invitation ── */}
+          <div className="journey-beat journey-beat-1">
+            <div
+              className={`journey-copy transition-[opacity,transform] duration-1000 ease-out ${
+                revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+            >
+              <p className="eyebrow mb-6">The Bhagavad Gita · 700 Verses</p>
+              <h1 className="hero-title mb-6">
+                Seek wisdom.
+                <br />
+                <em className="shimmer-text">Find peace.</em>
+              </h1>
+              <p className="mb-8 max-w-[33rem] text-base leading-[1.8] text-moonlight/80 md:text-[1.075rem]">
+                Bring the question you carry. Madhav answers from the Bhagavad Gita &mdash; one verse,
+                one truth, and one step you can take today.
+              </p>
 
-                <p className="text-moonlight/68 text-base md:text-[1.075rem] leading-[1.8] max-w-[34rem] mx-auto lg:mx-0">
-                  Bring the question you carry. Madhav answers from the Bhagavad Gita &mdash; one
-                  verse, one truth, and one step you can take today.
-                </p>
-              </div>
+              {/* Ask from the first frame: the question goes straight to the
+                  chat below (`madhav:prefill` with send) — no second step. */}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  askMadhav(question)
+                }}
+                className="ask-bar max-w-[34rem]"
+              >
+                <label htmlFor="hero-ask" className="sr-only">
+                  Ask Madhav a question
+                </label>
+                <input
+                  id="hero-ask"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  maxLength={1000}
+                  placeholder="What weighs on your heart?"
+                  className="min-w-0 flex-1 bg-transparent py-3 text-[0.95rem] text-moonlight placeholder:text-moonlight/45 focus:outline-none"
+                />
+                <button type="submit" className="btn-leaf shrink-0 px-5 py-3 sm:px-6">
+                  <span className="sm:hidden">Ask</span>
+                  <span className="hidden sm:inline">Ask Madhav</span>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              </form>
 
-              {/* ── Invitation ─────────────────────────────────── */}
-              <div className="order-2 text-center lg:text-left lg:mt-9">
-                {/* Ask from the first fold: the question goes straight to the
-                    chat below (`madhav:prefill` with send) — no second step. */}
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    askMadhav(question)
-                  }}
-                  className="ask-bar max-w-[34rem] mx-auto lg:mx-0"
-                >
-                  <label htmlFor="hero-ask" className="sr-only">
-                    Ask Madhav a question
-                  </label>
-                  <input
-                    id="hero-ask"
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    maxLength={1000}
-                    placeholder="What weighs on your heart?"
-                    className="min-w-0 flex-1 bg-transparent py-3 text-[0.95rem] text-moonlight placeholder:text-moonlight/40 focus:outline-none"
-                  />
-                  <button type="submit" className="btn-leaf shrink-0 px-5 py-3 text-sm sm:px-6">
-                    <span className="sm:hidden">Ask</span>
-                    <span className="hidden sm:inline">Ask Madhav</span>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {STARTERS.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => askMadhav(s)}
+                    className="rounded-full border border-white/15 bg-black/25 px-3.5 py-1.5 text-xs text-moonlight/75 backdrop-blur-sm transition-colors hover:border-gold-soft/60 hover:text-moonlight"
+                  >
+                    {s}
                   </button>
-                </form>
+                ))}
+              </div>
 
-                <div className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
-                  {STARTERS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => askMadhav(s)}
-                      className="rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs text-moonlight/62 transition-colors hover:border-gold-soft/50 hover:text-moonlight"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+              <nav aria-label="Other ways in" className="mt-8 hidden flex-wrap items-center gap-x-6 gap-y-3 sm:flex">
+                {ENTRY_POINTS.map((item, i) => (
+                  <span key={item.label} className="flex items-center gap-6">
+                    {i > 0 && <span className="h-1 w-1 rotate-45 bg-gold-soft/60" aria-hidden="true" />}
+                    <a href={item.href} className="caps-link">
+                      {item.label}
+                    </a>
+                  </span>
+                ))}
+              </nav>
+            </div>
 
-                <nav
-                  aria-label="Other ways in"
-                  className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 lg:justify-start"
-                >
-                  {ENTRY_POINTS.map((item, i) => (
-                    <span key={item.label} className="flex items-center gap-6">
-                      {i > 0 && <span className="hidden h-1 w-1 rotate-45 bg-gold-soft/45 sm:block" aria-hidden="true" />}
-                      <a href={item.href} className="caps-link">
-                        {item.label}
-                      </a>
-                    </span>
-                  ))}
-                </nav>
+            {!still && (
+              <p className="journey-scroll-cue" aria-hidden="true">
+                <span>Scroll to enter the darshan</span>
+                <span className="journey-scroll-line" />
+              </p>
+            )}
+          </div>
 
-                <p className="mt-8 text-moonlight/35 text-xs max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                  Guidance inspired by the Bhagavad Gita &mdash; for reflection, not a substitute for
-                  medical, legal, or financial advice.
+          {/* ── Act II copy ── */}
+          {!still && (
+            <div className="journey-beat journey-beat-2">
+              <div className="journey-copy">
+                <p className="eyebrow mb-5">Kurukshetra · Chapter 2</p>
+                <h2 className="hero-title !text-[clamp(2.5rem,5.4vw,4.6rem)]">
+                  A single verse
+                  <br />
+                  <em className="gold-leaf">changes everything.</em>
+                </h2>
+                <p className="section-lede mt-6 max-w-sm">
+                  Between two armies, one conversation turned a warrior&rsquo;s despair into clarity.
+                  It still does.
                 </p>
               </div>
             </div>
+          )}
 
-            {/* ── Darshan: presence + the verse resting beneath it ── */}
-            <div className="order-3 flex flex-col items-center">
-              <div className="relative mb-6">
-                {/* Breathing aura */}
-                <div className="darshan-aura lotus-pulse" aria-hidden="true" />
-                {/* Turning halo of light behind the window */}
-                <div className="darshan-halo halo-turn" aria-hidden="true" />
-
-                {/* The Sudarshan Chakra is the darshan: the brand mark at full
-                    scale, engine-driven, so it gathers speed while Madhav is
-                    thinking and settles when he answers — the same motion as the
-                    navbar logo. Aniconic by design: light, not likeness. */}
-                <div className="hero-chakra" aria-hidden="true">
-                  <div className="hero-chakra-glow" />
-                  <EngineChakra size={380} className="hero-chakra-mark" />
-                </div>
-              </div>
-
-              {/* Glass surface the verse rests on */}
-              <div className="darshan-surface" aria-hidden="true" />
-              <div className="w-full">
-                <QuoteReflection tone="cosmic" reflect />
-              </div>
+          {/* ── Act III copy ── */}
+          <div className="journey-beat journey-beat-3">
+            <p className="eyebrow mb-5">Vishwaroop · Gita 11.7</p>
+            <h2 className="hero-title !text-[clamp(2.6rem,6vw,5rem)]">
+              The whole universe,
+              <br />
+              <em className="gold-leaf">in one form.</em>
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl font-display text-lg italic leading-relaxed text-moonlight/80 md:text-xl">
+              &ldquo;Behold, Arjuna &mdash; the entire universe, moving and unmoving, gathered here as one.&rdquo;
+            </p>
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
+              <a href="#chat" className="btn-leaf px-7 py-3.5">
+                Ask Madhav
+              </a>
+              <a href="#three-paths" className="btn-ghost px-7 py-3.5">
+                Choose your path
+              </a>
             </div>
-
           </div>
         </div>
       </section>
