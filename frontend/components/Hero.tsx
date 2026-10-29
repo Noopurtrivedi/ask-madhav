@@ -150,13 +150,34 @@ export default function Hero() {
       const t = smooth(0.06, 0.5, p)
 
       set('--zoom', 1 + 1.55 * t)
-      // The chakra lies flat, spinning on his fingertip; as the dive begins it
-      // lifts off, turns to face the seeker and grows. The cut-out fingertip
-      // fades as the disc leaves it.
-      const rise = smooth(0.1, 0.36, p)
-      set('--tilt', 70 * (1 - rise))
-      set('--lift', -0.07 * window.innerHeight * smooth(0.1, 0.3, p))
-      set('--tip', 1 - smooth(0.1, 0.17, p))
+      // ── The take-off, choreographed like the logo's launch ritual ──
+      // Gather: the disc brightens on his fingertip and two rings of light
+      // ripple out in its plane. Throw: it lifts off and flies an arc — up,
+      // then out at the seeker to the centre of the frame — opening from flat
+      // to face-on with two tumbles. Everything is a function of scroll, so
+      // scrolling back flies it home and lands it flat on the fingertip.
+      const W = window.innerWidth
+      const H = window.innerHeight
+      const fx = parseFloat(stage.style.getPropertyValue('--fx')) || W * 0.58
+      const fy = parseFloat(stage.style.getPropertyValue('--fy')) || H * 0.3
+      set('--gather', smooth(0.04, 0.12, p) * (1 - smooth(0.3, 0.45, p)))
+      set('--ring1', smooth(0.05, 0.13, p))
+      set('--ring2', smooth(0.08, 0.16, p))
+      const u = smooth(0.12, 0.4, p)
+      const endX = W / 2 - fx
+      const endY = H / 2 - fy
+      const c1x = endX * 0.15 - W * 0.05
+      const c1y = -H * 0.34
+      const cx = 2 * (1 - u) * u * c1x + u * u * endX
+      const cy = 2 * (1 - u) * u * c1y + u * u * endY
+      set('--cx', cx)
+      set('--cy', cy)
+      stage.style.setProperty('--chx', `${(fx + cx).toFixed(1)}px`)
+      stage.style.setProperty('--chy', `${(fy + cy).toFixed(1)}px`)
+      set('--tilt', 70 * (1 - smooth(0.12, 0.36, p)))
+      set('--tumble', Math.sin(u * Math.PI * 4) * 26 * (1 - u))
+      // The cut-out fingertip exists only while the disc sits on it.
+      set('--tip', 1 - smooth(0.115, 0.13, p))
       set('--art', 1 - smooth(0.46, 0.53, p))
       // A phone frames him smaller, so the disc starts a little smaller too.
       const base = window.innerWidth >= 1024 ? 0.34 : 0.27
@@ -181,7 +202,9 @@ export default function Hero() {
       galaxy.current.burst = 1 - Math.pow(1 - burst, 3)
       galaxy.current.active = inView && p > 0.52
 
-      const nowDiving = p > 0.1 && p < 0.6
+      // Throw speed from the gather until the whiteout; below it the engine
+      // eases the spin back down — the landing decelerates like a discus.
+      const nowDiving = p > 0.08 && p < 0.6
       if (nowDiving !== wasDiving) {
         wasDiving = nowDiving
         setDiving(nowDiving)
@@ -223,6 +246,9 @@ export default function Hero() {
 
           {/* The Sudarshan Chakra, lying flat and spinning on Krishna's
               fingertip — the door we dive through. */}
+          {/* Rings of light the chakra gathers before the throw (in its plane). */}
+          <div className="journey-ring journey-ring-1" aria-hidden="true" />
+          <div className="journey-ring journey-ring-2" aria-hidden="true" />
           <div className="journey-chakra" aria-hidden="true">
             <div className="journey-chakra-glow" />
             <EngineChakra size={600} override={diving ? 'processing' : undefined} />
