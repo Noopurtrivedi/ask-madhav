@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * KrishnaFigure — a stylised 3D Krishna, built from geometry.
+ * KrishnaFigure — a stylised, *living* 3D Krishna, built from geometry.
  *
  * ── What this is, and is not ──────────────────────────────────────────────
  * This is a real figure standing in the scene — not a photograph on a plane,
@@ -17,12 +17,32 @@
  * placeholder it always was. Until then this is a genuine 3D presence rather
  * than an apology for the lack of one.
  *
+ * ── The animation system ──────────────────────────────────────────────────
+ * The figure is articulated into pivot groups and animated per-frame, all
+ * delta-timed and scaled by the engine's `energy` (amplitude) and `tempo`
+ * (speed) so the whole body calms when the page calms:
+ *
+ *   breath        the torso swells; the whole figure rises a few millimetres
+ *   sway          the tribhanga stance shifts weight, never swings
+ *   head          tilts gently toward the flute — Venugopala listening to
+ *                 his own song
+ *   flute lilt    arms + bansuri rock with a slow playing rhythm
+ *   mor pankh     each crown feather sways on its own phase
+ *   uttariya      a sash ribbon behind the body, vertex-waved like cloth in
+ *                 a slow wind (one 6×28-segment plane; no per-frame allocation)
+ *   flute-song    small motes of light rise from the bansuri's tip and fade —
+ *                 the melody made visible; they bloom with `energy`, so the
+ *                 song swells while Madhav is answering
+ *
+ * Everything is generated in code, so nothing here can be unlicensed. The
+ * scene is only ever mounted at `full` motion tier, so reduced-motion seekers
+ * never see any of it (they get the still DivineSilhouette).
+ *
  * ── How it reads as premium rather than as a toy ──────────────────────────
  * Three things do the work: peacock-blue skin under a proper key/rim/fill rig
  * so the form has volume; gold metallic crown/jewellery/flute that catch the
  * light; and an additive aura + halo behind, so the figure is lit *from within
- * the cosmos* rather than pasted onto it. Everything is generated in code, so
- * nothing here can be unlicensed.
+ * the cosmos* rather than pasted onto it.
  */
 
 import { useMemo, useRef } from 'react'
@@ -111,25 +131,173 @@ function Halo({ palette, tempo }: Props) {
 
 /**
  * A single peacock feather for the crown — a curved quill with an ocellus.
- * Built small; three of them fan from the mukuta.
+ * Each feather sways on its own phase, like feathers do: from the quill base,
+ * a few degrees, never in unison with its neighbours.
  */
-function CrownFeather({ rotation }: { rotation: [number, number, number] }) {
+function CrownFeather({
+  rotation,
+  phase,
+  tempo,
+  energy,
+}: {
+  rotation: [number, number, number]
+  phase: number
+  tempo: number
+  energy: number
+}) {
+  const sway = useRef<THREE.Group>(null)
+  const t = useRef(phase)
+  useFrame((_, d) => {
+    t.current += d / Math.max(0.2, tempo)
+    const g = sway.current
+    if (!g) return
+    const amp = 0.035 + 0.03 * energy
+    g.rotation.z = Math.sin(t.current * 0.8) * amp
+    g.rotation.x = Math.sin(t.current * 0.62 + 1.3) * amp * 0.6
+  })
   return (
     <group rotation={rotation}>
-      {/* quill */}
-      <mesh position={[0, 0.45, 0]}>
-        <cylinderGeometry args={[0.012, 0.02, 0.9, 6]} />
-        <meshStandardMaterial color={FEATHER_GREEN} roughness={0.5} />
-      </mesh>
-      {/* the eye */}
-      <mesh position={[0, 0.92, 0]}>
-        <sphereGeometry args={[0.12, 16, 16]} />
-        <meshStandardMaterial color={FEATHER_BLUE} emissive={FEATHER_BLUE} emissiveIntensity={0.35} roughness={0.35} />
-      </mesh>
-      <mesh position={[0, 0.92, 0.02]}>
-        <sphereGeometry args={[0.06, 16, 16]} />
-        <meshStandardMaterial color="#123B66" emissive="#0E2B4E" emissiveIntensity={0.4} roughness={0.3} />
-      </mesh>
+      <group ref={sway}>
+        {/* quill */}
+        <mesh position={[0, 0.45, 0]}>
+          <cylinderGeometry args={[0.012, 0.02, 0.9, 6]} />
+          <meshStandardMaterial color={FEATHER_GREEN} roughness={0.5} />
+        </mesh>
+        {/* the eye */}
+        <mesh position={[0, 0.92, 0]}>
+          <sphereGeometry args={[0.12, 16, 16]} />
+          <meshStandardMaterial color={FEATHER_BLUE} emissive={FEATHER_BLUE} emissiveIntensity={0.35} roughness={0.35} />
+        </mesh>
+        <mesh position={[0, 0.92, 0.02]}>
+          <sphereGeometry args={[0.06, 16, 16]} />
+          <meshStandardMaterial color="#123B66" emissive="#0E2B4E" emissiveIntensity={0.4} roughness={0.3} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/**
+ * The uttariya — a sash ribbon behind the body, moving like cloth in a slow
+ * wind. One plane, 6×28 segments, vertex-waved in place each frame: the top
+ * edge is pinned at the shoulder, the amplitude grows toward the free end.
+ * Base positions are captured once; no allocation ever happens per frame.
+ */
+function FlowingSash({ energy, tempo }: { energy: number; tempo: number }) {
+  const meshRef = useRef<THREE.Mesh>(null)
+  const t = useRef(0)
+
+  const { geometry, base } = useMemo(() => {
+    const geo = new THREE.PlaneGeometry(0.15, 1.15, 4, 20)
+    const pos = geo.getAttribute('position') as THREE.BufferAttribute
+    const arr = pos.array as Float32Array
+    // Bake shape into the rest pose so the strip never reads as a plank:
+    // a taper (wide at the anchor, narrow at the tail) and a gentle S-drape
+    // in depth. The wave in useFrame then plays on top of a cloth-like curve.
+    for (let i = 0; i < arr.length; i += 3) {
+      const y = arr[i + 1] // −0.575 … 0.575, top is the anchor
+      const free = (0.575 - y) / 1.15 // 0 at the anchor → 1 at the tail
+      arr[i] *= 1 - free * 0.35 // taper
+      arr[i + 2] = Math.sin(free * Math.PI * 1.2) * 0.1 // drape
+    }
+    pos.needsUpdate = true
+    geo.computeVertexNormals()
+    return { geometry: geo, base: Float32Array.from(arr) }
+  }, [])
+
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: SASH,
+        roughness: 0.6,
+        metalness: 0.15,
+        emissive: new THREE.Color('#7A4E12'),
+        emissiveIntensity: 0.22,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.65,
+      }),
+    []
+  )
+
+  useFrame((_, d) => {
+    t.current += d / Math.max(0.2, tempo)
+    const mesh = meshRef.current
+    if (!mesh) return
+    const pos = mesh.geometry.getAttribute('position') as THREE.BufferAttribute
+    const arr = pos.array as Float32Array
+    const amp = 0.05 + 0.06 * energy
+    const time = t.current
+    // Plane is 1.15 tall, centred: y ∈ [-0.575, 0.575]. Top is the anchor.
+    for (let i = 0; i < arr.length; i += 3) {
+      const bx = base[i]
+      const by = base[i + 1]
+      const free = (0.575 - by) / 1.15 // 0 at the pinned top → 1 at the free end
+      const w = free * free // quadratic: the hem moves, the shoulder doesn't
+      arr[i + 2] = base[i + 2] + Math.sin(by * 2.4 + time * 1.25) * amp * w
+      arr[i] = bx + Math.sin(by * 1.7 + time * 0.9 + 0.8) * amp * 0.55 * w
+    }
+    pos.needsUpdate = true
+    mesh.geometry.computeVertexNormals()
+  })
+
+  return (
+    <mesh
+      ref={meshRef}
+      geometry={geometry}
+      material={material}
+      // A pennant trailing from the waist-belt, beside the dhoti and slightly
+      // behind: small enough to read as a fluttering cloth tail, and it must
+      // never lie flat across the torso, where a plane reads as a card.
+      position={[-0.32, 1.5, -0.16]}
+      rotation={[0.1, 0.45, 0.12]}
+    />
+  )
+}
+
+/**
+ * The flute-song — the melody, made visible. Small motes of light rise from
+ * the bansuri's tip along a gentle arc and fade. A fixed pool of sprites on
+ * staggered phases; opacity blooms with `energy`, so the song audibly (well —
+ * visibly) swells while Madhav is answering, and all but stills at rest.
+ */
+function FluteSong({ palette, energy, tempo }: Props) {
+  const note = useGlowTexture(palette.glow, true)
+  const t = useRef(0)
+  const group = useRef<THREE.Group>(null)
+  const COUNT = 6
+
+  useFrame((_, d) => {
+    t.current += d / Math.max(0.2, tempo)
+    const g = group.current
+    if (!g) return
+    for (let i = 0; i < g.children.length; i++) {
+      const s = g.children[i] as THREE.Sprite
+      // Each note loops its own journey: born at the tip, rising up and away.
+      const cycle = (t.current * 0.16 + i / COUNT) % 1
+      const drift = Math.sin(i * 2.4) // stable per-note lateral variation
+      s.position.set(
+        -0.06 * drift - cycle * (0.5 + 0.25 * Math.abs(drift)),
+        cycle * (1.1 + 0.3 * Math.sin(i * 1.7)),
+        cycle * 0.18 * drift
+      )
+      const fade = Math.sin(cycle * Math.PI) // in, then out
+      const m = s.material as THREE.SpriteMaterial
+      m.opacity = fade * (0.18 + 0.55 * energy)
+      const sc = 0.1 + cycle * 0.1
+      s.scale.set(sc, sc, 1)
+    }
+  })
+
+  if (!note) return null
+  return (
+    // Anchored at the bansuri's upper tip.
+    <group ref={group} position={[-0.6, 3.35, 0.45]}>
+      {Array.from({ length: COUNT }, (_, i) => (
+        <sprite key={i} scale={[0.1, 0.1, 1]}>
+          <spriteMaterial map={note} transparent opacity={0} blending={THREE.AdditiveBlending} depthWrite={false} />
+        </sprite>
+      ))}
     </group>
   )
 }
@@ -138,9 +306,16 @@ function CrownFeather({ rotation }: { rotation: [number, number, number] }) {
  * The figure. Built as one group in the tribhanga S-curve: hips shifted one
  * way, shoulders the other, head returning to centre — the stance that makes a
  * standing Krishna read as Krishna even in silhouette.
+ *
+ * Articulation: `headGroup` pivots at the neck, `fluteGroup` (both arms + the
+ * bansuri) pivots at the chest, the torso breathes — all driven from ONE
+ * useFrame so every rhythm shares a clock and the body stays coherent.
  */
 function Figure({ palette, energy, tempo }: Props) {
   const root = useRef<THREE.Group>(null)
+  const headGroup = useRef<THREE.Group>(null)
+  const fluteGroup = useRef<THREE.Group>(null)
+  const torso = useRef<THREE.Mesh>(null)
   const t = useRef(0)
 
   // Body skin material, shared. Slight emissive so it glows on a dark field but
@@ -188,11 +363,40 @@ function Figure({ palette, energy, tempo }: Props) {
     t.current += d / Math.max(0.2, tempo)
     const g = root.current
     if (!g) return
-    // Breath + the faintest sway, so the stance lives without swinging.
-    const breath = Math.sin(t.current * 0.9) * 0.5 + 0.5
+    const time = t.current
+    const live = 0.7 + 0.6 * energy // one amplitude dial for the whole body
+
+    // Breath + the faintest weight-shift, so the stance lives without swinging.
+    const breath = Math.sin(time * 0.9) * 0.5 + 0.5
     g.position.y = breath * (0.03 + 0.04 * energy)
-    g.rotation.y = Math.sin(t.current * 0.2) * 0.06
-    g.rotation.z = Math.sin(t.current * 0.16) * 0.012
+    g.rotation.y = Math.sin(time * 0.2) * 0.06
+    g.rotation.z = Math.sin(time * 0.16) * 0.012
+
+    // The torso swells with the breath — scale on width/depth, not height,
+    // so the head never bobs against its own neck.
+    const chest = torso.current
+    if (chest) {
+      const s = 1 + breath * 0.018 * live
+      chest.scale.set(s, 1, s)
+    }
+
+    // The head tilts gently toward the raised flute and back — Venugopala
+    // listening to his own song. Degrees, not tens of degrees.
+    const head = headGroup.current
+    if (head) {
+      head.rotation.z = (0.05 + Math.sin(time * 0.5) * 0.028) * live
+      head.rotation.x = Math.sin(time * 0.66 + 0.9) * 0.02 * live
+      head.rotation.y = Math.sin(time * 0.34) * 0.03 * live
+    }
+
+    // The playing rhythm: arms and bansuri rock together from the chest,
+    // slightly faster than the breath — a lilt, not a metronome.
+    const flute = fluteGroup.current
+    if (flute) {
+      flute.rotation.z = Math.sin(time * 1.6) * 0.018 * live
+      flute.rotation.x = Math.sin(time * 1.1 + 0.4) * 0.012 * live
+      flute.position.y = Math.sin(time * 1.6 + 0.5) * 0.008 * live
+    }
   })
 
   return (
@@ -223,8 +427,11 @@ function Figure({ palette, energy, tempo }: Props) {
         <torusGeometry args={[0.2, 0.045, 12, 32]} />
       </mesh>
 
+      {/* The uttariya — the sash ribbon, alive in a slow wind behind him */}
+      <FlowingSash energy={energy} tempo={tempo} />
+
       {/* Torso — tall and slim; tribhanga leans the chest back to centre */}
-      <mesh position={[0.02, 2.55, 0]} rotation={[0, 0, -0.05]} material={skinMat}>
+      <mesh ref={torso} position={[0.02, 2.55, 0]} rotation={[0, 0, -0.05]} material={skinMat}>
         <capsuleGeometry args={[0.2, 0.62, 12, 24]} />
       </mesh>
       {/* chest jewel */}
@@ -249,58 +456,76 @@ function Figure({ palette, energy, tempo }: Props) {
         <cylinderGeometry args={[0.07, 0.08, 0.12, 12]} />
       </mesh>
 
-      {/* Head — smooth and faceless, the aniconic choice */}
-      <mesh position={[0, 3.32, 0]} material={skinMat}>
-        <sphereGeometry args={[0.23, 32, 32]} />
-      </mesh>
+      {/* ── The head, articulated at the neck ─────────────────────────────
+          Head, crown and mor pankh live in one pivot group so the tilt moves
+          them as one — a crown that lagged its head would break the figure. */}
+      <group ref={headGroup} position={[0, 3.2, 0]}>
+        {/* Head — smooth and faceless, the aniconic choice */}
+        <mesh position={[0, 0.12, 0]} material={skinMat}>
+          <sphereGeometry args={[0.23, 32, 32]} />
+        </mesh>
 
-      {/* Mukuta — the crown */}
-      <mesh position={[0, 3.5, 0]} material={goldMat}>
-        <cylinderGeometry args={[0.18, 0.23, 0.13, 20]} />
-      </mesh>
-      <mesh position={[0, 3.64, 0]} material={goldMat}>
-        <coneGeometry args={[0.15, 0.26, 20]} />
-      </mesh>
-      <mesh position={[0, 3.8, 0]} material={goldMat}>
-        <sphereGeometry args={[0.045, 12, 12]} />
-      </mesh>
+        {/* Mukuta — the crown */}
+        <mesh position={[0, 0.3, 0]} material={goldMat}>
+          <cylinderGeometry args={[0.18, 0.23, 0.13, 20]} />
+        </mesh>
+        <mesh position={[0, 0.44, 0]} material={goldMat}>
+          <coneGeometry args={[0.15, 0.26, 20]} />
+        </mesh>
+        <mesh position={[0, 0.6, 0]} material={goldMat}>
+          <sphereGeometry args={[0.045, 12, 12]} />
+        </mesh>
 
-      {/* Mor pankh — three feathers fanning up and back from the crown */}
-      <group position={[0, 3.58, -0.1]}>
-        <CrownFeather rotation={[-0.28, 0, 0]} />
-        <CrownFeather rotation={[-0.3, 0, 0.36]} />
-        <CrownFeather rotation={[-0.3, 0, -0.36]} />
+        {/* Mor pankh — three feathers fanning up and back, each on its own sway */}
+        <group position={[0, 0.38, -0.1]}>
+          <CrownFeather rotation={[-0.28, 0, 0]} phase={0} tempo={tempo} energy={energy} />
+          <CrownFeather rotation={[-0.3, 0, 0.36]} phase={2.1} tempo={tempo} energy={energy} />
+          <CrownFeather rotation={[-0.3, 0, -0.36]} phase={4.2} tempo={tempo} energy={energy} />
+        </group>
       </group>
 
-      {/* Venugopala pose — both hands raised to a flute held across, angled up
-          to the figure's left. The arms and the flute are the read: this is
-          what makes the silhouette Krishna and not a generic idol. */}
-      {/* left arm: shoulder → elbow (out) → hand (in at flute, high) */}
-      <mesh position={[-0.3, 2.86, 0.06]} rotation={[0.3, 0, 0.7]} material={skinMat}>
-        <capsuleGeometry args={[0.055, 0.32, 8, 16]} />
-      </mesh>
-      <mesh position={[-0.34, 3.06, 0.28]} rotation={[1.0, 0.3, 0.2]} material={skinMat}>
-        <capsuleGeometry args={[0.045, 0.3, 8, 16]} />
-      </mesh>
-      {/* right arm: shoulder → elbow (out) → hand (in at flute, low) */}
-      <mesh position={[0.3, 2.84, 0.06]} rotation={[0.3, 0, -0.6]} material={skinMat}>
-        <capsuleGeometry args={[0.055, 0.32, 8, 16]} />
-      </mesh>
-      <mesh position={[0.16, 3.0, 0.3]} rotation={[1.05, -0.3, -0.15]} material={skinMat}>
-        <capsuleGeometry args={[0.045, 0.3, 8, 16]} />
-      </mesh>
-
-      {/* The bansuri — flute — across the lower face, angled up to the left */}
-      <mesh position={[-0.12, 3.12, 0.42]} rotation={[0, 0.1, 0.42]} material={goldMat}>
-        <cylinderGeometry args={[0.022, 0.024, 1.0, 12]} />
-      </mesh>
-
-      {/* Armlets */}
-      {[[-0.3, 2.98, 0.14], [0.3, 2.96, 0.14]].map((p, i) => (
-        <mesh key={i} position={p as [number, number, number]} material={goldMat}>
-          <torusGeometry args={[0.06, 0.016, 8, 16]} />
+      {/* ── Venugopala pose, articulated at the chest ──────────────────────
+          Both arms and the bansuri share one pivot group so the playing lilt
+          rocks them together — hands that drifted off the flute would read as
+          broken, not alive. */}
+      {/* The outer group carries the chest position; the inner (animated) group
+          oscillates around its own origin — the useFrame writes position.y
+          absolutely, so it must never own the declarative offset. */}
+      <group position={[0, 2.9, 0.06]}>
+      <group ref={fluteGroup}>
+        {/* left arm: shoulder → elbow (out) → hand (in at flute, high) */}
+        <mesh position={[-0.3, -0.04, 0]} rotation={[0.3, 0, 0.7]} material={skinMat}>
+          <capsuleGeometry args={[0.055, 0.32, 8, 16]} />
         </mesh>
-      ))}
+        <mesh position={[-0.34, 0.16, 0.22]} rotation={[1.0, 0.3, 0.2]} material={skinMat}>
+          <capsuleGeometry args={[0.045, 0.3, 8, 16]} />
+        </mesh>
+        {/* right arm: shoulder → elbow (out) → hand (in at flute, low) */}
+        <mesh position={[0.3, -0.06, 0]} rotation={[0.3, 0, -0.6]} material={skinMat}>
+          <capsuleGeometry args={[0.055, 0.32, 8, 16]} />
+        </mesh>
+        <mesh position={[0.16, 0.1, 0.24]} rotation={[1.05, -0.3, -0.15]} material={skinMat}>
+          <capsuleGeometry args={[0.045, 0.3, 8, 16]} />
+        </mesh>
+
+        {/* The bansuri — flute — held near-horizontal across the lower face,
+            rising gently to the figure's left: the Venugopala read. Steeper
+            than this and it stops being a flute and becomes a staff. */}
+        <mesh position={[-0.05, 0.14, 0.36]} rotation={[0, 0.1, 1.25]} material={goldMat}>
+          <cylinderGeometry args={[0.022, 0.024, 1.0, 12]} />
+        </mesh>
+
+        {/* Armlets */}
+        {[[-0.3, 0.08, 0.08], [0.3, 0.06, 0.08]].map((p, i) => (
+          <mesh key={i} position={p as [number, number, number]} material={goldMat}>
+            <torusGeometry args={[0.06, 0.016, 8, 16]} />
+          </mesh>
+        ))}
+      </group>
+      </group>
+
+      {/* The song, rising from the flute's tip */}
+      <FluteSong palette={palette} energy={energy} tempo={tempo} />
     </group>
   )
 }

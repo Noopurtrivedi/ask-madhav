@@ -63,3 +63,8 @@ uploads/
 .shloka_cache.json
 verses_clean.json
 .vercel
+.env*
+
+# Local tooling output (browser screenshots/logs, per-machine Claude settings)
+.playwright-mcp/
+.claude/settings.local.json
