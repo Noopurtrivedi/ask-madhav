@@ -10,11 +10,22 @@ import QuoteReflection from './darshan/QuoteReflection'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
 
 const ENTRY_POINTS = [
-  { label: 'Guide me', href: '#paths', note: 'Walk a guided Gita path' },
-  { label: 'Explain this shloka', href: '#daily-verse', note: 'Open Daily Wisdom' },
-  { label: 'Teach me', href: '#chapters', note: 'Study all 18 chapters' },
-  { label: 'Ask Madhav', href: '#chat', note: 'Ask as Parth, receive guidance' },
+  { label: 'Walk a path', href: '#paths' },
+  { label: "Today's shloka", href: '#daily-verse' },
+  { label: '18 chapters', href: '#chapters' },
+  { label: 'Stories', href: '#stories' },
 ]
+
+// One tap from the hero to a real answer — the questions people most often bring.
+const STARTERS = ['I feel anxious about the future', 'I am afraid of failing', 'What is my purpose?']
+
+/** Hand a question to the chat below and send it there. */
+function askMadhav(raw: string) {
+  const question = raw.trim()
+  document.getElementById('chat')?.scrollIntoView({ behavior: 'smooth' })
+  if (!question) return
+  window.dispatchEvent(new CustomEvent('madhav:prefill', { detail: { question, send: true } }))
+}
 
 /**
  * Hero — the Darshan.
@@ -50,10 +61,7 @@ export default function Hero() {
   }, [])
 
   const revealed = landed || failsafe
-
-  const scrollTo = (target: string) => {
-    document.querySelector(target)?.scrollIntoView({ behavior: 'smooth' })
-  }
+  const [question, setQuestion] = useState('')
 
   return (
     <>
@@ -75,74 +83,95 @@ export default function Hero() {
             revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}
         >
-          {/* Mobile is one column ordered word → darshan → invitation; desktop is
-              two columns with the word and the invitation stacked on the left.
-              `contents` dissolves the left wrapper on mobile so its two halves
-              can be ordered around the darshan without duplicating any markup. */}
+          {/* Mobile is one column ordered word → invitation → darshan, so the ask
+              bar sits in a phone's first fold; desktop is two columns with the
+              word and the invitation stacked on the left. `contents` dissolves
+              the left wrapper on mobile so its halves order around the darshan. */}
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1.02fr_0.98fr] lg:gap-14 lg:items-center">
             <div className="contents lg:block lg:text-left">
               {/* ── Word ───────────────────────────────────────── */}
               <div className="order-1 text-center lg:text-left">
-                <p className="text-gold-soft/70 text-[11px] sm:text-xs font-medium tracking-[0.34em] uppercase mb-5">
-                  Bhagavad Gita · 700 Verses · Timeless Wisdom
-                </p>
+                <p className="eyebrow mb-6">The Bhagavad Gita · 700 Verses</p>
 
-                <h1
-                  className="text-4xl sm:text-5xl md:text-6xl font-bold text-moonlight mb-5 leading-[1.08]"
-                  style={{ fontFamily: 'Crimson Text, serif' }}
-                >
-                  Seek Wisdom.
+                <h1 className="hero-title mb-6">
+                  Seek wisdom.
                   <br />
-                  <span className="shimmer-text">Find Peace.</span>
+                  <em className="shimmer-text">Find peace.</em>
                 </h1>
 
-                <p className="text-moonlight/65 text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0">
-                  Bring your daily life questions. Receive guidance rooted in the eternal
-                  teachings of the Bhagavad Gita — verse by verse, truth by truth.
+                <p className="text-moonlight/68 text-base md:text-[1.075rem] leading-[1.8] max-w-[34rem] mx-auto lg:mx-0">
+                  Bring the question you carry. Madhav answers from the Bhagavad Gita &mdash; one
+                  verse, one truth, and one step you can take today.
                 </p>
               </div>
 
               {/* ── Invitation ─────────────────────────────────── */}
-              <div className="order-3 text-center lg:text-left lg:mt-8">
-                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                  <button
-                    onClick={() => scrollTo('#chat')}
-                    className="px-8 py-4 bg-saffron text-navy font-semibold rounded-full text-lg
-                               hover:bg-saffron-light transition-all hover:scale-105 shadow-lg shadow-saffron/25"
-                  >
-                    Ask Madhav
+              <div className="order-2 text-center lg:text-left lg:mt-9">
+                {/* Ask from the first fold: the question goes straight to the
+                    chat below (`madhav:prefill` with send) — no second step. */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    askMadhav(question)
+                  }}
+                  className="ask-bar max-w-[34rem] mx-auto lg:mx-0"
+                >
+                  <label htmlFor="hero-ask" className="sr-only">
+                    Ask Madhav a question
+                  </label>
+                  <input
+                    id="hero-ask"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    maxLength={1000}
+                    placeholder="What weighs on your heart, Parth?"
+                    className="min-w-0 flex-1 bg-transparent py-3 text-[0.95rem] text-moonlight placeholder:text-moonlight/40 focus:outline-none"
+                  />
+                  <button type="submit" className="btn-leaf shrink-0 px-5 py-3 text-sm sm:px-6">
+                    <span className="sm:hidden">Ask</span>
+                    <span className="hidden sm:inline">Ask Madhav</span>
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
                   </button>
-                  <a
-                    href="#paths"
-                    className="px-8 py-4 border border-gold/40 text-moonlight rounded-full text-lg bg-white/[0.06]
-                               backdrop-blur-sm hover:border-gold hover:bg-white/[0.12] transition-all hover:scale-105 inline-block"
-                  >
-                    Walk a Path
-                  </a>
-                </div>
+                </form>
 
-                <div className="mt-5 grid grid-cols-2 gap-2 max-w-lg mx-auto lg:mx-0">
-                  {ENTRY_POINTS.map((item) => (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      className="rounded-xl border border-gold/18 bg-white/[0.045] px-3 py-3 text-left transition-colors hover:border-gold/40 hover:bg-white/[0.08]"
+                <div className="mt-4 flex flex-wrap justify-center gap-2 lg:justify-start">
+                  {STARTERS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => askMadhav(s)}
+                      className="rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-xs text-moonlight/62 transition-colors hover:border-gold-soft/50 hover:text-moonlight"
                     >
-                      <span className="block text-sm font-medium text-moonlight">{item.label}</span>
-                      <span className="mt-1 block text-xs leading-snug text-moonlight/42">{item.note}</span>
-                    </a>
+                      {s}
+                    </button>
                   ))}
                 </div>
 
-                <p className="mt-6 text-moonlight/35 text-xs max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                  Guidance inspired by the Bhagavad Gita — for reflection, not a substitute for
+                <nav
+                  aria-label="Other ways in"
+                  className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 lg:justify-start"
+                >
+                  {ENTRY_POINTS.map((item, i) => (
+                    <span key={item.label} className="flex items-center gap-6">
+                      {i > 0 && <span className="hidden h-1 w-1 rotate-45 bg-gold-soft/45 sm:block" aria-hidden="true" />}
+                      <a href={item.href} className="caps-link">
+                        {item.label}
+                      </a>
+                    </span>
+                  ))}
+                </nav>
+
+                <p className="mt-8 text-moonlight/35 text-xs max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                  Guidance inspired by the Bhagavad Gita &mdash; for reflection, not a substitute for
                   medical, legal, or financial advice.
                 </p>
               </div>
             </div>
 
             {/* ── Darshan: presence + the verse resting beneath it ── */}
-            <div className="order-2 flex flex-col items-center">
+            <div className="order-3 flex flex-col items-center">
               <div className="relative mb-6">
                 {/* Breathing aura */}
                 <div className="darshan-aura lotus-pulse" aria-hidden="true" />

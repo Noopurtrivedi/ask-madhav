@@ -37,20 +37,20 @@ export default function PopularVerses() {
   }, [])
 
   return (
-    <section className="py-14 sm:py-20 px-6" >
+    <section id="popular" className="py-20 sm:py-28 px-6" >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-gold-soft/65 text-xs font-medium uppercase tracking-widest mb-3">
+          <p className="eyebrow mb-5">
             Timeless Wisdom
           </p>
           <h2
-            className="text-3xl md:text-4xl text-moonlight mb-3"
-            style={{ fontFamily: 'Crimson Text, serif' }}
+            className="section-title mb-4"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            Popular Verses
+            The verses we <em className="gold-leaf">return to</em>
           </h2>
-          <p className="text-moonlight/58 text-sm max-w-md mx-auto">
+          <p className="section-lede max-w-lg mx-auto">
             The shlokas people return to again and again — in moments of doubt, grief, and searching.
             Tap a verse to unfold its meaning.
           </p>
@@ -64,8 +64,7 @@ export default function PopularVerses() {
             return (
               <div
                 key={meta.reference}
-                className={`group border rounded-xl overflow-hidden transition-all duration-300
-                  ${isOpen ? 'border-gold/40 bg-white shadow-lg shadow-saffron/10' : 'border-saffron/15 bg-saffron/[0.04] hover:border-gold/35 hover:shadow-md hover:shadow-saffron/10'}`}
+                className={`group sacred-card rounded-2xl overflow-hidden ${isOpen ? 'ring-1 ring-gold-soft/25' : 'hover:-translate-y-0.5'}`}
               >
                 {/* Card head — toggles the meaning */}
                 <button
@@ -82,7 +81,7 @@ export default function PopularVerses() {
 
                   <p
                     className="text-moonlight text-base font-semibold mb-3 group-hover:text-saffron transition-colors"
-                    style={{ fontFamily: 'Crimson Text, serif' }}
+                    style={{ fontFamily: 'var(--font-display), serif' }}
                   >
                     {meta.label}
                   </p>
@@ -91,7 +90,7 @@ export default function PopularVerses() {
                   {verse ? (
                     <p
                       className="text-moonlight/90 text-lg leading-relaxed"
-                      style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+                      style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
                       lang="sa"
                     >
                       {verse.sanskrit_text}

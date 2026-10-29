@@ -38,13 +38,13 @@ export default function SubscribeRitual() {
   }
 
   return (
-    <section className="py-14 sm:py-20 px-6" >
+    <section id="ritual" className="py-20 sm:py-28 px-6" >
       <div className="max-w-2xl mx-auto text-center">
-        <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Daily Ritual</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-moonlight mb-3" style={{ fontFamily: 'Crimson Text, serif' }}>
-          A verse in your inbox, every morning
+        <p className="eyebrow mb-5">Daily Ritual</p>
+        <h2 className="section-title mb-4" style={{ fontFamily: 'var(--font-display), serif' }}>
+          A verse in your inbox, <em className="gold-leaf">every morning</em>
         </h2>
-        <p className="text-moonlight/58 text-sm mb-8 max-w-lg mx-auto">
+        <p className="section-lede mb-8 max-w-lg mx-auto">
           Begin each day with one verse from the Gita and a small practical step. No noise, just wisdom.
         </p>
 

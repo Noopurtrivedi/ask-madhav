@@ -193,7 +193,7 @@ export default function JournalApp() {
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
           <p className="text-gold-soft/70 text-xs uppercase tracking-[0.25em] mb-2">Daily Practice</p>
-          <h1 className="text-3xl font-bold text-moonlight" style={{ fontFamily: 'Crimson Text, serif' }}>Sankalpa Journal</h1>
+          <h1 className="text-3xl font-bold text-moonlight" style={{ fontFamily: 'var(--font-display), serif' }}>Sankalpa Journal</h1>
           <p className="text-moonlight/48 text-sm">{user.email}</p>
         </div>
         <div className="flex items-center gap-4">
@@ -218,7 +218,7 @@ export default function JournalApp() {
 
       <section className="border border-gold/22 rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.05)' }}>
         <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
-          <h2 className="text-xl font-semibold text-moonlight" style={{ fontFamily: 'Crimson Text, serif' }}>Today&apos;s Gita Check-In</h2>
+          <h2 className="text-xl font-semibold text-moonlight" style={{ fontFamily: 'var(--font-display), serif' }}>Today&apos;s Gita Check-In</h2>
           <span className="text-moonlight/38 text-xs">{formatDay(today)}</span>
         </div>
         <p className="text-moonlight/48 text-xs mb-5">A simple inward practice: see clearly, offer the action, release the fruit.</p>
@@ -301,7 +301,7 @@ export default function JournalApp() {
 
       {pastEntries.length > 0 && (
         <section className="border border-gold/18 rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.04)' }}>
-          <h2 className="text-xl font-semibold text-moonlight mb-1" style={{ fontFamily: 'Crimson Text, serif' }}>Past Reflections</h2>
+          <h2 className="text-xl font-semibold text-moonlight mb-1" style={{ fontFamily: 'var(--font-display), serif' }}>Past Reflections</h2>
           <p className="text-moonlight/48 text-xs mb-4">Svadhyaya — read yourself back. Tap a day to reopen it.</p>
           <div className="space-y-2">
             {pastEntries.slice(0, 30).map((entry) => (
@@ -333,7 +333,7 @@ export default function JournalApp() {
       )}
 
       <section>
-        <h2 className="text-xl font-semibold text-moonlight mb-4" style={{ fontFamily: 'Crimson Text, serif' }}>Saved Verses</h2>
+        <h2 className="text-xl font-semibold text-moonlight mb-4" style={{ fontFamily: 'var(--font-display), serif' }}>Saved Verses</h2>
         {saved.length === 0 ? (
           <p className="text-moonlight/48 text-sm">
             No saved verses yet. Tap <span className="text-gold-soft">Save</span> on the Daily Wisdom card, a popular
@@ -409,7 +409,7 @@ function JournalInput({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-gold/18 rounded-xl p-5 text-center backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.05)' }}>
-      <p className="text-3xl font-bold text-gold-soft" style={{ fontFamily: 'Crimson Text, serif' }}>{value}</p>
+      <p className="text-3xl font-bold text-gold-soft" style={{ fontFamily: 'var(--font-display), serif' }}>{value}</p>
       <p className="text-moonlight/58 text-xs mt-1">{label}</p>
     </div>
   )

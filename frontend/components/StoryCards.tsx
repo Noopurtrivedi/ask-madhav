@@ -71,18 +71,18 @@ export default function StoryCards() {
   }
 
   return (
-    <section id="stories" className="py-14 sm:py-20 px-6" >
+    <section id="stories" className="py-20 sm:py-28 px-6" >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Mahabharata</p>
+          <p className="eyebrow mb-5">Mahabharata</p>
           <h2
-            className="text-4xl font-bold text-moonlight"
-            style={{ fontFamily: 'Crimson Text, serif' }}
+            className="section-title"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            Stories and Their Lessons
+            Stories &amp; their <em className="gold-leaf">lessons</em>
           </h2>
-          <p className="text-moonlight/58 mt-3 max-w-xl mx-auto text-sm">
+          <p className="section-lede mt-4 max-w-xl mx-auto">
             Hear each story told in full, take its lesson, and when a moment feels unfair — ask Madhav.
           </p>
         </div>
@@ -127,7 +127,7 @@ export default function StoryCards() {
               {/* Title */}
               <h3
                 className="text-moonlight text-xl font-semibold mb-3 leading-snug"
-                style={{ fontFamily: 'Crimson Text, serif' }}
+                style={{ fontFamily: 'var(--font-display), serif' }}
               >
                 {story.title}
               </h3>

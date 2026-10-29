@@ -140,7 +140,7 @@ export default function QuoteReflection({
 
         <p
           className={`mb-2 text-lg leading-relaxed md:text-xl ${cosmic ? 'text-moonlight' : 'text-ink'}`}
-          style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+          style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
           lang="sa"
         >
           {quote.sanskrit}
@@ -158,7 +158,7 @@ export default function QuoteReflection({
           <p
             className={`mt-2 text-sm leading-relaxed ${cosmic ? 'text-moonlight/60' : 'text-ink/60'}`}
             lang="hi"
-            style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+            style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
           >
             {quote.hindi_meaning}
           </p>
@@ -171,7 +171,7 @@ export default function QuoteReflection({
               <p
                 className={`mt-2 text-sm leading-relaxed ${cosmic ? 'text-moonlight/60' : 'text-ink/60'}`}
                 lang="hi"
-                style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+                style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
               >
                 {quote.hindi_meaning}
               </p>

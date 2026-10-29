@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Tiro+Devanagari+Hindi&family=Noto+Serif+Devanagari:wght@400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -23,11 +22,202 @@ body {
      the over-scroll gutter, where a warm strip used to flash. */
   background-color: #05070F;
   color: var(--moonlight);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
+/* Cormorant is a display face with a small x-height: it wants medium weight
+   (never bold) and a touch of negative tracking to read as luxury, not book. */
 h1, h2, h3 {
-  font-family: 'Crimson Text', serif;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+/* Cormorant defaults to old-style figures ("18" reads as "I8") — use lining. */
+h1, h2, h3, .font-display, .gold-leaf { font-variant-numeric: lining-nums; }
+h1.font-bold, h2.font-bold, h3.font-bold { font-weight: 500; }
+h3.font-semibold, h2.font-semibold { font-weight: 600; }
+
+::selection { background: rgba(232, 195, 90, 0.32); color: #fff8e6; }
+
+/* In the components layer so Tailwind utilities (e.g. `hidden md:inline-flex`)
+   still override these on a per-element basis. */
+@layer components {
+/* ── Brand system: Midnight & Gold Leaf ─────────────────────────
+   One vocabulary for the whole site. Sections compose these classes rather
+   than restyling their own headings, buttons and cards. */
+:root {
+  --leaf-1: #F7E3A6;
+  --leaf-2: #E3B65C;
+  --leaf-3: #B8862F;
+  --gold-leaf: linear-gradient(135deg, var(--leaf-1) 0%, var(--leaf-2) 45%, var(--leaf-3) 100%);
+  --hairline: rgba(232, 195, 90, 0.22);
+  --moonlight: #F6F1E4;
+}
+
+/* Inscriptional eyebrow: Cinzel caps between two hairlines of gold. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-family: var(--font-caps), serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(232, 195, 90, 0.85);
+}
+.eyebrow::before,
+.eyebrow::after {
+  content: '';
+  width: 2.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 195, 90, 0.7));
+}
+.eyebrow::after { transform: scaleX(-1); }
+.eyebrow-left::before { display: none; }
+
+.section-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2.35rem, 4.6vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  color: var(--moonlight);
+}
+.section-title em,
+.display-italic {
+  font-style: italic;
+  font-weight: 400;
+}
+.section-lede {
+  font-size: 0.98rem;
+  line-height: 1.75;
+  color: rgba(246, 241, 228, 0.6);
+}
+
+/* Gold leaf as ink — static (the shimmer variant below animates). */
+.gold-leaf {
+  background: var(--gold-leaf);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* A thin rule with a diamond at its heart — the section divider. */
+.ornament-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: rgba(232, 195, 90, 0.7);
+}
+.ornament-rule::before,
+.ornament-rule::after {
+  content: '';
+  height: 1px;
+  width: min(9rem, 24vw);
+  background: linear-gradient(90deg, transparent, rgba(232, 195, 90, 0.5));
+}
+.ornament-rule::after { transform: scaleX(-1); }
+
+/* Buttons — the primary is beaten gold with an inner highlight; the ghost is
+   a hairline of gold on glass. Both are pills. */
+.btn-leaf,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease,
+    background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
+}
+.btn-leaf {
+  color: #1A1206;
+  background: var(--gold-leaf);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 230, 0.65),
+    inset 0 -1px 0 rgba(120, 80, 20, 0.35),
+    0 10px 30px -10px rgba(227, 182, 92, 0.55);
+}
+.btn-leaf:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 230, 0.75),
+    inset 0 -1px 0 rgba(120, 80, 20, 0.35),
+    0 18px 44px -12px rgba(227, 182, 92, 0.7);
+}
+.btn-ghost {
+  color: var(--moonlight);
+  border: 1px solid rgba(232, 195, 90, 0.38);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 195, 90, 0.8);
+  background: rgba(232, 195, 90, 0.08);
+  color: #FFF4D6;
+}
+.btn-leaf:focus-visible,
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--leaf-2);
+  outline-offset: 3px;
+}
+
+/* Small tracked caps link — navbar and footer. */
+.caps-link {
+  font-family: var(--font-caps), serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(246, 241, 228, 0.72);
+  transition: color 0.3s ease;
+}
+.caps-link:hover { color: var(--leaf-1); }
+
+/* The hero headline — light Cormorant at poster scale. */
+.hero-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(3.1rem, 7.4vw, 6.4rem);
+  line-height: 0.96;
+  letter-spacing: -0.025em;
+  color: var(--moonlight);
+}
+.hero-title em { font-weight: 400; font-style: italic; padding-right: 0.06em; }
+
+/* The hero's ask bar — the first thing a seeker can touch. */
+.ask-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.4rem 0.4rem 1.35rem;
+  border-radius: 9999px;
+  background: rgba(8, 11, 30, 0.55);
+  border: 1px solid rgba(232, 195, 90, 0.3);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.ask-bar:focus-within {
+  border-color: rgba(232, 195, 90, 0.75);
+  box-shadow: 0 0 0 4px rgba(232, 195, 90, 0.1), 0 24px 60px -28px rgba(0, 0, 0, 0.9);
+}
+
+/* Phones: the eyebrow keeps one line. */
+@media (max-width: 640px) {
+  .eyebrow { letter-spacing: 0.22em; gap: 0.6rem; font-size: 0.66rem; }
+  .eyebrow::before, .eyebrow::after { width: 1.25rem; }
+}
+
 }
 
 /* ── Animations ───────────────────────────────────────────── */
@@ -79,15 +269,21 @@ h1, h2, h3 {
    On the cosmic page this is glass, not paper — one definition so every card in
    the app changes together rather than being restyled section by section. */
 .sacred-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(212, 160, 23, 0.22);
-  box-shadow: 0 22px 60px -30px rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(6px);
+  background:
+    linear-gradient(180deg, rgba(22, 26, 58, 0.97), rgba(11, 14, 34, 0.97)) padding-box,
+    linear-gradient(160deg, rgba(247, 227, 166, 0.42), rgba(232, 195, 90, 0.08) 38%, rgba(232, 195, 90, 0.05) 62%, rgba(184, 134, 47, 0.32)) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 30px 70px -36px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+.sacred-card:hover {
+  box-shadow: 0 36px 80px -34px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(232, 195, 90, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Gold shimmering text accent */
 .shimmer-text {
-  background: linear-gradient(100deg, var(--gold) 20%, #f6d27a 40%, var(--gold) 60%);
+  background: linear-gradient(100deg, #E3B65C 20%, #FBEBBE 40%, #E3B65C 60%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -303,6 +499,8 @@ h1, h2, h3 {
 .darshan-page input::placeholder,
 .darshan-page textarea::placeholder { color: rgba(246, 241, 228, 0.4); }
 .darshan-page select option { background: #0A0E2A; color: var(--moonlight); }
+/* The ask bar is the field's surface — its input stays bare glass. */
+.darshan-page .ask-bar input { background: transparent; }
 
 /* ══════════════════════════════════════════════════════════════
    DARSHAN LAYER — the cosmic hero, the Sudarshan Chakra ritual,
@@ -789,3 +987,6 @@ section[id] { scroll-margin-top: 6rem; }
 @media (prefers-reduced-motion: reduce) {
   .skeleton { animation: none; }
 }
+
+/* Anchored sections clear the fixed navbar when jumped to. */
+section[id] { scroll-margin-top: 5rem; }

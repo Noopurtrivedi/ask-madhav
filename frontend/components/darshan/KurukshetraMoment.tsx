@@ -70,12 +70,12 @@ export default function KurukshetraMoment() {
 
         {/* The caption. */}
         <div className="absolute bottom-0 left-0 max-w-lg p-6 sm:p-10">
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.3em] text-gold-soft/80">
+          <p className="eyebrow eyebrow-left mb-4">
             Where it was spoken
           </p>
           <h2
-            className="mb-3 text-2xl font-bold leading-tight text-moonlight sm:text-3xl"
-            style={{ fontFamily: 'Crimson Text, serif' }}
+            className="mb-3 text-3xl leading-tight text-moonlight sm:text-[2.6rem]"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
             The Field of Kurukshetra
           </h2>

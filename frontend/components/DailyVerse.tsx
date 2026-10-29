@@ -24,14 +24,14 @@ export default function DailyVerse() {
   }, [])
 
   return (
-    <section id="daily-verse" className="py-14 sm:py-20 px-6" >
+    <section id="daily-verse" className="py-20 sm:py-28 px-6" >
       <div className="max-w-6xl mx-auto text-center">
-        <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Daily Wisdom</p>
+        <p className="eyebrow mb-5">Daily Wisdom</p>
         <h2
-          className="text-4xl font-bold text-moonlight mb-12"
-          style={{ fontFamily: 'Crimson Text, serif' }}
+          className="section-title mb-12"
+          style={{ fontFamily: 'var(--font-display), serif' }}
         >
-          Daily Wisdom
+          Today&rsquo;s <em className="gold-leaf">shloka</em>
         </h2>
 
         {loading && (
@@ -100,7 +100,7 @@ export default function DailyVerse() {
                 <div className="mb-5 rounded-2xl border border-gold/12 bg-gradient-to-b from-white/[0.05] to-transparent px-5 py-4">
                   <p
                     className="text-[1.6rem] leading-relaxed text-moonlight"
-                    style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+                    style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
                     lang="sa"
                   >
                     {verse.sanskrit_text}

@@ -156,7 +156,7 @@ export default function VishwaroopDarshan() {
           ref={returnFocus}
           type="button"
           onClick={enter}
-          className="rounded-full border border-gold/40 bg-gold-soft/10 px-8 py-4 text-lg font-semibold text-moonlight shadow-lg shadow-black/40 backdrop-blur-sm transition-all hover:scale-105 hover:border-gold hover:bg-gold-soft/20"
+          className="btn-ghost px-9 py-4 font-caps text-sm tracking-[0.22em] uppercase"
         >
           Behold the Cosmic Form
         </button>
@@ -302,7 +302,7 @@ export default function VishwaroopDarshan() {
                   <p
                     className="whitespace-nowrap text-[10px] text-gold-soft/60"
                     lang="sa"
-                    style={{ fontFamily: 'Tiro Devanagari Hindi, Noto Serif Devanagari, serif' }}
+                    style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
                   >
                     {glyph.sanskrit}
                   </p>

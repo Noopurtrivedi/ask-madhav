@@ -108,7 +108,7 @@ export default function JournalMadhav({ seed, journalContext }: Props) {
           🪷
         </span>
         <div>
-          <p className="text-moonlight font-semibold leading-tight" style={{ fontFamily: 'Crimson Text, serif' }}>
+          <p className="text-moonlight font-semibold leading-tight" style={{ fontFamily: 'var(--font-display), serif' }}>
             Madhav
           </p>
           <p className="text-moonlight/45 text-xs">Your journal companion — grounded in today&apos;s check-in</p>

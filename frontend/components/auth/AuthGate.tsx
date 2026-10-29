@@ -209,7 +209,7 @@ function SignIn() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <span className="text-4xl select-none">🪷</span>
-          <h1 className="mt-3 text-3xl font-bold text-moonlight" style={{ fontFamily: 'Crimson Text, serif' }}>
+          <h1 className="mt-3 text-3xl font-bold text-moonlight" style={{ fontFamily: 'var(--font-display), serif' }}>
             Ask Madhav
           </h1>
           <p className="mt-3 text-moonlight/58 text-sm leading-relaxed max-w-sm mx-auto">

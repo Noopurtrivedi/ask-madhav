@@ -13,9 +13,9 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/app/` — routes & pages
 | File | Description |
 |---|---|
-| `app/layout.tsx` | Root layout — fonts, metadata, global chrome; wraps every route in `AuthProvider` (session context only — the app is open; gated features use `AuthGate` themselves). |
+| `app/layout.tsx` | Root layout — loads the brand fonts via `next/font` (Cinzel, Cormorant Garamond, Manrope, Tiro Devanagari Sanskrit, Noto Serif Devanagari → `--font-*` vars), metadata, global chrome; wraps every route in `AuthProvider` (session context only — the app is open; gated features use `AuthGate` themselves). |
 | `app/page.tsx` | Single-page home — composes Hero, DailyVerse, ChatInterface, PopularVerses, StoryCards, SubscribeRitual. |
-| `app/globals.css` | Tailwind base + global styles (sacred light theme). |
+| `app/globals.css` | Tailwind base + global styles. Holds the **brand system** (`@layer components`: `.eyebrow`, `.section-title`, `.section-lede`, `.hero-title`, `.gold-leaf`, `.btn-leaf`, `.btn-ghost`, `.caps-link`, `.ask-bar`, `.ornament-rule`), `.sacred-card`, and the Darshan/cosmic layers. |
 | `app/icon.svg` | App favicon / icon. |
 | `app/journal/page.tsx` | `/journal` route — renders the Sankalpa Journal wrapped in `AuthGate` (the only sign-in-gated route). |
 | `app/verse/[reference]/page.tsx` | `/verse/2.47` deep-link page; `generateMetadata` produces share/OG tags per verse. |

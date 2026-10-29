@@ -143,6 +143,7 @@ export default function ChatInterface() {
   const inputRef = useRef<HTMLInputElement>(null)
   const followConversation = useRef(false)
   const restored = useRef(false)
+  const sendRef = useRef<(question?: string) => Promise<void>>(async () => {})
 
   // Hydrate saved preferences + conversation after mount (avoids SSR/client
   // markup mismatch, and keeps random suggestions off the server render).
@@ -251,14 +252,18 @@ export default function ChatInterface() {
     }
   }, [])
 
-  // Listen for prefill events fired by PopularVerses / ChapterBrowser
+  // Listen for prefill events fired by PopularVerses / ChapterBrowser. The hero's
+  // ask bar sets `send: true` — the seeker already pressed Ask once.
   useEffect(() => {
     const handler = (e: Event) => {
-      const question = (e as CustomEvent<{ question: string }>).detail?.question
-      if (question) {
-        setInput(question)
-        setTimeout(() => inputRef.current?.focus(), 300)
+      const { question, send } = (e as CustomEvent<{ question: string; send?: boolean }>).detail ?? {}
+      if (!question) return
+      if (send) {
+        void sendRef.current(question)
+        return
       }
+      setInput(question)
+      setTimeout(() => inputRef.current?.focus(), 300)
     }
     window.addEventListener('madhav:prefill', handler)
     return () => window.removeEventListener('madhav:prefill', handler)
@@ -325,6 +330,12 @@ export default function ChatInterface() {
     }
   }
 
+  // Always the latest handleSend, so the once-registered prefill listener
+  // never sends with a stale conversation history.
+  useEffect(() => {
+    sendRef.current = handleSend
+  })
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -355,7 +366,7 @@ export default function ChatInterface() {
   return (
     <section
       id="chat"
-      className="relative overflow-hidden py-14 sm:py-20 px-6"
+      className="relative overflow-hidden py-20 sm:py-28 px-6"
       
     >
       {/* The form behind him while he speaks — swells on the engine's
@@ -377,14 +388,14 @@ export default function ChatInterface() {
               />
             </div>
           </div>
-          <p className="text-gold-soft/75 text-xs tracking-[0.3em] uppercase mb-2">Gita Guidance</p>
+          <p className="eyebrow mb-5">Gita Guidance</p>
           <h2
-            className="text-4xl font-bold text-moonlight"
-            style={{ fontFamily: 'Crimson Text, serif' }}
+            className="section-title"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            Ask Madhav
+            Ask <em className="gold-leaf">Madhav</em>
           </h2>
-          <p className="text-moonlight/58 mt-3 text-sm">
+          <p className="section-lede mt-4">
             Every answer is grounded in a real verse from the Bhagavad Gita
           </p>
         </div>

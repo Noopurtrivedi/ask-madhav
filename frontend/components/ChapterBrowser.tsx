@@ -50,20 +50,20 @@ export default function ChapterBrowser() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section id="chapters" className="py-14 sm:py-20 px-6" >
+    <section id="chapters" className="py-20 sm:py-28 px-6" >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <p className="text-gold-soft/65 text-xs font-medium uppercase tracking-widest mb-3">
+          <p className="eyebrow mb-5">
             18 Chapters · 700 Verses
           </p>
           <h2
-            className="text-3xl md:text-4xl text-moonlight mb-3"
-            style={{ fontFamily: 'Crimson Text, serif' }}
+            className="section-title mb-4"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            The Yogs of the Bhagavad Gita
+            The eighteen <em className="gold-leaf">yogas</em>
           </h2>
-          <p className="text-moonlight/58 text-sm max-w-md mx-auto">
+          <p className="section-lede max-w-lg mx-auto">
             Each chapter is a complete yoga — a path. Tap any chapter to read its essence.
           </p>
         </div>
@@ -83,20 +83,20 @@ export default function ChapterBrowser() {
                 <button
                   onClick={() => setOpen(isOpen ? null : ch.n)}
                   aria-expanded={isOpen}
-                  className="w-full text-left p-4"
+                  className="w-full text-left p-5"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <span
-                      className="text-gold-soft/45 text-3xl font-bold leading-none"
-                      style={{ fontFamily: 'Crimson Text, serif' }}
+                      className="gold-leaf text-[2.6rem] font-light leading-none opacity-80"
+                      style={{ fontFamily: 'var(--font-display), serif' }}
                     >
                       {ch.n}
                     </span>
-                    <span className="text-moonlight/34 text-xs mt-1">{ch.verses} verses</span>
+                    <span className="font-caps text-[0.6rem] tracking-[0.2em] uppercase text-moonlight/40 mt-1">{ch.verses} verses</span>
                   </div>
                   <p
-                    className="text-moonlight/90 text-sm font-semibold mb-0.5 group-hover:text-saffron transition-colors leading-snug"
-                    style={{ fontFamily: 'Crimson Text, serif' }}
+                    className="text-moonlight/90 text-lg font-semibold mb-0.5 group-hover:text-gold-soft transition-colors leading-snug"
+                    style={{ fontFamily: 'var(--font-display), serif' }}
                   >
                     {ch.yoga}
                   </p>

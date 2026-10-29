@@ -31,6 +31,30 @@ const STATS = [
   },
 ]
 
+const FOOTER_COLUMNS = [
+  {
+    title: 'Explore',
+    links: [
+      { label: "Today's shloka", href: '/#daily-verse' },
+      { label: 'The 18 chapters', href: '/#chapters' },
+      { label: 'Popular verses', href: '/#popular' },
+      { label: 'Mahabharata stories', href: '/#stories' },
+    ],
+  },
+  {
+    title: 'Practice',
+    links: [
+      { label: 'Ask Madhav', href: '/#chat' },
+      { label: 'Walk a path', href: '/#paths' },
+      { label: 'Sankalpa Journal', href: '/journal' },
+    ],
+  },
+  {
+    title: 'Connect',
+    links: [{ label: 'Daily verse by email', href: '/#ritual' }],
+  },
+]
+
 export default function Home() {
   return (
     <main className="darshan-page">
@@ -40,20 +64,19 @@ export default function Home() {
       <Navbar overlay />
       <Hero />
 
-      {/* Stats bar */}
-      <section className="py-16 px-6"  data-reveal>
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 text-center">
+      {/* Pillars — three numbers between hairlines, set like an inscription. */}
+      <section className="px-6 py-20" data-reveal>
+        <div className="mx-auto max-w-5xl">
+          <div className="grid border-y border-gold-soft/15 md:grid-cols-3 md:divide-x md:divide-gold-soft/15">
             {STATS.map((item) => (
-              <div key={item.label} className="p-6">
-                <p
-                  className="text-5xl font-bold text-saffron mb-2"
-                  style={{ fontFamily: 'Crimson Text, serif' }}
-                >
+              <div key={item.label} className="px-8 py-10 text-center">
+                <p className="gold-leaf font-display text-6xl font-light leading-none md:text-7xl">
                   {item.number}
                 </p>
-                <p className="text-moonlight font-medium mb-2">{item.label}</p>
-                <p className="text-moonlight/58 text-sm leading-relaxed">{item.desc}</p>
+                <p className="mt-4 font-caps text-[0.7rem] tracking-[0.3em] text-moonlight/80 uppercase">
+                  {item.label}
+                </p>
+                <p className="mx-auto mt-3 max-w-[16rem] text-sm leading-relaxed text-moonlight/50">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -74,48 +97,67 @@ export default function Home() {
           the page open and close on the same cosmos. */}
       <div data-reveal><VishwaroopDarshan /></div>
 
-      {/* Footer */}
-      {/* No background of its own — it sits in the same continuous sky as
-          everything above it, separated only by a hairline. */}
-      <footer className="border-t border-white/[0.06] px-6 py-14">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="text-3xl select-none">🪷</span>
-          <p className="text-moonlight/70 mt-3 text-sm font-medium">
-            Ask Madhav — Bhagavad Gita Guidance
-          </p>
-
-          {/* Channels */}
-          <div className="flex flex-wrap items-center justify-center gap-5 mt-4 text-sm">
-            <a href="/#paths" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Walk a Path</a>
-            <a href="/#daily-verse" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Daily Wisdom</a>
-            <a href="/#chapters" className="text-gold-soft/80 hover:text-gold-soft transition-colors">18 Chapters</a>
-            <a href="/#stories" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Stories</a>
-            <a href="/#chat" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Ask Madhav</a>
-            <a href="/journal" className="text-gold-soft/80 hover:text-gold-soft transition-colors">Journal</a>
-            {process.env.NEXT_PUBLIC_WHATSAPP_NUMBER && (
-              <a href="/whatsapp" className="text-gold-soft/80 hover:text-gold-soft transition-colors">WhatsApp</a>
-            )}
+      {/* Footer — no background of its own; it sits in the same continuous sky
+          as everything above it, separated only by a hairline. */}
+      <footer className="border-t border-white/[0.06] px-6 pb-12 pt-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div>
+              <p className="font-caps text-lg tracking-[0.3em] text-moonlight">ASK MADHAV</p>
+              <p className="mt-4 max-w-xs font-display text-xl italic leading-snug text-moonlight/70">
+                &ldquo;You have a right to your actions, never to their fruits.&rdquo;
+              </p>
+              <p className="mt-2 font-caps text-[0.65rem] tracking-[0.28em] text-gold-soft/70">Bhagavad Gita 2.47</p>
+            </div>
+            {FOOTER_COLUMNS.map((col) => (
+              <div key={col.title}>
+                <p className="font-caps text-[0.68rem] tracking-[0.28em] text-gold-soft/80 uppercase">{col.title}</p>
+                <ul className="mt-5 space-y-3 text-sm">
+                  {col.links.map((l) => (
+                    <li key={l.href}>
+                      <a href={l.href} className="text-moonlight/60 transition-colors hover:text-moonlight">
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
+                  {col.title === 'Connect' && process.env.NEXT_PUBLIC_WHATSAPP_NUMBER && (
+                    <li>
+                      <a href="/whatsapp" className="text-moonlight/60 transition-colors hover:text-moonlight">
+                        Madhav on WhatsApp
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          {/* Motion control — the OS setting is honoured automatically, but a
-              seeker who has never found it can choose stillness right here. */}
-          <MotionPreferenceToggle tone="dark" className="mt-8 border-t border-white/10 pt-6" />
+          <div className="ornament-rule my-12" aria-hidden="true">
+            <span className="h-1.5 w-1.5 rotate-45 bg-gold-soft/60" />
+          </div>
 
-          {/* Gita Press attribution — the credibility line */}
-          <p className="text-moonlight/55 text-xs mt-3 font-medium">
-            Sanskrit & Hindi Bhavartha: Swami Ramsukhdas,{' '}
-            <span className="italic">Sadhak-Sanjivani</span>
-            {' '}(Gita Press, Gorakhpur) · English: Swami Gambhirananda
-            {' '}· Digitized by IIT Kanpur Gita Supersite
-          </p>
+          <div className="grid gap-6 text-xs leading-relaxed md:grid-cols-2">
+            <div>
+              {/* Gita Press attribution — the credibility line */}
+              <p className="text-moonlight/50">
+                Sanskrit &amp; Hindi Bhavartha: Swami Ramsukhdas,{' '}
+                <span className="italic">Sadhak-Sanjivani</span> (Gita Press, Gorakhpur) · English: Swami
+                Gambhirananda · Digitized by IIT Kanpur Gita Supersite
+              </p>
+              <p className="mt-3 text-moonlight/35">
+                This application offers reflections through the lens of the Bhagavad Gita. It is not a
+                professional coach, therapist, religious authority, legal, medical, or financial advisor;
+                it is an effort to bring shlokas into simple language for daily reflection.
+              </p>
+            </div>
+            {/* Motion control — the OS setting is honoured automatically, but a
+                seeker who has never found it can choose stillness right here. */}
+            <div className="md:justify-self-end">
+              <MotionPreferenceToggle tone="dark" />
+            </div>
+          </div>
 
-          <p className="text-moonlight/35 text-xs mt-4 max-w-lg mx-auto leading-relaxed">
-            This application offers reflections through the lens of the Bhagavad Gita.
-            It is not a professional coach, therapist, religious authority, legal,
-            medical, or financial advisor; it is an effort to bring shlokas into
-            simple language for daily reflection.
-          </p>
-          <p className="text-moonlight/25 text-xs mt-6">
+          <p className="mt-10 text-center font-caps text-[0.62rem] tracking-[0.3em] text-moonlight/30 uppercase">
             Built with reverence for timeless wisdom
           </p>
         </div>

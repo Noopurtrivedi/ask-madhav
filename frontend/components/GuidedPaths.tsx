@@ -16,17 +16,34 @@ interface Step {
 }
 interface Path {
   id: string
-  icon: string
+  icon: IconName
   title: string
   yoga: string
   intro: string
   steps: Step[]
 }
 
+type IconName = 'wave' | 'flame' | 'dove' | 'diya'
+
+/** Fine-line glyphs drawn for the paths — one stroke weight, gold, no emoji. */
+function PathIcon({ name }: { name: IconName }) {
+  const d: Record<IconName, string> = {
+    wave: 'M3 15c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 3 2M3 19c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 3 2M6 11c0-3.3 2.7-6 6-6 2 0 3.6.9 4.6 2.4-1.9-.4-4 .6-4.6 2.6',
+    flame: 'M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.4 1.2-3.9 2.5-5 .2 1.8 1 2.8 2 3.2C11 8.6 11.3 5.6 12 3zM12 21a2.2 2.2 0 0 1-2.2-2.2c0-1.4 1.2-2.2 2.2-3.6 1 1.4 2.2 2.2 2.2 3.6A2.2 2.2 0 0 1 12 21z',
+    dove: 'M4 15c3 0 5.5-1 7.5-3.5L15 7c1-1.2 2.6-1.6 4-.8l1.5.8-2 .6c-.6 4.8-3.6 8.4-8.5 8.4H7l-3 3v-4zM11.5 11.5L8 6',
+    diya: 'M3 13h18c-.8 3.6-4.6 6-9 6s-8.2-2.4-9-6zM12 4c.9 1.6 2 2.6 2 4.1a2 2 0 0 1-4 0C10 6.6 11.1 5.6 12 4zM8 21h8',
+  }
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={d[name]} />
+    </svg>
+  )
+}
+
 const PATHS: Path[] = [
   {
     id: 'letting-go',
-    icon: '🌊',
+    icon: 'wave',
     title: 'Letting Go of Outcomes',
     yoga: 'Karma Yoga',
     intro: 'Act with all your heart, then release your grip on the result.',
@@ -39,7 +56,7 @@ const PATHS: Path[] = [
   },
   {
     id: 'facing-fear',
-    icon: '🔥',
+    icon: 'flame',
     title: 'Facing Fear & Anxiety',
     yoga: 'Sankhya & Dhyana Yoga',
     intro: 'Steady the restless mind and meet what frightens you.',
@@ -52,7 +69,7 @@ const PATHS: Path[] = [
   },
   {
     id: 'grief',
-    icon: '🕊️',
+    icon: 'dove',
     title: 'Walking Through Grief',
     yoga: 'Sankhya Yoga',
     intro: 'For when you have lost someone, or something, dear.',
@@ -65,7 +82,7 @@ const PATHS: Path[] = [
   },
   {
     id: 'purpose',
-    icon: '🪔',
+    icon: 'diya',
     title: 'Finding Your Purpose',
     yoga: 'Dharma',
     intro: 'Discover your own work — and why it is yours to do.',
@@ -93,19 +110,19 @@ export default function GuidedPaths() {
   const [open, setOpen] = useState<string | null>(null)
 
   return (
-    <section id="paths" className="py-14 sm:py-20 px-6" >
+    <section id="paths" className="py-20 sm:py-28 px-6" >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <p className="text-gold-soft/65 text-xs font-medium uppercase tracking-widest mb-3">
+          <p className="eyebrow mb-5">
             Guided Journeys
           </p>
           <h2
-            className="text-3xl md:text-4xl text-moonlight mb-3"
-            style={{ fontFamily: 'Crimson Text, serif' }}
+            className="section-title mb-4"
+            style={{ fontFamily: 'var(--font-display), serif' }}
           >
-            Walk a Path
+            Walk a <em className="gold-leaf">path</em>
           </h2>
-          <p className="text-moonlight/58 text-sm max-w-md mx-auto">
+          <p className="section-lede max-w-lg mx-auto">
             Not sure what to ask? Choose what your heart is carrying. Each path is a short journey
             of verses — read them, or walk through them with Madhav.
           </p>
@@ -117,27 +134,25 @@ export default function GuidedPaths() {
             return (
               <div
                 key={path.id}
-                className={`rounded-2xl border transition-all duration-300 ${
-                  isOpen
-                    ? 'border-gold/40 bg-white shadow-lg shadow-saffron/10'
-                    : 'border-saffron/15 bg-white/[0.05] hover:border-gold/35 hover:shadow-md hover:shadow-saffron/10'
-                }`}
+                className={`sacred-card rounded-2xl ${isOpen ? 'ring-1 ring-gold-soft/25' : 'hover:-translate-y-0.5'}`}
               >
                 <button
                   onClick={() => setOpen(isOpen ? null : path.id)}
                   aria-expanded={isOpen}
-                  className="w-full text-left p-5"
+                  className="w-full text-left p-6"
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-3xl select-none">{path.icon}</span>
+                  <div className="flex items-center gap-4 mb-3">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold-soft/30 bg-gold-soft/[0.06] text-gold-soft">
+                      <PathIcon name={path.icon} />
+                    </span>
                     <div>
                       <p
-                        className="text-moonlight text-lg font-semibold leading-snug group-hover:text-saffron"
-                        style={{ fontFamily: 'Crimson Text, serif' }}
+                        className="text-moonlight text-[1.4rem] font-medium leading-snug"
+                        style={{ fontFamily: 'var(--font-display), serif' }}
                       >
                         {path.title}
                       </p>
-                      <p className="text-gold-soft/65 text-xs">{path.yoga} · {path.steps.length} verses</p>
+                      <p className="font-caps text-[0.62rem] tracking-[0.2em] uppercase text-gold-soft/70 mt-0.5">{path.yoga} · {path.steps.length} verses</p>
                     </div>
                     <span
                       className={`ml-auto text-gold-soft/55 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}

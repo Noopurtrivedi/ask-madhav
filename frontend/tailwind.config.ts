@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Every integer step 0–100, so modifiers like `border-gold/12` or
+      // `text-moonlight/58` (used throughout) generate instead of being
+      // silently dropped — a dropped border falls back to light gray.
+      opacity: Object.fromEntries(Array.from({ length: 101 }, (_, i) => [String(i), String(i / 100)])),
       colors: {
         navy: {
           DEFAULT: '#0A0F2E',
@@ -50,8 +54,15 @@ const config: Config = {
         lotus: '#E8A0B8',
       },
       fontFamily: {
-        crimson: ['"Crimson Text"', 'serif'],
-        inter: ['Inter', 'sans-serif'],
+        // Wired to the next/font variables set on <html> in app/layout.tsx.
+        display: ['var(--font-display)', 'Georgia', 'serif'],
+        caps: ['var(--font-caps)', 'var(--font-display)', 'serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        sanskrit: ['var(--font-sanskrit)', 'var(--font-hindi)', 'serif'],
+        hindi: ['var(--font-hindi)', 'var(--font-sanskrit)', 'serif'],
+        // Legacy aliases — older markup still says font-crimson / font-inter.
+        crimson: ['var(--font-display)', 'Georgia', 'serif'],
+        inter: ['var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       animation: {
         'lotus-pulse': 'lotus-pulse 3s ease-in-out infinite',
