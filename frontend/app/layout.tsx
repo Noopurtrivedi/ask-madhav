@@ -62,7 +62,9 @@ export default function RootLayout({
     // before hydration (so a returning seeker never sees it flash), and browser
     // extensions commonly stamp attributes on <html>. Neither is server-visible.
     <html lang="en" className={fontVars} suppressHydrationWarning>
-      <body>
+      {/* Extensions such as Grammarly stamp attributes on <body> before React
+          hydrates; that mismatch is not ours, so don't report it. */}
+      <body suppressHydrationWarning>
         {/*
           The Darshan Experience Engine wraps the whole app so state, device
           tier and the active quote are shared by every route — the navbar

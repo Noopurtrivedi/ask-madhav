@@ -68,7 +68,7 @@ export default function Navbar({ overlay = false }: Props) {
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
         onHero
           ? 'nav-on-light bg-transparent border-b border-black/5'
-          : 'bg-[#07080F]/92 backdrop-blur-md border-b border-gold-soft/10'
+          : 'bg-[#07080F]/95 border-b border-gold-soft/10'
       }`}
     >
       <div ref={progressRef} className="scroll-progress" aria-hidden="true" />

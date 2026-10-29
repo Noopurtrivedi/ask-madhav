@@ -77,7 +77,8 @@ export default function GalaxyCanvas({ drive, count }: { drive: RefObject<Galaxy
     let h = 0
     let dpr = 1
     const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 1.75)
+      // Stars are points of light — a high pixel ratio buys nothing but fill cost.
+      dpr = Math.min(window.devicePixelRatio || 1, 1.25)
       w = canvas.clientWidth
       h = canvas.clientHeight
       canvas.width = Math.round(w * dpr)

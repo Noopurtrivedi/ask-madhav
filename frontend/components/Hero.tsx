@@ -20,18 +20,25 @@ const ENTRY_POINTS = [
 const STARTERS = ['I feel anxious about the future', 'I am afraid of failing', 'What is my purpose?']
 
 // The opening frame: an original Shree Krishna avatar (FLUX.1 [schnell],
-// Apache-2.0, generated locally — see docs/AVATAR.md), and where his raised
-// fingertip sits in it as fractions of the image. The Sudarshan Chakra forms
-// just above the fingertip. `x`/`mobileX` place that point on screen.
+// Apache-2.0, generated locally — see docs/AVATAR.md). (fx, fy) is the centre
+// of the Sudarshan Chakra as fractions of the image: on his index finger, a
+// little below the tip, so the fingertip rises through the disc's hole.
+// `x`/`mobileX` place that point on screen.
 const ART = {
   src: '/art/krishna-avatar.jpg',
   w: 2560,
   h: 1440,
-  fx: 0.522,
-  fy: 0.29,
+  fx: 0.5242,
+  fy: 0.3444,
   x: 0.58,
   mobileX: 0.36,
 }
+
+// The fingertip above the disc's centre line, cut out of the same image
+// (public/art/krishna-fingertip.png, image px). It is layered *over* the
+// flat-lying chakra so the finger reads as passing through the hole: the
+// disc's far half sits behind it, the near half covers the rest of the finger.
+const TIP = { src: '/art/krishna-fingertip.png', x: 1300, y: 440, w: 86, h: 56 }
 
 /** Hand a question to the chat below and send it there. */
 function askMadhav(raw: string) {
@@ -54,7 +61,7 @@ const smooth = (a: number, b: number, x: number) => {
  *       Chakra forming on Krishna's raised fingertip. The headline and the ask
  *       bar live here.
  *  II.  **The dive.** Scrolling pushes the camera toward the fingertip: the
- *       painting zooms and blurs past, the chakra grows and turns faster —
+ *       chakra lifts off his fingertip, turns to face the seeker, grows and races —
  *       "a single verse changes everything".
  *  III. **Vishwaroop.** A flash of light, and a galaxy bursts out of the
  *       chakra's centre — the universe in one form (Gita 11.7).
@@ -83,11 +90,12 @@ export default function Hero() {
   const engine = useDarshanOptional()
   const reduced = useReducedMotion()
   const still = reduced || engine?.tier === 'still'
-  const starCount = engine?.tier === 'lite' ? 1800 : 4200
+  const starCount = engine?.tier === 'lite' ? 1600 : 3200
 
   const sectionRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const artRef = useRef<HTMLDivElement>(null)
+  const tipRef = useRef<HTMLDivElement>(null)
   const galaxy = useRef<GalaxyDrive>({ burst: 0, active: false })
   const [diving, setDiving] = useState(false)
 
@@ -97,7 +105,8 @@ export default function Hero() {
   useEffect(() => {
     const stage = stageRef.current
     const art = artRef.current
-    if (!stage || !art) return
+    const tip = tipRef.current
+    if (!stage || !art || !tip) return
     const layout = () => {
       const W = stage.clientWidth
       const H = stage.clientHeight
@@ -110,7 +119,9 @@ export default function Hero() {
       const wantX = W >= 1024 ? ART.x : ART.mobileX
       const left = Math.min(0, Math.max(W - dw, W * wantX - ART.fx * dw))
       const top = Math.min(0, Math.max(H - dh, H * 0.27 - ART.fy * dh))
-      Object.assign(art.style, { left: `${left}px`, top: `${top}px`, width: `${dw}px`, height: `${dh}px` })
+      const rect = { left: `${left}px`, top: `${top}px`, width: `${dw}px`, height: `${dh}px` }
+      Object.assign(art.style, rect)
+      Object.assign(tip.style, rect)
       stage.style.setProperty('--fx', `${left + ART.fx * dw}px`)
       stage.style.setProperty('--fy', `${top + ART.fy * dh}px`)
     }
@@ -139,9 +150,17 @@ export default function Hero() {
       const t = smooth(0.06, 0.5, p)
 
       set('--zoom', 1 + 1.55 * t)
-      set('--blur', 12 * smooth(0.3, 0.52, p))
+      // The chakra lies flat, spinning on his fingertip; as the dive begins it
+      // lifts off, turns to face the seeker and grows. The cut-out fingertip
+      // fades as the disc leaves it.
+      const rise = smooth(0.1, 0.36, p)
+      set('--tilt', 70 * (1 - rise))
+      set('--lift', -0.07 * window.innerHeight * smooth(0.1, 0.3, p))
+      set('--tip', 1 - smooth(0.1, 0.17, p))
       set('--art', 1 - smooth(0.46, 0.53, p))
-      set('--cs', 0.12 + 4.6 * t * t * t)
+      // A phone frames him smaller, so the disc starts a little smaller too.
+      const base = window.innerWidth >= 1024 ? 0.34 : 0.27
+      set('--cs', base + 4.4 * t * t * t)
       set('--ca', 1 - smooth(0.5, 0.535, p))
       // A true whiteout: the light builds, holds fully opaque while the
       // painting and chakra are swapped for the galaxy, then fades to reveal it.
@@ -153,6 +172,10 @@ export default function Hero() {
       // so the cut between the two worlds is never seen.
       set('--gal', smooth(0.525, 0.545, p))
       stage.dataset.act = p < 0.12 ? '1' : p > 0.68 ? '3' : '2'
+      // While the film fills the screen, the site-wide sky behind it is
+      // invisible — stop painting it (measured: ~30% of frame time).
+      const covers = rect.top <= 1 && rect.bottom >= window.innerHeight - 1
+      document.documentElement.toggleAttribute('data-hero-covers', covers)
 
       const burst = smooth(0.545, 0.78, p)
       galaxy.current.burst = 1 - Math.pow(1 - burst, 3)
@@ -180,6 +203,7 @@ export default function Hero() {
       io.disconnect()
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
+      document.documentElement.removeAttribute('data-hero-covers')
     }
   }, [still])
 
@@ -197,10 +221,28 @@ export default function Hero() {
           </div>
           <div className="journey-shade" aria-hidden="true" />
 
-          {/* The Sudarshan Chakra on Krishna's fingertip — the door we dive through. */}
+          {/* The Sudarshan Chakra, lying flat and spinning on Krishna's
+              fingertip — the door we dive through. */}
           <div className="journey-chakra" aria-hidden="true">
             <div className="journey-chakra-glow" />
             <EngineChakra size={600} override={diving ? 'processing' : undefined} />
+          </div>
+
+          {/* The fingertip through the disc's hole (see TIP). Zooms with the art. */}
+          <div className="journey-tip" aria-hidden="true">
+            <div ref={tipRef} className="absolute">
+              <span
+                className="absolute"
+                style={{
+                  left: `${(TIP.x / ART.w) * 100}%`,
+                  top: `${(TIP.y / ART.h) * 100}%`,
+                  width: `${(TIP.w / ART.w) * 100}%`,
+                  height: `${(TIP.h / ART.h) * 100}%`,
+                }}
+              >
+                <Image src={TIP.src} alt="" fill unoptimized sizes="120px" />
+              </span>
+            </div>
           </div>
 
           {/* ── Act III: the universe in one form ── */}
@@ -264,7 +306,7 @@ export default function Hero() {
                     key={s}
                     type="button"
                     onClick={() => askMadhav(s)}
-                    className="journey-chip rounded-full border border-white/15 bg-black/25 px-3.5 py-1.5 text-xs text-moonlight/75 backdrop-blur-sm transition-colors hover:border-gold-soft/60 hover:text-moonlight"
+                    className="journey-chip rounded-full border border-white/15 bg-black/25 px-3.5 py-1.5 text-xs text-moonlight/75 transition-colors hover:border-gold-soft/60 hover:text-moonlight"
                   >
                     {s}
                   </button>
