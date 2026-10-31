@@ -8,6 +8,9 @@ stock art, no third-party likeness.
 | Step | Tool | Licence |
 |---|---|---|
 | Image | [ComfyUI](https://github.com/comfyanonymous/ComfyUI) (GPL-3.0, the tool only) running **FLUX.1 [schnell]** fp8 (`Comfy-Org/flux1-schnell`) | Model: **Apache-2.0** — outputs free for commercial use |
+| Dashavatar, cosmic form, Viraat heads, lotus, feather, Three Paths cards | Same setup. `public/art/dash/`, `public/art/viraat/` (cut out with rembg, isnet-general-use), `public/art/path-karma.jpg`, `public/art/card-*.jpg`, `lotus.webp`, `feather.webp` | Model: **Apache-2.0** |
+| Krishna theme (`public/audio/krishna-rhythm.*`) | Original: a melody written for this app and synthesised in Python with no samples (bansuri, tabla in keherwa, santoor-like figures, tanpura, strings, generated reverb). Source kept with the local work files. | Ours |
+| Arjuna loop | Wan 2.2 TI2V 5B, seed 913, 49 frames, ping-pong (`public/art/arjuna.*`) | **Apache-2.0** |
 | Upscale 1536×864 → 2560×1440 | **Real-ESRGAN x4plus** | BSD-3-Clause |
 | Animation (when present) | **Wan 2.2 TI2V 5B** (`Comfy-Org/Wan_2.2_ComfyUI_Repackaged`) | **Apache-2.0** |
 | Galaxy, burst | Same ComfyUI + FLUX.1 [schnell] setup (`public/art/galaxy.jpg` seed 12, `public/art/burst.jpg` seed 21; prompts in the local work folder) | Model: **Apache-2.0** — outputs free for commercial use |

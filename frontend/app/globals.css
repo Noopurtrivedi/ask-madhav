@@ -199,16 +199,6 @@ h3.font-semibold, h2.font-semibold { font-weight: 600; }
 .btn-outline-gold:hover { background: rgba(227, 182, 92, 0.12); border-color: #E9C46A; color: #F7E3A6; }
 
 /* Navbar over the ivory first frame: dark ink. */
-.nav-on-light .caps-link,
-.nav-on-light .nav-burger { color: rgba(38, 32, 24, 0.78); }
-.nav-on-light .caps-link:hover { color: #8A6420; }
-.nav-on-light .nav-wordmark { color: #221D16; }
-.nav-on-light .btn-outline-gold {
-  color: #6E4F16;
-  border-color: rgba(138, 100, 32, 0.55);
-  background: rgba(250, 246, 236, 0.9);
-}
-.nav-on-light .btn-outline-gold:hover { background: rgba(138, 100, 32, 0.08); }
 
 /* Small tracked caps link — navbar and footer. */
 .caps-link {
@@ -1137,6 +1127,16 @@ section[id] { scroll-margin-top: 5rem; }
 }
 
 /* Still counterpart: no pinning, no film — Act I as a hero, Act III below it. */
+.nav-on-light .caps-link,
+.nav-on-light .nav-burger { color: rgba(38, 32, 24, 0.78); }
+.nav-on-light .caps-link:hover { color: #8A6420; }
+.nav-on-light .nav-wordmark { color: #221D16; }
+.nav-on-light .btn-outline-gold {
+  color: #6E4F16;
+  border-color: rgba(138, 100, 32, 0.55);
+  background: rgba(250, 246, 236, 0.9);
+}
+.nav-on-light .btn-outline-gold:hover { background: rgba(138, 100, 32, 0.08); }
 .journey-still { height: auto; }
 .journey-still .journey-stage { position: relative; height: auto; min-height: 100svh; }
 .journey-still .journey-beat-1 { position: relative; min-height: 100svh; }
@@ -1299,3 +1299,275 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
 }
 /* The fingertip cut-out follows the tracked finger while the loop plays. */
 .journey-tip-patch { transform: translate(calc(var(--tx) * var(--vid)), calc(var(--ty) * var(--vid))); }
+
+/* ── Dashavatar orbit (DashavatarOrbit.tsx) ─────────────────────────
+   Ten portraits orbit the form. Seats rotate with the ring; each counter-
+   rotates so faces stay upright. --px/--py come from the pointer. */
+.orbit-root {
+  --R: min(33vh, 44vw);
+  --px: 0;
+  --py: 0;
+  --medal: clamp(46px, min(10.5vh, 17vw), 104px);
+  position: absolute;
+  inset: 0;
+}
+.orbit-stage {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 0;
+  height: 0;
+  transform: perspective(1500px) rotateX(calc(var(--py) * -7deg)) rotateY(calc(var(--px) * 9deg));
+  transform-style: preserve-3d;
+  transition: transform 400ms ease-out;
+}
+.orbit-halo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(227, 182, 92, 0.42);
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+.orbit-halo-1 {
+  width: calc(var(--R) * 2);
+  height: calc(var(--R) * 2);
+  margin: calc(var(--R) * -1) 0 0 calc(var(--R) * -1);
+}
+.orbit-halo-2 {
+  width: calc(var(--R) * 2.9);
+  height: calc(var(--R) * 2.9);
+  margin: calc(var(--R) * -1.45) 0 0 calc(var(--R) * -1.45);
+  border-color: rgba(150, 130, 230, 0.26);
+  transform: translateZ(-90px);
+}
+.orbit-centre {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--R) * 1.44);
+  height: calc(var(--R) * 1.44);
+  margin: calc(var(--R) * -0.72) 0 0 calc(var(--R) * -0.72);
+  transition: opacity 1.2s ease;
+}
+.orbit-disc {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 9999px;
+  -webkit-mask-image: radial-gradient(circle, #000 58%, transparent 71%);
+  mask-image: radial-gradient(circle, #000 58%, transparent 71%);
+  transition: opacity 0.9s ease;
+}
+.orbit-disc img { animation: orbit-breathe 26s ease-in-out infinite alternate; }
+.orbit-disc-dim { opacity: 0; }
+.orbit-disc-form { animation: orbit-form-in 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.orbit-caption {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 6%;
+  padding: 3.5rem 0.5rem 0.75rem;
+  text-align: center;
+  background: radial-gradient(ellipse 72% 78% at 50% 72%, rgba(5, 7, 12, 0.9) 0%, rgba(5, 7, 12, 0.7) 50%, rgba(5, 7, 12, 0) 100%);
+  pointer-events: none;
+  text-shadow: 0 1px 14px #05070C, 0 0 4px #05070C;
+}
+.orbit-ring {
+  position: absolute;
+  left: 0;
+  top: 0;
+  animation: orbit-spin 150s linear infinite;
+}
+.orbit-seat {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: rotate(var(--a)) translateY(calc(var(--R) * -1)) rotate(calc(var(--a) * -1));
+  transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.orbit-counter {
+  position: absolute;
+  left: calc(var(--medal) / -2);
+  top: calc(var(--medal) / -2);
+  animation: orbit-spin 150s linear infinite reverse;
+}
+.orbit-held .orbit-ring,
+.orbit-held .orbit-counter,
+.orbit-ring:has(.orbit-medal:hover) ,
+.orbit-ring:has(.orbit-medal:hover) .orbit-counter { animation-play-state: paused; }
+.orbit-medal {
+  display: block;
+  width: var(--medal);
+  opacity: 0;
+  transform: scale(0.4);
+  cursor: pointer;
+  transition: opacity 1s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.orbit-medal-in { opacity: 1; transform: scale(1); }
+.orbit-medal-in:hover,
+.orbit-medal-in:focus-visible { transform: scale(1.14); outline: none; }
+.orbit-medal-on { transform: scale(1.2); }
+.orbit-medal-art {
+  position: relative;
+  display: block;
+  width: var(--medal);
+  height: var(--medal);
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(227, 182, 92, 0.75);
+  box-shadow: 0 0 22px rgba(227, 182, 92, 0.28);
+  transition: box-shadow 0.5s ease, border-color 0.5s ease;
+}
+.orbit-medal-in:hover .orbit-medal-art,
+.orbit-medal-in:focus-visible .orbit-medal-art,
+.orbit-medal-on .orbit-medal-art { border-color: #F7E3A6; box-shadow: 0 0 34px rgba(247, 227, 166, 0.7); }
+.orbit-medal-name {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 3px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: rgba(246, 241, 228, 0.82);
+  text-shadow: 0 0 8px #05070C;
+}
+/* Gathering: the ten draw inward into the one, and the stage clears for it. */
+.orbit-gathered .orbit-seat {
+  transform: rotate(var(--a)) translateY(calc(var(--R) * -0.1)) rotate(calc(var(--a) * -1));
+}
+.orbit-gathered .orbit-medal { opacity: 0; transform: scale(0.3); pointer-events: none; }
+.orbit-gathered .orbit-centre,
+.orbit-gathered .orbit-halo-1 { opacity: 0; }
+.orbit-bloom {
+  position: absolute;
+  inset: -6%;
+  opacity: 0.2;
+  filter: blur(46px) saturate(1.25);
+  animation: orbit-bloom-in 1.2s ease both;
+  pointer-events: none;
+}
+.orbit-gather {
+  position: absolute;
+  left: 50%;
+  bottom: 5.25rem;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+/* The one form (ViraatForm.tsx). Heads rise from behind his crown along two
+   arcs, centred on --hx/--hy, one after another. */
+.viraat {
+  --S: min(90vh, 104vw);
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: var(--S);
+  height: var(--S);
+  margin: calc(var(--S) / -2) 0 0 calc(var(--S) / -2);
+  pointer-events: none;
+  animation: viraat-in 2.4s ease-out both;
+}
+.viraat-grow {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 52%;
+  transition: transform 3.2s cubic-bezier(0.55, 0, 0.3, 1), opacity 1s ease 2.4s;
+}
+.viraat-ending .viraat-grow { transform: scale(3.4); opacity: 0; }
+.viraat-aura {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 120%;
+  height: 120%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 226, 160, 0.72) 0%, rgba(240, 180, 90, 0.34) 36%, rgba(240, 180, 90, 0) 68%);
+}
+.viraat-head {
+  --r: calc(var(--S) * 0.25);
+  --w: calc(var(--S) * 0.18);
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  width: var(--w);
+  height: var(--w);
+  margin: calc(var(--w) / -2) 0 0 calc(var(--w) / -2);
+  opacity: 0;
+  transform: rotate(var(--deg)) translateY(calc(var(--r) * -0.2)) rotate(calc(var(--deg) * -1)) scale(calc(var(--flip) * 0.35), 0.35);
+  animation: viraat-head 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.viraat-far { --r: calc(var(--S) * 0.39); --w: calc(var(--S) * 0.15); filter: brightness(0.82); }
+.viraat-body {
+  position: absolute;
+  left: 21%;
+  right: 21%;
+  top: 32%;
+  bottom: -8%;
+  /* The render's outermost hands meet its frame; let them fade into the light. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+}
+.vishwa-ending::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 42%, #FFFFFF 0%, #FFF3D6 45%, #F6DDA6 100%);
+  animation: vishwa-light 3.4s ease-in both;
+}
+.arjuna-witness {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 5;
+  width: min(50vh, 86vw);
+  transform: translateX(-50%);
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 50% 62% at 50% 62%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 62% at 50% 62%, #000 62%, transparent 100%);
+}
+@keyframes viraat-in { from { opacity: 0; transform: scale(0.72); } to { opacity: 1; transform: scale(1); } }
+@keyframes viraat-head {
+  to {
+    opacity: 1;
+    transform: rotate(var(--deg)) translateY(calc(var(--r) * -1)) rotate(calc(var(--deg) * -1)) scale(var(--flip), 1);
+  }
+}
+@keyframes vishwa-light { 0%, 45% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes orbit-spin { to { transform: rotate(360deg); } }
+@keyframes orbit-breathe { from { transform: scale(1.02); } to { transform: scale(1.12); } }
+@keyframes orbit-form-in { from { opacity: 0; transform: scale(0.82); } to { opacity: 1; transform: scale(1); } }
+@keyframes orbit-bloom-in { from { opacity: 0; } to { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) {
+  .orbit-ring, .orbit-counter, .orbit-disc img, .orbit-disc-form, .orbit-bloom { animation: none; }
+  .viraat, .viraat-head { animation-duration: 1ms; animation-delay: 0s !important; }
+  .orbit-stage { transform: none; }
+}
+@media (max-width: 767px) {
+  .orbit-medal-name { display: none; }
+  .orbit-stage { top: 40%; }
+}
+
+/* Lotus and mor pankh, adrift over the obsidian page (FloatingOfferings.tsx). */
+.offerings {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+html[data-hero-covers] .offerings { opacity: 0; }
+.offering {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  max-width: none;
+  will-change: transform;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.5));
+}
+@media (max-width: 767px) { .offering { scale: 0.7; opacity: 0.5 !important; } }

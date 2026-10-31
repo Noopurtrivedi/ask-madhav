@@ -6,13 +6,14 @@
  * The brief is emphatic that Vishwaroop must never be the default state, so
  * this is a quiet invitation card on the page. Nothing loads, mounts or moves
  * until the seeker taps it: the 3D scene lives behind a dynamic import that is
- * only reached on entry, and the reveal ends itself after
- * `config.vishwaroop.max_duration_ms`.
+ * only reached on entry.
  *
  * Arjuna asked to see it, was overwhelmed, and asked for the gentle form back
  * (11.45–11.46). That arc is the interaction model: an explicit request, a
  * bounded experience, and an always-available way out — Escape, the Return
- * button, or simply waiting.
+ * button, or simply leaving it: the reveal closes itself after
+ * `max_duration_ms` without a touch. Within that, the ten descents are
+ * interactive (DashavatarOrbit); the seeker chooses when they gather.
  *
  * Under reduced motion (or on any device below `full` tier) the same content is
  * offered as a still mandala with the verse — the meaning is never gated behind
@@ -24,8 +25,8 @@ import { createPortal } from 'react-dom'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDarshanOptional } from './DarshanProvider'
 import { CosmicMandala } from './SacredSymbols'
-import { ArjunaWitness, DivineSilhouette, VishwaroopForm } from './CosmicForms'
-import { DASHAVATAR, AvatarGlyphIcon } from './Dashavatar'
+import ViraatForm from './ViraatForm'
+import DashavatarOrbit from './DashavatarOrbit'
 import { useReducedMotion } from '@/lib/motion'
 import { darshan } from '@/lib/darshan/events'
 import { VISUAL_MOODS } from '@/lib/darshan/registry'
@@ -35,11 +36,17 @@ const VishwaroopScene = dynamic(() => import('./three/VishwaroopScene'), {
   loading: () => null,
 })
 
+// The two acts: I (0 → 0.52) the ten descents arrive and can be explored;
+// II (0.52 → 1) they gather and the one form manifests, at the seeker's asking.
+const ACT_II = 0.52
+
 export default function VishwaroopDarshan() {
   const engine = useDarshanOptional()
   const reduced = useReducedMotion()
   const [open, setOpen] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [gathered, setGathered] = useState(false)
+  const [ending, setEnding] = useState(false)
   // The overlay is portalled to <body>, so it needs a mounted flag to stay
   // SSR-safe (there is no `document` on the server).
   const [mounted, setMounted] = useState(false)
@@ -49,7 +56,8 @@ export default function VishwaroopDarshan() {
   useEffect(() => setMounted(true), [])
 
   const enabled = engine?.config.vishwaroop.enabled ?? true
-  const maxMs = engine?.config.vishwaroop.max_duration_ms ?? 24_000
+  const idleMs = engine?.config.vishwaroop.max_duration_ms ?? 90_000
+  const idleAt = useRef(0)
   const palette =
     engine?.config.forms.find((f) => f.form_id === 'vishwaroop_darshan')?.color_palette ??
     VISUAL_MOODS.cosmos.palette
@@ -58,13 +66,33 @@ export default function VishwaroopDarshan() {
   const videoUrl = engine?.config.vishwaroop.video_url ?? null
   const videoPoster = engine?.config.vishwaroop.video_poster ?? null
 
-  const close = useCallback(() => {
+  const finish = useCallback(() => {
     setOpen(false)
     setProgress(0)
+    setGathered(false)
+    setEnding(false)
     darshan.idle('vishwaroop')
     // Return focus to the trigger — the overlay took it on entry.
     returnFocus.current?.focus()
   }, [])
+
+  // The form swells past the frame into light before the gentle form returns.
+  // A second request while that plays leaves at once; so does stillness.
+  const close = useCallback(() => {
+    if (reduced || !gathered || ending) {
+      finish()
+      return
+    }
+    setEnding(true)
+    window.setTimeout(finish, 3400)
+  }, [reduced, gathered, ending, finish])
+
+  // The timeline must not restart when `close` changes (it does when the ending
+  // begins), so it reaches the latest one through a ref.
+  const closeRef = useRef(close)
+  useEffect(() => {
+    closeRef.current = close
+  }, [close])
 
   const enter = useCallback(() => {
     setOpen(true)
@@ -72,23 +100,31 @@ export default function VishwaroopDarshan() {
     darshan.vishwaroop('vishwaroop')
   }, [])
 
-  // Drive `progress` 0→1 over the configured duration, then resolve on its own.
+  const touch = useCallback(() => {
+    idleAt.current = performance.now()
+  }, [])
+  const gather = useCallback(() => {
+    touch()
+    setGathered(true)
+  }, [touch])
+
+  // Drive `progress`: the ten arrive (0 → ACT_II) and hold while the seeker
+  // explores; gathering plays the rest (ACT_II → 1), which holds on the one form.
+  // Either way the reveal stays bounded: untouched for `idleMs`, it closes.
   useEffect(() => {
     if (!open) return
-    if (reduced) {
-      // Stillness: hold the form fully revealed, no timeline, no auto-dismiss.
-      setProgress(1)
-      return
-    }
+    touch()
+    const from = gathered ? ACT_II : 0
+    const to = gathered ? 1 : ACT_II
+    const dur = gathered ? 7000 : 9000
     const start = performance.now()
     const tick = (now: number) => {
-      const p = Math.min(1, (now - start) / maxMs)
-      setProgress(p)
-      if (p >= 1) {
+      if (now - idleAt.current > idleMs) {
         raf.current = null
-        close()
+        closeRef.current()
         return
       }
+      if (!reduced) setProgress(Math.min(to, from + ((to - from) * (now - start)) / dur))
       raf.current = requestAnimationFrame(tick)
     }
     raf.current = requestAnimationFrame(tick)
@@ -96,7 +132,7 @@ export default function VishwaroopDarshan() {
       if (raf.current != null) cancelAnimationFrame(raf.current)
       raf.current = null
     }
-  }, [open, reduced, maxMs, close])
+  }, [open, reduced, idleMs, gathered, touch])
 
   // Escape always returns the gentle form. The overlay owns the viewport.
   useEffect(() => {
@@ -115,15 +151,9 @@ export default function VishwaroopDarshan() {
 
   if (!enabled) return null
 
-  // ── The two acts ────────────────────────────────────────────────────────
-  // I  (0 → 0.52): the ten descents arrive one by one around the form.
-  // II (0.52 → 1): they converge inward and the Vishwaroop manifests — the form
-  //                Arjuna was actually shown. The Dashavatar is the *prelude*;
-  //                this is the moment it builds to.
-  const ACT_II = 0.52
-  const manifest = Math.max(0, Math.min(1, (progress - ACT_II) / (1 - ACT_II)))
-  // Reduced motion has no timeline, so it is shown the climax directly.
-  const climax = reduced ? 1 : manifest
+  // Stillness has no timeline: gathering simply shows the form.
+  const shown = reduced ? (gathered ? 1 : ACT_II) : progress
+  const climax = Math.max(0, Math.min(1, (shown - ACT_II) / (1 - ACT_II)))
 
   return (
     <section id="vishwaroop" className="relative overflow-hidden px-6 py-24">
@@ -149,7 +179,7 @@ export default function VishwaroopDarshan() {
           Arjuna asked to see the form that contains all forms. What opened was
           not one figure but the whole descent — fish, tortoise, boar, man-lion,
           dwarf, axe-bearer, archer, cowherd, the awakened one, and the rider yet
-          to come. Enter only if you wish to; it lasts a moment, then returns you.
+          to come. Enter only if you wish to, touch each form, and return whenever you choose.
         </p>
 
         <button
@@ -162,7 +192,7 @@ export default function VishwaroopDarshan() {
         </button>
 
         <p className="mt-4 text-xs text-moonlight/40">
-          A brief, quiet reveal · press Escape at any time to return
+          Press Escape at any time to return
         </p>
       </div>
 
@@ -175,7 +205,7 @@ export default function VishwaroopDarshan() {
       */}
       {open && mounted && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex flex-col items-center justify-end pb-8"
+          className={`fixed inset-0 z-[100] flex flex-col items-center justify-end pb-8 ${ending ? 'vishwa-ending' : ''}`}
           style={{ background: palette.deep }}
           role="dialog"
           aria-modal="true"
@@ -211,7 +241,7 @@ export default function VishwaroopDarshan() {
           {/* The reveal itself. */}
           <div className="absolute inset-0" aria-hidden="true">
             {canRender3D ? (
-              <VishwaroopScene palette={palette} progress={progress} />
+              <VishwaroopScene palette={palette} progress={shown} />
             ) : (
               // Static counterpart — the same meaning without a single moving pixel.
               <div className="flex h-full w-full items-center justify-center">
@@ -223,93 +253,38 @@ export default function VishwaroopDarshan() {
             )}
           </div>
 
-          {/* Act I's form, which dissolves as Act II takes over. */}
-          <div
-            className="pointer-events-none absolute left-1/2 top-[46%] h-[68vh] w-[min(720px,80vw)] -translate-x-1/2 -translate-y-1/2"
-            aria-hidden="true"
-            style={{
-              opacity: (0.55 + 0.35 * Math.min(1, progress * 2)) * (1 - climax),
-              transition: 'opacity 900ms ease-out',
-            }}
-          >
-            <DivineSilhouette
-              className="h-full w-full"
-              color={palette.glow}
-              glow={palette.primary}
-              opacity={0.85}
-            />
-          </div>
+          {/* The one form, which is everyone. */}
+          {climax > 0 && <ViraatForm ending={ending} />}
 
-          {/* Act II — the Vishwaroop itself. Grows as it manifests, so it opens
-              *into* the viewer rather than simply appearing. */}
-          {climax > 0 && (
-            <div
-              className="pointer-events-none absolute left-1/2 top-[44%] h-[92vh] w-[min(1080px,98vw)] -translate-x-1/2 -translate-y-1/2"
+          {/* Arjuna, kneeling in the light. Without a human figure in frame,
+              "vast" is only "large". */}
+          {reduced ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="arjuna-witness" src="/art/arjuna-poster.jpg" alt="" aria-hidden="true" />
+          ) : (
+            <video
+              className="arjuna-witness"
+              poster="/art/arjuna-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              disablePictureInPicture
               aria-hidden="true"
-              style={{
-                opacity: Math.min(1, climax * 1.6),
-                transform: `translate(-50%, -50%) scale(${(0.72 + 0.28 * climax).toFixed(3)})`,
-                transition: 'opacity 900ms ease-out',
-              }}
             >
-              <VishwaroopForm
-                className="h-full w-full"
-                color={palette.glow}
-                glow={palette.accent}
-                intensity={climax}
-              />
-            </div>
+              <source src="/art/arjuna.webm" type="video/webm" />
+              <source src="/art/arjuna.mp4" type="video/mp4" />
+            </video>
           )}
 
-          {/* Arjuna, kneeling at the foot of it. Without a human figure in frame,
-              "vast" is only "large". */}
-          <div
-            className="pointer-events-none absolute bottom-[9vh] left-1/2 h-[19vh] w-[min(380px,56vw)] -translate-x-1/2"
-            aria-hidden="true"
-            style={{ opacity: 0.55 + 0.45 * climax, transition: 'opacity 900ms ease-out' }}
-          >
-            <ArjunaWitness className="h-full w-full" color="#05081C" />
-          </div>
-
-          {/* The ten, arriving one after another around the form. */}
-          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-            {DASHAVATAR.map((glyph, i) => {
-              // Ringed evenly, clockwise from the top — but rotated half a step
-              // so nothing lands at dead bottom, where Arjuna kneels.
-              const angle =
-                (i / DASHAVATAR.length) * Math.PI * 2 - Math.PI / 2 + Math.PI / DASHAVATAR.length
-              // Each arrives in turn over the first ~75% of the reveal, so the
-              // sequence reads as a descent rather than ten simultaneous pops.
-              const arrival = (i / DASHAVATAR.length) * 0.75
-              const shown = reduced || progress >= arrival
-              const R = 'min(38vh, 36vw)'
-              return (
-                <div
-                  key={glyph.id}
-                  className="absolute left-1/2 top-[46%] flex flex-col items-center"
-                  style={{
-                    // They draw inward as Act II begins — the ten gathering back
-                    // into the one they were always descents of.
-                    transform: `translate(-50%, -50%) translate(calc(${R} * ${(Math.cos(angle) * (1 - 0.72 * climax)).toFixed(4)}), calc(${R} * ${(Math.sin(angle) * (1 - 0.72 * climax)).toFixed(4)}))`,
-                    opacity: shown ? 1 - climax : 0,
-                    transition: 'opacity 1100ms ease-out, transform 1400ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  }}
-                >
-                  <AvatarGlyphIcon glyph={glyph} size={56} color={palette.glow} active={shown} />
-                  <p className="mt-1 whitespace-nowrap text-[11px] tracking-[0.14em] text-moonlight/75">
-                    {glyph.name}
-                  </p>
-                  <p
-                    className="whitespace-nowrap text-[10px] text-gold-soft/60"
-                    lang="sa"
-                    style={{ fontFamily: 'var(--font-sanskrit), var(--font-hindi), serif' }}
-                  >
-                    {glyph.sanskrit}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
+          <DashavatarOrbit
+            arrival={Math.min(1, shown / ACT_II)}
+            gathered={gathered}
+            reduced={reduced}
+            onGather={gather}
+            onTouch={touch}
+          />
 
           {/* No verse here by design. The cosmic form is the whole point of this
               moment, and a panel of text in front of it — however small — reads

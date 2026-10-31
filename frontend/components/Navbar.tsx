@@ -26,8 +26,8 @@ export default function Navbar({ overlay = false }: Props) {
 
   useEffect(() => {
     if (!overlay) return
-    // Stay transparent for as long as the film is on ivory (Hero's dive fills
-    // the frame at about 38% of the pin); elsewhere, the first 90px.
+    // Stay transparent through the film's opening (Hero's dive fills the frame
+    // at about 38% of the pin); elsewhere, the first 90px.
     const onScroll = () => {
       const film = document.getElementById('darshan')
       const ivory = film ? (film.offsetHeight - window.innerHeight) * 0.38 : 0

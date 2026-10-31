@@ -1,7 +1,10 @@
 'use client'
 
 /**
- * Dashavatar — the ten descents, as luminous silhouettes.
+ * Dashavatar — the list of ten descents, and their vector silhouettes.
+ *
+ * The Vishwaroop ring now shows generated portraits (DashavatarOrbit); the glyphs
+ * and their no-rendered-face note below predate that user decision (Oct 2026).
  *
  * This is what Vishwaroop resolves into: Arjuna asks to see the form that
  * contains all forms, and what opens is not one figure but the whole sequence —

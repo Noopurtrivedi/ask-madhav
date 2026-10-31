@@ -11,6 +11,7 @@ import BackToTop from '@/components/BackToTop'
 import GuidedPaths from '@/components/GuidedPaths'
 import VishwaroopDarshan from '@/components/darshan/VishwaroopDarshan'
 import ThreePaths from '@/components/ThreePaths'
+import FloatingOfferings from '@/components/darshan/FloatingOfferings'
 import MotionPreferenceToggle from '@/components/darshan/MotionPreferenceToggle'
 
 const STATS = [
@@ -59,6 +60,7 @@ export default function Home() {
   return (
     <main className="darshan-page">
       <ScrollReveal />
+      <FloatingOfferings />
       {/* `overlay` — the home page opens on the dark cosmic Darshan hero, so the
           bar starts transparent and only takes on its cream glass on scroll. */}
       <Navbar overlay />

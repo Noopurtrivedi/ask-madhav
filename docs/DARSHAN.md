@@ -273,6 +273,8 @@ low and the fade is slow; reduced motion removes it rather than freezing it.
 
 ## 6. What Vishwaroop must never become
 
+> **Oct 2026, user decision:** the reveal now shows generated portraits, so the "no faces" line below no longer describes it. The rest stands: serene forms only, no blood, combat, strobing or fear. It stays opt-in and bounded (closes after `max_duration_ms` untouched), but the seeker now drives it (`DashavatarOrbit`). `ViraatForm` shows multiple faces on purpose, each calm and reviewed by eye for iconography; the devouring imagery of 11.25–30 stays out. These are FLUX.1 [schnell] renders (Apache-2.0) and have **not** had the cultural review this guide asks for.
+
 `VishwaroopDarshan` is the product's one moment of spectacle, which makes it the
 one most likely to go wrong. The scene is abstract on purpose:
 

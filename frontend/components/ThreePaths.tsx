@@ -8,8 +8,7 @@ import Link from 'next/link'
  * after the hero's Vishwaroop moment: the universe has opened, now choose the
  * way in. Each card reads its verse and can hand the path to Madhav.
  *
- * Art is the existing Kurukshetra set (public/art), cropped differently per
- * card — no new assets.
+ * Art: original FLUX.1 [schnell] renders (public/art, docs/AVATAR.md).
  */
 
 const PATHS = [
@@ -19,8 +18,8 @@ const PATHS = [
     title: 'The Path of Action',
     line: 'Do the work in front of you with your whole heart — and set down your grip on the result.',
     ref: '2.47',
-    art: '/art/scene-2.png',
-    focus: '62% 40%',
+    art: '/art/path-karma.jpg',
+    focus: '50% 30%',
     ask: 'Teach me Karma Yoga — how do I act fully without being attached to the outcome?',
   },
   {
@@ -29,8 +28,8 @@ const PATHS = [
     title: 'The Path of Knowledge',
     line: 'Nothing in this world purifies like true understanding. See clearly, and fear loosens.',
     ref: '4.38',
-    art: '/art/scene-1.png',
-    focus: '50% 30%',
+    art: '/art/card-jnana-abhaya.jpg',
+    focus: '50% 50%',
     ask: 'Teach me Jnana Yoga — how does knowing who I truly am bring peace?',
   },
   {
@@ -39,8 +38,8 @@ const PATHS = [
     title: 'The Path of Devotion',
     line: 'Rest your mind in what is highest. Love, offered fully, is itself the way.',
     ref: '12.8',
-    art: '/art/scene-3.png',
-    focus: '45% 45%',
+    art: '/art/card-bhakti-lotus.jpg',
+    focus: '50% 50%',
     ask: 'Teach me Bhakti Yoga — what does devotion look like in an ordinary day?',
   },
 ]
@@ -73,14 +72,16 @@ export default function ThreePaths() {
           {PATHS.map((p, i) => (
             <article key={p.yoga} className="path-card group">
               <div className="relative aspect-[4/5] overflow-hidden">
-                <Image
-                  src={p.art}
-                  alt=""
-                  fill
-                  sizes="(min-width: 768px) 33vw, 100vw"
-                  className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]"
-                  style={{ objectPosition: p.focus }}
-                />
+                <div className="absolute inset-0 transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]">
+                  <Image
+                    src={p.art}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover"
+                    style={{ objectPosition: p.focus }}
+                  />
+                </div>
                 <span className="absolute right-4 top-4 rounded-full border border-gold-soft/40 bg-black/50 px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.2em] text-gold-soft backdrop-blur-sm">
                   {p.chapter}
                 </span>
