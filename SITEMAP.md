@@ -51,6 +51,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `lib/whatsapp/client.ts` | Meta WhatsApp Cloud API client — `sendWhatsAppText()` (chunks long replies), `isWhatsAppConfigured()`, `verifySignature()` (X-Hub-Signature-256). |
 | `lib/whatsapp/memory.ts` | Per-phone conversation memory + message-id dedup over Upstash Redis (fail-open; stateless without it). Roadmap: migrate to Supabase at scale. |
 | `lib/darshan-launch.ts` | Contract between the launch ritual and the page it unveils — the `madhav:darshan-ready` event (+ a `useSyncExternalStore` subscribe/snapshot pair), the `data-chakra-logo` target attribute, and the once-per-session flag. |
+| `lib/darshan/heroTheme.ts` | Hero theme switch: `dawn` (default), `nebula` or `ivory` via `NEXT_PUBLIC_HERO_THEME`; holds all three art sets. |
 | `lib/motion.ts` | Motion preference — `prefersReducedMotion()` + the `useReducedMotion()` hook. The lightweight gate the ritual components check; `lib/darshan/tier.ts` builds the full tiering on top. |
 | `lib/darshan/types.ts` | **Darshan engine types** — 1:1 with the `supabase/darshan-schema.sql` tables (sacred assets, forms, quotes, moods, transitions, motion prefs). |
 | `lib/darshan/states.ts` | The 12-state machine: `DARSHAN_STATES` tuning profiles, the explicit `TRANSITIONS` table (illegal transitions are ignored, never thrown), `chakraStateFor()` bridge to `ChakraState`. `reduced_motion` is terminal. |
@@ -72,7 +73,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
-| `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: ivory first frame with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra with the universe visible through the wheel → whiteout → plasma burst → photographic galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
+| `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: dawn first frame, night meeting day (nebula and ivory fallbacks) with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra with the universe visible through the wheel → whiteout → plasma burst → photographic galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
 | `components/ThreePaths.tsx` | Karma / Jnana / Bhakti yoga as three tall framed cards, art above text, with a staggered gold-wipe reveal (verse link + hand the path to the chat). Follows the hero. |
 | `lib/darshan/avatarTrack.ts` | Per-frame fingertip offsets for the hero's looping avatar video (match-move), plus `sourceFrame()` to undo the ping-pong. |
 | `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. Shows a quiet Sign out when a seeker is signed in. |
@@ -110,7 +111,6 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `components/darshan/VishwaroopDarshan.tsx` | The opt-in Cosmic Form — invitation card, consented full-screen reveal (portalled to `<body>`, since `[data-reveal]`'s transform would otherwise trap `position:fixed`), self-ending after `max_duration_ms`, Escape always returns. Static mandala under reduced motion. |
 | `components/darshan/DashavatarOrbit.tsx` | Interactive ring of the ten avatar portraits inside the Vishwaroop reveal: orbit, pointer tilt, touch or arrow keys to behold one, gather into the one form. |
 | `components/darshan/ViraatForm.tsx` | The Vishwaroop climax: twenty head cut-outs emerging around Krishna in two arcs, swelling into light on exit. |
-| `components/darshan/FluteToggle.tsx` | Tap-to-play flute control. Not mounted: music is on hold, audio lives outside the repo until a tune is chosen. |
 | `components/darshan/FloatingOfferings.tsx` | Lotus and mor pankh cut-outs drifting in 3D along the page margins; scrolling acts as wind. Home page only, hidden over the hero film. |
 | `components/darshan/three/VishwaroopScene.tsx` | The Vishwaroop R3F scene — starfield, opening mandala rings, nested wireframe shells, core of light. Deliberately abstract: no faces, no horror, no strobing. |
 | `components/darshan/CosmicJourney.tsx` | **The travelling sky.** One fixed layer behind every route: five cosmic scenes cross-faded across the scroll, three parallax star depths, drifting nebulae and rare shooting stars. One rAF-throttled listener writes `--sy`/`--sp`; everything else is pure CSS, so scrolling never causes a React render. Tier-scaled; collapses to a static gradient under reduced motion. |

@@ -7,6 +7,7 @@ import EngineChakra from './darshan/EngineChakra'
 import { useDarshanOptional } from './darshan/DarshanProvider'
 import { useReducedMotion } from '@/lib/motion'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
+import { HERO_ART, HERO_THEME } from '@/lib/darshan/heroTheme'
 import { AVATAR_LOOP, FINGERTIP_DX, FINGERTIP_DY, sourceFrame } from '@/lib/darshan/avatarTrack'
 
 // The opening frame: an original Shree Krishna avatar (FLUX.1 [schnell],
@@ -15,7 +16,7 @@ import { AVATAR_LOOP, FINGERTIP_DX, FINGERTIP_DY, sourceFrame } from '@/lib/dars
 // little below the tip, so the fingertip rises through the disc's hole.
 // `x`/`mobileX` place that point on screen.
 const ART = {
-  src: '/art/krishna-avatar.jpg',
+  src: HERO_ART.still,
   w: 2560,
   h: 1440,
   fx: 0.5242,
@@ -28,14 +29,14 @@ const ART = {
 // (public/art/krishna-fingertip.png, image px). It is layered *over* the
 // flat-lying chakra so the finger reads as passing through the hole: the
 // disc's far half sits behind it, the near half covers the rest of the finger.
-const TIP = { src: '/art/krishna-fingertip.png', x: 1300, y: 440, w: 86, h: 56 }
+const TIP = { src: HERO_ART.tip, x: 1300, y: 440, w: 86, h: 56 }
 
 // The living portrait (Wan 2.2, Apache-2.0 — docs/AVATAR.md): a seamless
 // ping-pong loop of the same frame. It covers image rows 15..1423 of 1440.
 const LOOP = {
-  webm: '/art/krishna-avatar.webm',
-  mp4: '/art/krishna-avatar.mp4',
-  poster: '/art/krishna-avatar-poster.jpg',
+  webm: HERO_ART.webm,
+  mp4: HERO_ART.mp4,
+  poster: HERO_ART.poster,
   top: 15 / 1440,
   height: 1408 / 1440,
 }
@@ -51,6 +52,8 @@ function askMadhav(raw: string) {
   if (!question) return
   window.dispatchEvent(new CustomEvent('madhav:prefill', { detail: { question, send: true } }))
 }
+
+const NAV_HEIGHT = 74
 
 const noSubscribe = () => () => {}
 const readSaveData = () =>
@@ -123,7 +126,7 @@ export default function Hero() {
     const layout = () => {
       const W = stage.clientWidth
       const H = stage.clientHeight
-      // Cover the frame. The avatar is composed with open ivory mist on the
+      // Cover the frame. The avatar is composed with open space on the
       // left for the headline, so desktop keeps him right of centre and a
       // phone slides the frame so his face and the fingertip both stay in.
       const s = Math.max(W / ART.w, H / ART.h)
@@ -131,7 +134,9 @@ export default function Hero() {
       const dh = ART.h * s
       const wantX = W >= 1024 ? ART.x : ART.mobileX
       const left = Math.min(0, Math.max(W - dw, W * wantX - ART.fx * dw))
-      const top = Math.min(0, Math.max(H - dh, H * 0.27 - ART.fy * dh))
+      // The nebula theme's navbar is solid, so the picture starts below it and
+      // his crown and feather are never cut off. The bar covers the gap above.
+      const top = HERO_THEME === 'ivory' ? Math.min(0, Math.max(H - dh, H * 0.27 - ART.fy * dh)) : NAV_HEIGHT
       const rect = { left: `${left}px`, top: `${top}px`, width: `${dw}px`, height: `${dh}px` }
       Object.assign(art.style, rect)
       Object.assign(tip.style, rect)
@@ -296,7 +301,7 @@ export default function Hero() {
       <ChakraLaunch />
 
       <section id="darshan" ref={sectionRef} className={`journey ${still ? 'journey-still' : ''}`}>
-        <div ref={stageRef} className="journey-stage journey-light" data-act="1">
+        <div ref={stageRef} className={`journey-stage ${HERO_THEME === 'ivory' ? 'journey-light' : ''}`} data-act="1">
           {/* ── Act I/II: the painting, zooming toward the fingertip ── */}
           <div className="journey-art-zoom" aria-hidden="true">
             <div ref={artRef} className="absolute">

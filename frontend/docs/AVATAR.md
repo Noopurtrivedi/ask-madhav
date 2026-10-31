@@ -9,7 +9,8 @@ stock art, no third-party likeness.
 |---|---|---|
 | Image | [ComfyUI](https://github.com/comfyanonymous/ComfyUI) (GPL-3.0, the tool only) running **FLUX.1 [schnell]** fp8 (`Comfy-Org/flux1-schnell`) | Model: **Apache-2.0** — outputs free for commercial use |
 | Dashavatar, cosmic form, Viraat heads, lotus, feather, Three Paths cards | Same setup. `public/art/dash/`, `public/art/viraat/` (cut out with rembg, isnet-general-use), `public/art/path-karma.jpg`, `public/art/card-*.jpg`, `lotus.webp`, `feather.webp` | Model: **Apache-2.0** |
-| Krishna theme (`public/audio/krishna-rhythm.*`) | Original: a melody written for this app and synthesised in Python with no samples (bansuri, tabla in keherwa, santoor-like figures, tanpura, strings, generated reverb). Source kept with the local work files. | Ours |
+| Nebula hero (`krishna-nebula-*`, live) | The Wan loop and still, cut out frame by frame (rembg), graded from the original footage, on a FLUX backdrop (seed 3104) with a light wrap and smoothed mattes. Same 160-frame ping-pong, so the fingertip track is unchanged | Apache-2.0 models |
+| Dawn hero (`krishna-peacock-*`, default) | The original loop and still, ungraded, cut out with filled mattes; one nebula (seed 3104) runs behind him, its clouds recoloured from night into dawn. Same 160-frame ping-pong | Apache-2.0 models |
 | Arjuna loop | Wan 2.2 TI2V 5B, seed 913, 49 frames, ping-pong (`public/art/arjuna.*`) | **Apache-2.0** |
 | Upscale 1536×864 → 2560×1440 | **Real-ESRGAN x4plus** | BSD-3-Clause |
 | Animation (when present) | **Wan 2.2 TI2V 5B** (`Comfy-Org/Wan_2.2_ComfyUI_Repackaged`) | **Apache-2.0** |

@@ -1,5 +1,6 @@
 'use client'
 
+import { HERO_THEME } from '@/lib/darshan/heroTheme'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import EngineChakra from './darshan/EngineChakra'
@@ -63,10 +64,9 @@ export default function Navbar({ overlay = false }: Props) {
   }, [])
 
   // On the cosmic hero (not scrolled, menu closed) the bar is invisible chrome.
-  // Over the home film's ivory first frame the bar is transparent with dark
-  // ink (`nav-on-light`); once the dive leaves the ivory it becomes a solid obsidian
-  // bar with moonlight ink — the Beyond pattern.
-  const onHero = overlay && !scrolled && !menuOpen
+  // The bar is solid near-black. Only the ivory fallback hero (lib/darshan/
+  // heroTheme.ts) gets a transparent bar with dark ink until the dive begins.
+  const onHero = HERO_THEME === 'ivory' && overlay && !scrolled && !menuOpen
   const link = 'caps-link'
 
   return (
@@ -74,7 +74,7 @@ export default function Navbar({ overlay = false }: Props) {
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ${
         onHero
           ? 'nav-on-light bg-transparent border-b border-black/5'
-          : 'bg-[#07080F]/95 border-b border-gold-soft/10'
+          : 'bg-[#030409] border-b border-gold-soft/15'
       }`}
     >
       <div ref={progressRef} className="scroll-progress" aria-hidden="true" />
