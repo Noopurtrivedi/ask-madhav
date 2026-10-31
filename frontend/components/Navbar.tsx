@@ -26,7 +26,13 @@ export default function Navbar({ overlay = false }: Props) {
 
   useEffect(() => {
     if (!overlay) return
-    const onScroll = () => setScrolled(window.scrollY > 90)
+    // Stay transparent for as long as the film is on ivory (Hero's dive fills
+    // the frame at about 38% of the pin); elsewhere, the first 90px.
+    const onScroll = () => {
+      const film = document.getElementById('darshan')
+      const ivory = film ? (film.offsetHeight - window.innerHeight) * 0.38 : 0
+      setScrolled(window.scrollY > Math.max(90, ivory))
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -58,7 +64,7 @@ export default function Navbar({ overlay = false }: Props) {
 
   // On the cosmic hero (not scrolled, menu closed) the bar is invisible chrome.
   // Over the home film's ivory first frame the bar is transparent with dark
-  // ink (`nav-on-light`); once the seeker scrolls it becomes a solid obsidian
+  // ink (`nav-on-light`); once the dive leaves the ivory it becomes a solid obsidian
   // bar with moonlight ink — the Beyond pattern.
   const onHero = overlay && !scrolled && !menuOpen
   const link = 'caps-link'

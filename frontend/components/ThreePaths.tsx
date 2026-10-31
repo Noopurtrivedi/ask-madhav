@@ -81,18 +81,15 @@ export default function ThreePaths() {
                   className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]"
                   style={{ objectPosition: p.focus }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#06070F] via-[#06070F]/40 to-transparent" />
-                <span className="absolute right-4 top-4 rounded-full border border-gold-soft/40 bg-black/40 px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.2em] text-gold-soft backdrop-blur-sm">
+                <span className="absolute right-4 top-4 rounded-full border border-gold-soft/40 bg-black/50 px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.2em] text-gold-soft backdrop-blur-sm">
                   {p.chapter}
                 </span>
-                <span className="gold-leaf absolute left-5 top-3 font-display text-6xl font-semibold opacity-90">
-                  {['I', 'II', 'III'][i]}
-                </span>
+                <span className="path-wipe" style={{ animationDelay: `${i * 180}ms` }} aria-hidden="true" />
               </div>
 
-              <div className="relative -mt-24 flex flex-1 flex-col p-6 pt-0">
+              <div className="flex flex-1 flex-col p-6">
                 <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-gold-soft">{p.yoga}</p>
-                <h3 className="mt-2 font-display text-[1.75rem] font-semibold leading-tight text-moonlight">{p.title}</h3>
+                <h3 className="mt-2 font-display text-[1.6rem] font-semibold leading-tight text-moonlight">{p.title}</h3>
                 <p className="mt-3 flex-1 text-[0.95rem] leading-relaxed text-moonlight/70">{p.line}</p>
                 <div className="mt-6 flex items-center justify-between gap-3 border-t border-gold/15 pt-5">
                   <Link href={`/verse/${p.ref}`} className="caps-link">

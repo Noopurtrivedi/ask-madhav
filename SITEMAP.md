@@ -72,9 +72,8 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
-| `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: ivory first frame with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra → whiteout → galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
-| `components/ThreePaths.tsx` | Karma / Jnana / Bhakti yoga as three tall illustrated cards (verse link + hand the path to the chat). Follows the hero. |
-| `components/darshan/GalaxyCanvas.tsx` | Code-generated spiral galaxy on a 2D canvas (additive stars, glints, nebula), driven by a ref (`burst`, `active`) from the hero; sleeps off-screen. |
+| `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: ivory first frame with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra with the universe visible through the wheel → whiteout → plasma burst → photographic galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
+| `components/ThreePaths.tsx` | Karma / Jnana / Bhakti yoga as three tall framed cards, art above text, with a staggered gold-wipe reveal (verse link + hand the path to the chat). Follows the hero. |
 | `lib/darshan/avatarTrack.ts` | Per-frame fingertip offsets for the hero's looping avatar video (match-move), plus `sourceFrame()` to undo the ping-pong. |
 | `components/Navbar.tsx` | Top navigation bar. `overlay` (home only) starts it transparent over the dark hero and switches to cream glass on scroll; the logo is the Sudarshan Chakra and carries `data-chakra-logo` — the target the launch ritual flies into. Shows a quiet Sign out when a seeker is signed in. |
 | `components/ChatInterface.tsx` | Multi-turn "Ask Madhav" chat UI; profile (age/language) + auto-read toggle, mic input, per-answer Listen/Copy/Share; **persists the conversation to `localStorage`** (capped 20 turns) with a returning-seeker recap + "Start a new conversation"; rotating suggested prompts; per-answer "Make this my intention" → Journal; always-present crisis helpline line. Calls `/api/ask`. |

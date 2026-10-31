@@ -10,6 +10,7 @@ stock art, no third-party likeness.
 | Image | [ComfyUI](https://github.com/comfyanonymous/ComfyUI) (GPL-3.0, the tool only) running **FLUX.1 [schnell]** fp8 (`Comfy-Org/flux1-schnell`) | Model: **Apache-2.0** — outputs free for commercial use |
 | Upscale 1536×864 → 2560×1440 | **Real-ESRGAN x4plus** | BSD-3-Clause |
 | Animation (when present) | **Wan 2.2 TI2V 5B** (`Comfy-Org/Wan_2.2_ComfyUI_Repackaged`) | **Apache-2.0** |
+| Galaxy, burst | Same ComfyUI + FLUX.1 [schnell] setup (`public/art/galaxy.jpg` seed 12, `public/art/burst.jpg` seed 21; prompts in the local work folder) | Model: **Apache-2.0** — outputs free for commercial use |
 
 Settings: 1536×864, 4 steps, cfg 1.0, euler / simple, **seed 7777**. Prompt below.
 

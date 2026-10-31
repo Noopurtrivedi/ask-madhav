@@ -4,21 +4,10 @@ import Image from 'next/image'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import ChakraLaunch from './darshan/ChakraLaunch'
 import EngineChakra from './darshan/EngineChakra'
-import GalaxyCanvas, { type GalaxyDrive } from './darshan/GalaxyCanvas'
 import { useDarshanOptional } from './darshan/DarshanProvider'
 import { useReducedMotion } from '@/lib/motion'
 import { darshanNotReady, isDarshanReady, subscribeDarshanReady } from '@/lib/darshan-launch'
 import { AVATAR_LOOP, FINGERTIP_DX, FINGERTIP_DY, sourceFrame } from '@/lib/darshan/avatarTrack'
-
-const ENTRY_POINTS = [
-  { label: 'Walk a path', href: '#paths' },
-  { label: "Today's shloka", href: '#daily-verse' },
-  { label: '18 chapters', href: '#chapters' },
-  { label: 'Stories', href: '#stories' },
-]
-
-// One tap from the hero to a real answer — the questions people most often bring.
-const STARTERS = ['I feel anxious about the future', 'I am afraid of failing', 'What is my purpose?']
 
 // The opening frame: an original Shree Krishna avatar (FLUX.1 [schnell],
 // Apache-2.0, generated locally — see docs/AVATAR.md). (fx, fy) is the centre
@@ -51,6 +40,10 @@ const LOOP = {
   height: 1408 / 1440,
 }
 
+// Generated with FLUX.1 [schnell] — docs/AVATAR.md.
+const GALAXY = '/art/galaxy.jpg'
+const BURST = '/art/burst.jpg'
+
 /** Hand a question to the chat below and send it there. */
 function askMadhav(raw: string) {
   const question = raw.trim()
@@ -78,8 +71,9 @@ const smooth = (a: number, b: number, x: number) => {
  *  II.  **The dive.** Scrolling pushes the camera toward the fingertip: the
  *       chakra lifts off his fingertip, turns to face the seeker, grows and races —
  *       "a single verse changes everything".
- *  III. **Vishwaroop.** A flash of light, and a galaxy bursts out of the
- *       chakra's centre — the universe in one form (Gita 11.7).
+ *       The universe is already visible through the wheel as it grows.
+ *  III. **Vishwaroop.** The light ruptures into a plasma burst, which clears to
+ *       the galaxy — the universe in one form (Gita 11.7).
  *
  * The section is tall and the stage is sticky; one rAF-throttled scroll
  * listener turns scroll position into a handful of CSS variables on the stage,
@@ -105,7 +99,6 @@ export default function Hero() {
   const engine = useDarshanOptional()
   const reduced = useReducedMotion()
   const still = reduced || engine?.tier === 'still'
-  const starCount = engine?.tier === 'lite' ? 1600 : 3200
   // The living portrait only where it is cheap and welcome: full tier, no
   // reduced motion, no data-saver. Everyone else gets the still.
   const saveData = useSyncExternalStore(noSubscribe, readSaveData, () => false)
@@ -117,7 +110,6 @@ export default function Hero() {
   const stageRef = useRef<HTMLDivElement>(null)
   const artRef = useRef<HTMLDivElement>(null)
   const tipRef = useRef<HTMLDivElement>(null)
-  const galaxy = useRef<GalaxyDrive>({ burst: 0, active: false })
   const [diving, setDiving] = useState(false)
 
   // ── Frame the painting so the fingertip lands where the composition wants it
@@ -214,24 +206,24 @@ export default function Hero() {
       const base = window.innerWidth >= 1024 ? 0.34 : 0.27
       set('--cs', base + 4.4 * t * t * t)
       set('--ca', 1 - smooth(0.5, 0.535, p))
-      // A true whiteout: the light builds, holds fully opaque while the
-      // painting and chakra are swapped for the galaxy, then fades to reveal it.
-      set('--flash', smooth(0.45, 0.52, p) * (1 - smooth(0.56, 0.66, p)))
+      // The universe through the wheel: visible once the disc has opened to face us.
+      set('--portal', smooth(0.2, 0.36, p))
+      // The rupture: light builds to fully opaque, the plasma burst is placed
+      // behind it, the light clears to the burst, and the burst clears to the
+      // galaxy. The swap of worlds is never seen.
+      set('--flash', smooth(0.45, 0.52, p) * (1 - smooth(0.54, 0.6, p)))
+      set('--burst', smooth(0.525, 0.535, p) * (1 - smooth(0.6, 0.7, p)))
+      set('--bs', 1 + 0.45 * smooth(0.53, 0.7, p))
+      set('--gs', 1.3 - 0.25 * smooth(0.54, 0.92, p))
       set('--b1', 1 - smooth(0.04, 0.14, p))
-      set('--b2', smooth(0.17, 0.24, p) * (1 - smooth(0.38, 0.45, p)))
+      set('--b2', smooth(0.17, 0.24, p) * (1 - smooth(0.31, 0.36, p)))
       set('--b3', smooth(0.7, 0.8, p))
-      // The galaxy is placed only behind the fully opaque light (0.52–0.56),
-      // so the cut between the two worlds is never seen.
       set('--gal', smooth(0.525, 0.545, p))
       stage.dataset.act = p < 0.12 ? '1' : p > 0.68 ? '3' : '2'
       // While the film fills the screen, the site-wide sky behind it is
       // invisible — stop painting it (measured: ~30% of frame time).
       const covers = rect.top <= 1 && rect.bottom >= window.innerHeight - 1
       document.documentElement.toggleAttribute('data-hero-covers', covers)
-
-      const burst = smooth(0.545, 0.78, p)
-      galaxy.current.burst = 1 - Math.pow(1 - burst, 3)
-      galaxy.current.active = inView && p > 0.52
 
       // Throw speed from the gather until the whiteout; below it the engine
       // eases the spin back down — the landing decelerates like a discus.
@@ -337,6 +329,10 @@ export default function Hero() {
           <div className="journey-ring journey-ring-2" aria-hidden="true" />
           <div className="journey-chakra" aria-hidden="true">
             <div className="journey-chakra-glow" />
+            {/* The universe seen through the wheel, as through a glass sphere. */}
+            <div className="journey-portal">
+              <Image src={GALAXY} alt="" fill sizes="100vw" className="object-cover" />
+            </div>
             <EngineChakra size={600} override={diving ? 'processing' : undefined} />
           </div>
 
@@ -359,9 +355,14 @@ export default function Hero() {
 
           {/* ── Act III: the universe in one form ── */}
           {!still && (
-            <div className="journey-galaxy" aria-hidden="true">
-              <GalaxyCanvas drive={galaxy} count={starCount} />
-            </div>
+            <>
+              <div className="journey-galaxy" aria-hidden="true">
+                <Image src={GALAXY} alt="" fill sizes="100vw" className="object-cover" />
+              </div>
+              <div className="journey-burst" aria-hidden="true">
+                <Image src={BURST} alt="" fill sizes="100vw" className="object-cover" />
+              </div>
+            </>
           )}
           <div className="journey-flash" aria-hidden="true" />
 
@@ -372,15 +373,13 @@ export default function Hero() {
                 revealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
               }`}
             >
-              <p className="eyebrow mb-6">The Bhagavad Gita · 700 Verses</p>
-              <h1 className="hero-title mb-6">
+              <h1 className="hero-title journey-title mb-5">
                 Seek wisdom.
                 <br />
                 <em className="shimmer-text">Find peace.</em>
               </h1>
-              <p className="journey-lede mb-8 max-w-[33rem] text-base leading-[1.8] text-moonlight/80 md:text-[1.075rem]">
-                Bring the question you carry. Madhav answers from the Bhagavad Gita &mdash; one verse,
-                one truth, and one step you can take today.
+              <p className="journey-lede mb-7 max-w-[30rem] text-base leading-[1.7] text-moonlight/80">
+                Bring the question you carry. Madhav answers from the Bhagavad Gita.
               </p>
 
               {/* Ask from the first frame: the question goes straight to the
@@ -411,30 +410,6 @@ export default function Hero() {
                   </svg>
                 </button>
               </form>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {STARTERS.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => askMadhav(s)}
-                    className="journey-chip rounded-full border border-white/15 bg-black/25 px-3.5 py-1.5 text-xs text-moonlight/75 transition-colors hover:border-gold-soft/60 hover:text-moonlight"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-
-              <nav aria-label="Other ways in" className="mt-8 hidden flex-wrap items-center gap-x-6 gap-y-3 sm:flex">
-                {ENTRY_POINTS.map((item, i) => (
-                  <span key={item.label} className="flex items-center gap-6">
-                    {i > 0 && <span className="h-1 w-1 rotate-45 bg-gold-soft/60" aria-hidden="true" />}
-                    <a href={item.href} className="caps-link">
-                      {item.label}
-                    </a>
-                  </span>
-                ))}
-              </nav>
             </div>
 
             {!still && (
@@ -449,17 +424,16 @@ export default function Hero() {
           {!still && (
             <div className="journey-beat journey-beat-2">
               <div className="journey-copy">
-                <p className="eyebrow mb-5">Kurukshetra · Chapter 2</p>
-                <h2 className="hero-title !text-[clamp(2.5rem,5.4vw,4.6rem)]">
+                <h2 className="hero-title journey-title">
                   A single verse
                   <br />
                   <em className="gold-leaf">changes everything.</em>
                 </h2>
-                <p className="section-lede mt-6 max-w-sm">
+                <p className="section-lede mt-4 max-w-sm">
                   Between two armies, one conversation turned a warrior&rsquo;s despair into clarity.
                   It still does.
                 </p>
-                <a href="#daily-verse" className="btn-leaf mt-8 px-6 py-3">
+                <a href="#daily-verse" className="btn-leaf mt-6 px-6 py-3">
                   Read today&rsquo;s verse <span aria-hidden="true">→</span>
                 </a>
               </div>

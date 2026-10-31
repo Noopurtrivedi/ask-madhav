@@ -1,28 +1,15 @@
 'use client'
 
 /**
- * CosmicJourney — one sky for the whole site, and it *travels*.
+ * CosmicJourney — one sky for the whole site.
  *
- * A single fixed layer behind every page. As the seeker scrolls, three things
- * happen at once:
+ * Beyond's obsidian: a flat near-black field with three depths of faint stars
+ * that parallax on scroll, so the page reads as travelling without a colour
+ * wash competing with the art. The film's galaxy (Hero) is the only colour.
  *
- *  1. **The scenery changes.** Five cosmic "scenes" are stacked and cross-faded
- *     across the scroll — deep space → a peacock nebula → a violet field →
- *     a warm golden expanse → the still deep again. You never scroll past the
- *     sky; you move *through* it.
- *  2. **The stars parallax.** Three depths drift at different rates, which is
- *     what actually produces the sensation of travelling rather than of a
- *     background sliding by.
- *  3. **Nebulae drift** slowly and independently of scroll, so the sky is alive
- *     even when the page is still.
- *
- * ── How it stays cheap ────────────────────────────────────────────────────
- * One rAF-throttled scroll listener writes two custom properties (`--sy`,
- * `--sp`) and nothing else; every layer is pure CSS driven off those, so
- * scrolling never triggers a React render. Only `transform` and `opacity`
- * animate, so it all stays on the compositor. Star counts scale with the
- * engine's motion tier, and under reduced motion the whole thing collapses to a
- * single static gradient with no listener attached at all.
+ * One rAF-throttled scroll listener writes `--sy` and every layer is pure CSS,
+ * so scrolling never triggers a React render. Star counts scale with the motion
+ * tier; under reduced motion it is the plain field, with no listener at all.
  */
 
 import { useEffect, useRef } from 'react'
@@ -109,10 +96,7 @@ export default function CosmicJourney() {
     let raf: number | null = null
     const read = () => {
       raf = null
-      const y = window.scrollY
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-      root.style.setProperty('--sy', String(y))
-      root.style.setProperty('--sp', (y / max).toFixed(4))
+      root.style.setProperty('--sy', String(window.scrollY))
     }
     const onScroll = () => {
       // Coalesce to one write per frame — scroll fires far faster than paint.
@@ -134,24 +118,12 @@ export default function CosmicJourney() {
     return <div className="cosmic-journey cosmic-journey-still" aria-hidden="true" />
   }
 
-  // A `lite` device gets the scenery and the nebulae but only the far stars —
-  // the parallax layers are the expensive part and the least missed.
+  // A `lite` device gets only the far stars — the parallax layers are the
+  // expensive part and the least missed.
   const full = tier === 'full'
 
   return (
     <div ref={rootRef} className="cosmic-journey" aria-hidden="true">
-      {/* The five scenes, cross-faded across the scroll. */}
-      <div className="cosmic-scene cosmic-scene-1" />
-      <div className="cosmic-scene cosmic-scene-2" />
-      <div className="cosmic-scene cosmic-scene-3" />
-      <div className="cosmic-scene cosmic-scene-4" />
-      <div className="cosmic-scene cosmic-scene-5" />
-
-      {/* Nebulae — drifting on their own clock, so the sky lives while you read. */}
-      <div className="cosmic-nebula cosmic-nebula-a" />
-      <div className="cosmic-nebula cosmic-nebula-b" />
-      {full && <div className="cosmic-nebula cosmic-nebula-c" />}
-
       {/* Depth. */}
       <StarLayer stars={FAR} depth={0.06} twinkle />
       {full && <StarLayer stars={MID} depth={0.16} twinkle />}
@@ -166,8 +138,6 @@ export default function CosmicJourney() {
         </>
       )}
 
-      {/* A soft vignette keeps text legible over the brightest scenes. */}
-      <div className="cosmic-vignette" />
     </div>
   )
 }
