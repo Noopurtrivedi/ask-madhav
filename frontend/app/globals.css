@@ -1444,6 +1444,7 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
   transform: rotate(var(--a)) translateY(calc(var(--R) * -0.1)) rotate(calc(var(--a) * -1));
 }
 .orbit-gathered .orbit-medal { opacity: 0; transform: scale(0.3); pointer-events: none; }
+.orbit-gathered .orbit-centre { transition-duration: 0.45s; }
 .orbit-gathered .orbit-centre,
 .orbit-gathered .orbit-halo-1,
 .orbit-gathered .orbit-halo-2 { opacity: 0; }
@@ -1476,7 +1477,7 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
   pointer-events: none;
   background: radial-gradient(circle, rgba(255, 222, 150, 0.5) 0%, rgba(236, 170, 70, 0.2) 36%, rgba(200, 130, 50, 0) 66%);
   mix-blend-mode: screen;
-  animation: viraat-sky-in 6s ease both, viraat-aura 7s ease-in-out 6s infinite alternate;
+  animation: viraat-sky-in 6s ease 0.5s both, viraat-aura 7s ease-in-out 6s infinite alternate;
 }
 .viraat {
   --H: min(77svh, 150vw);
@@ -1488,7 +1489,7 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
   margin-left: calc(var(--H) * -0.307);
   pointer-events: none;
   transform-origin: 50% 100%;
-  animation: viraat-in 18s cubic-bezier(0.3, 0.1, 0.4, 1) both;
+  animation: viraat-in 18s cubic-bezier(0.3, 0.1, 0.4, 1) 0.5s both;
 }
 .viraat-grow {
   position: absolute;

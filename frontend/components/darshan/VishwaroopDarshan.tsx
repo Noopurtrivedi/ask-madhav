@@ -271,7 +271,7 @@ export default function VishwaroopDarshan() {
           </div>
 
           {/* The one form, which is everyone. */}
-          {climax > 0 && <ViraatForm ending={ending} use3D={canRender3D} />}
+          <ViraatForm show={climax > 0} ending={ending} use3D={canRender3D} />
 
           {/* Arjuna, kneeling in the light. Without a human figure in frame,
               "vast" is only "large". */}

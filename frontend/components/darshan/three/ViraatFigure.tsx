@@ -10,7 +10,7 @@
  * video, faces can never warp and detail holds when the form swells to the end.
  *
  * Only reached at `full` tier (VishwaroopDarshan); ViraatForm shows the flat
- * avatar everywhere else, and until these textures have loaded.
+ * avatar everywhere else, or if these textures fail to arrive in time.
  */
 
 import { Suspense, useEffect, useMemo, useRef } from 'react'
@@ -20,6 +20,15 @@ import * as THREE from 'three'
 const FIGURE_ASPECT = 1678 / 2732
 const GROW_SECONDS = 18
 const END_SCALE = 3.4
+const FADE_DELAY = 0.5
+const FADE_SECONDS = 1.6
+
+interface Props {
+  /** False while the ring is on screen: the textures load unseen. */
+  show: boolean
+  ending: boolean
+  onReady: () => void
+}
 
 const vertexShader = /* glsl */ `
   uniform sampler2D uDepth;
@@ -47,10 +56,11 @@ const fragmentShader = /* glsl */ `
   uniform sampler2D uDepth;
   uniform vec2 uLight;
   uniform vec2 uTexel;
+  uniform float uOpacity;
   varying vec2 vUv;
   void main() {
     vec4 c = texture2D(uColor, vUv);
-    if (c.a < 0.02) discard;
+    if (c.a < 0.02 || uOpacity < 0.004) discard;
     // The relief catches a slow light, so the surface reads as a solid form.
     float dx = texture2D(uDepth, vUv + vec2(uTexel.x, 0.0)).r - texture2D(uDepth, vUv - vec2(uTexel.x, 0.0)).r;
     float dy = texture2D(uDepth, vUv + vec2(0.0, uTexel.y)).r - texture2D(uDepth, vUv - vec2(0.0, uTexel.y)).r;
@@ -60,11 +70,11 @@ const fragmentShader = /* glsl */ `
     float spec = pow(max(dot(n, normalize(l + vec3(0.0, 0.0, 1.0))), 0.0), 26.0);
     float gold = smoothstep(0.08, 0.4, c.r - c.b);
     vec3 col = c.rgb * shade + vec3(1.0, 0.82, 0.5) * spec * 0.2 * gold;
-    gl_FragColor = vec4(col, c.a);
+    gl_FragColor = vec4(col, c.a * uOpacity);
   }
 `
 
-function Figure({ ending, onReady }: { ending: boolean; onReady: () => void }) {
+function Figure({ show, ending, onReady }: Props) {
   const [color, depth] = useLoader(THREE.TextureLoader, [
     '/art/dash/vishwaroop-avatar-hd3.webp',
     '/art/dash/vishwaroop-avatar-relief2.webp',
@@ -84,6 +94,7 @@ function Figure({ ending, onReady }: { ending: boolean; onReady: () => void }) {
       uColor: { value: color },
       uDepth: { value: depth },
       uTime: { value: 0 },
+      uOpacity: { value: 0 },
       uRelief: { value: 0.46 },
       uLight: { value: new THREE.Vector2(0, 0.4) },
       uTexel: { value: new THREE.Vector2(3 / depth.image.width, 3 / depth.image.height) },
@@ -106,9 +117,19 @@ function Figure({ ending, onReady }: { ending: boolean; onReady: () => void }) {
   const feetY = viewport.height / 2 - viewport.height * (0.01 + heightFrac)
 
   useFrame((state) => {
+    // The material holds its own copy of the uniforms: write to that one.
+    const live = (mesh.current?.material as THREE.ShaderMaterial | undefined)?.uniforms
+    if (!live) return
     const t = state.clock.elapsedTime
     const c = clock.current
+    if (!show) {
+      live.uOpacity.value = 0
+      return
+    }
     if (c.start < 0) c.start = t
+    // The ring's painting clears first, so the form arrives whole.
+    const f = Math.min(1, Math.max(0, (t - c.start - FADE_DELAY) / FADE_SECONDS))
+    live.uOpacity.value = f * f * (3 - 2 * f)
     if (ending && c.endAt < 0) c.endAt = t
     const p = pointer.current
     p.sx += (p.x - p.sx) * 0.018
@@ -132,13 +153,13 @@ function Figure({ ending, onReady }: { ending: boolean; onReady: () => void }) {
       g.rotation.x = -p.sy * 0.015
       g.position.y = feetY - lift
     }
-    uniforms.uTime.value = t
-    uniforms.uLight.value.set(Math.sin(t * 0.2) * 0.6, 0.45 + Math.cos(t * 0.16) * 0.25)
+    live.uTime.value = t
+    live.uLight.value.set(Math.sin(t * 0.2) * 0.6, 0.45 + Math.cos(t * 0.16) * 0.25)
   })
 
   return (
     <group ref={group}>
-      <mesh ref={mesh} position={[0, h / 2, 0]}>
+      <mesh ref={mesh} position={[0, h / 2, 0]} frustumCulled={false}>
         <planeGeometry args={[h * FIGURE_ASPECT, h, 260, 420]} />
         <shaderMaterial
           vertexShader={vertexShader}
@@ -152,7 +173,7 @@ function Figure({ ending, onReady }: { ending: boolean; onReady: () => void }) {
   )
 }
 
-export default function ViraatFigure({ ending, onReady }: { ending: boolean; onReady: () => void }) {
+export default function ViraatFigure({ show, ending, onReady }: Props) {
   return (
     <div className="viraat-3d" aria-hidden="true">
       <Canvas
@@ -163,7 +184,7 @@ export default function ViraatFigure({ ending, onReady }: { ending: boolean; onR
         style={{ width: '100%', height: '100%' }}
       >
         <Suspense fallback={null}>
-          <Figure ending={ending} onReady={onReady} />
+          <Figure show={show} ending={ending} onReady={onReady} />
         </Suspense>
       </Canvas>
     </div>

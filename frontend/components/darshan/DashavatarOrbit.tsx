@@ -152,7 +152,7 @@ export default function DashavatarOrbit({ arrival, gathered, reduced, onGather, 
       </div>
 
       {!gathered && arrival >= 0.9 && (
-        <button type="button" onClick={onGather} className="btn-leaf orbit-gather px-6 py-3">
+        <button type="button" onClick={onGather} className="btn-leaf orbit-gather px-4 py-1.5 text-[0.62rem]">
           Behold the one form
         </button>
       )}
