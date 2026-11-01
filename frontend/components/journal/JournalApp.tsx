@@ -192,9 +192,9 @@ export default function JournalApp() {
     <Shell wide>
       <div className="flex items-center justify-between mb-8 flex-wrap gap-3">
         <div>
-          <p className="text-gold-soft/70 text-xs uppercase tracking-[0.25em] mb-2">Daily Practice</p>
-          <h1 className="text-3xl font-bold text-moonlight" style={{ fontFamily: 'var(--font-display), serif' }}>Sankalpa Journal</h1>
-          <p className="text-moonlight/48 text-sm">{user.email}</p>
+          <p className="eyebrow eyebrow-left mb-3">Daily Practice</p>
+          <h1 className="section-title">Sankalpa <em className="gold-leaf">Journal</em></h1>
+          <p className="text-moonlight/60 text-sm mt-2">{user.email}</p>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/" className="text-gold-soft/75 hover:text-gold-soft text-sm">Home</Link>
@@ -209,7 +209,7 @@ export default function JournalApp() {
       </div>
 
       {insights.length > 0 && (
-        <p className="text-moonlight/65 text-sm mb-8 border border-gold/18 rounded-xl p-4 bg-saffron/[0.04]">
+        <p className="text-moonlight/80 text-base mb-8 border border-gold/18 rounded-xl p-4 bg-saffron/[0.04]">
           You keep returning to <span className="text-gold-soft capitalize">{insights[0].theme}</span>
           {insights[1] && <> and <span className="text-gold-soft capitalize">{insights[1].theme}</span></>}.
           Let today&apos;s entry turn that theme into one clear action.
@@ -218,10 +218,10 @@ export default function JournalApp() {
 
       <section className="border border-gold/22 rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.05)' }}>
         <div className="flex items-baseline justify-between flex-wrap gap-2 mb-1">
-          <h2 className="text-xl font-semibold text-moonlight" style={{ fontFamily: 'var(--font-display), serif' }}>Today&apos;s Gita Check-In</h2>
-          <span className="text-moonlight/38 text-xs">{formatDay(today)}</span>
+          <h2 className="font-display text-2xl sm:text-3xl font-semibold text-moonlight">Today&apos;s Gita Check-In</h2>
+          <span className="text-moonlight/60 text-sm">{formatDay(today)}</span>
         </div>
-        <p className="text-moonlight/48 text-xs mb-5">A simple inward practice: see clearly, offer the action, release the fruit.</p>
+        <p className="text-moonlight/70 text-base mb-6">A simple inward practice: see clearly, offer the action, release the fruit.</p>
 
         {intentionFromChat && (
           <p className="text-gold-soft/85 text-xs border border-gold/22 bg-saffron/[0.05] rounded-lg px-3 py-2 mb-4">
@@ -236,8 +236,8 @@ export default function JournalApp() {
               key={m}
               onClick={() => setField('mood', form.mood === m ? '' : m)}
               aria-pressed={form.mood === m}
-              className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
-                form.mood === m ? 'border-saffron/60 text-gold-soft bg-saffron/10' : 'border-gold/22 text-moonlight/58 hover:border-gold/35'
+              className={`px-3.5 py-1.5 rounded-full text-sm border transition-colors ${
+                form.mood === m ? 'border-saffron/60 text-gold-soft bg-saffron/10' : 'border-gold/22 text-moonlight/75 hover:border-gold/35'
               }`}
             >
               {m}
@@ -259,15 +259,15 @@ export default function JournalApp() {
             onChange={(e) => setField('reflection', e.target.value)}
             placeholder="Where did I act from steadiness? Where did I forget?"
             rows={4}
-            className="w-full bg-saffron/5 border border-gold/22 rounded-xl px-4 py-3 text-moonlight placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60 text-sm resize-none"
+            className="w-full bg-saffron/5 border border-gold/22 rounded-xl px-4 py-3 text-moonlight placeholder:text-moonlight/55 focus:outline-none focus:border-saffron/60 text-base resize-none"
           />
         </label>
 
         <div className="grid gap-3 md:grid-cols-2 mb-5">
           {PRACTICE_PROMPTS.map((prompt) => (
             <div key={prompt.title} className="rounded-xl border border-gold/14 bg-white/[0.035] p-4">
-              <p className="text-gold-soft/75 text-xs uppercase tracking-[0.15em]">{prompt.title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-moonlight/68">{prompt.text}</p>
+              <p className="font-display text-lg font-semibold text-gold-soft">{prompt.title}</p>
+              <p className="mt-1 text-[0.95rem] leading-relaxed text-moonlight/80">{prompt.text}</p>
             </div>
           ))}
         </div>
@@ -301,13 +301,13 @@ export default function JournalApp() {
 
       {pastEntries.length > 0 && (
         <section className="border border-gold/18 rounded-2xl p-6 mb-8" style={{ background: 'rgba(255,255,255,0.04)' }}>
-          <h2 className="text-xl font-semibold text-moonlight mb-1" style={{ fontFamily: 'var(--font-display), serif' }}>Past Reflections</h2>
-          <p className="text-moonlight/48 text-xs mb-4">Svadhyaya — read yourself back. Tap a day to reopen it.</p>
+          <h2 className="font-display text-2xl sm:text-3xl font-semibold text-moonlight mb-1">Past Reflections</h2>
+          <p className="text-moonlight/70 text-base mb-4">Svadhyaya — read yourself back. Tap a day to reopen it.</p>
           <div className="space-y-2">
             {pastEntries.slice(0, 30).map((entry) => (
               <details key={entry.entry_date} className="group rounded-xl border border-gold/14 bg-white/[0.03] open:bg-white/[0.05] transition-colors">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
-                  <span className="text-moonlight/82 text-sm font-medium">{formatDay(entry.entry_date)}</span>
+                  <span className="text-moonlight/90 text-base font-medium">{formatDay(entry.entry_date)}</span>
                   <span className="flex items-center gap-2">
                     {entry.mood && (
                       <span className="rounded-full border border-gold/22 px-2 py-0.5 text-[11px] text-gold-soft/80">{entry.mood}</span>
@@ -318,8 +318,8 @@ export default function JournalApp() {
                 <div className="space-y-3 border-t border-gold/12 px-4 py-4">
                   {ENTRY_FIELDS.filter(({ key }) => entry[key]).map(({ key, label }) => (
                     <div key={key}>
-                      <p className="text-gold-soft/65 text-[11px] uppercase tracking-wider mb-0.5">{label}</p>
-                      <p className="text-moonlight/76 text-sm leading-relaxed whitespace-pre-wrap">{entry[key]}</p>
+                      <p className="text-gold-soft/90 text-xs font-semibold uppercase tracking-[0.14em] mb-0.5">{label}</p>
+                      <p className="text-moonlight/85 text-base leading-relaxed whitespace-pre-wrap">{entry[key]}</p>
                     </div>
                   ))}
                   {ENTRY_FIELDS.every(({ key }) => !entry[key]) && (
@@ -333,9 +333,9 @@ export default function JournalApp() {
       )}
 
       <section>
-        <h2 className="text-xl font-semibold text-moonlight mb-4" style={{ fontFamily: 'var(--font-display), serif' }}>Saved Verses</h2>
+        <h2 className="font-display text-2xl sm:text-3xl font-semibold text-moonlight mb-4">Saved Verses</h2>
         {saved.length === 0 ? (
-          <p className="text-moonlight/48 text-sm">
+          <p className="text-moonlight/70 text-base">
             No saved verses yet. Tap <span className="text-gold-soft">Save</span> on the Daily Wisdom card, a popular
             verse, or any verse Madhav shares in the chat — they gather here.
           </p>
@@ -345,7 +345,7 @@ export default function JournalApp() {
               <div key={v.id} className="border border-gold/18 rounded-xl p-4 flex items-start justify-between gap-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
                 <div>
                   <Link href={`/verse/${v.reference}`} className="text-gold-soft text-sm font-medium hover:underline">Bhagavad Gita {v.reference}</Link>
-                  <p className="text-moonlight/72 text-sm mt-1 leading-relaxed">{v.english_meaning}</p>
+                  <p className="text-moonlight/80 text-base mt-1 leading-relaxed">{v.english_meaning}</p>
                 </div>
                 <button onClick={() => unsave(v.reference)} aria-label="Remove" className="text-moonlight/38 hover:text-gold-soft text-xs flex-shrink-0">Remove</button>
               </div>
@@ -354,7 +354,7 @@ export default function JournalApp() {
         )}
       </section>
 
-      <p className="mt-10 text-moonlight/35 text-xs leading-relaxed">
+      <p className="mt-10 text-moonlight/55 text-sm leading-relaxed">
         Ask Madhav offers reflection from the Bhagavad Gita perspective only. It is not professional coaching, therapy, legal, medical, or financial advice.
       </p>
     </Shell>
@@ -370,7 +370,7 @@ function Shell({ children, wide = false }: { children: React.ReactNode; wide?: b
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <p className="text-gold-soft/65 text-xs uppercase tracking-wider mb-2">{children}</p>
+  return <p className="text-gold-soft/90 text-[0.8rem] font-semibold uppercase tracking-[0.14em] mb-2">{children}</p>
 }
 
 function JournalInput({
@@ -387,7 +387,7 @@ function JournalInput({
   multiline?: boolean
 }) {
   const cls =
-    'w-full bg-saffron/5 border border-gold/22 rounded-xl px-4 py-3 text-moonlight placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60 text-sm'
+    'w-full bg-saffron/5 border border-gold/22 rounded-xl px-4 py-3 text-moonlight placeholder:text-moonlight/55 focus:outline-none focus:border-saffron/60 text-base'
   return (
     <label className="block mb-4">
       <FieldLabel>{label}</FieldLabel>
@@ -409,8 +409,8 @@ function JournalInput({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="border border-gold/18 rounded-xl p-5 text-center backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.05)' }}>
-      <p className="text-3xl font-bold text-gold-soft" style={{ fontFamily: 'var(--font-display), serif' }}>{value}</p>
-      <p className="text-moonlight/58 text-xs mt-1">{label}</p>
+      <p className="font-display text-4xl font-bold text-gold-soft">{value}</p>
+      <p className="text-moonlight/70 text-sm mt-1">{label}</p>
     </div>
   )
 }

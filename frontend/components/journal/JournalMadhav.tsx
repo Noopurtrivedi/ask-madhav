@@ -108,10 +108,10 @@ export default function JournalMadhav({ seed, journalContext }: Props) {
           🪷
         </span>
         <div>
-          <p className="text-moonlight font-semibold leading-tight" style={{ fontFamily: 'var(--font-display), serif' }}>
+          <p className="font-display text-xl text-moonlight font-semibold leading-tight">
             Madhav
           </p>
-          <p className="text-moonlight/45 text-xs">Your journal companion — grounded in today&apos;s check-in</p>
+          <p className="text-moonlight/65 text-sm">Your journal companion — grounded in today&apos;s check-in</p>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export default function JournalMadhav({ seed, journalContext }: Props) {
               <span className="mt-2 block">
                 <Link
                   href={`/verse/${m.verseRef}`}
-                  className="inline-block rounded-full border border-gold/30 px-2 py-0.5 text-[11px] text-gold-soft hover:border-gold hover:bg-gold-soft/[0.08] transition-colors"
+                  className="inline-block rounded-full border border-gold/30 px-2.5 py-0.5 text-xs text-gold-soft hover:border-gold hover:bg-gold-soft/[0.08] transition-colors"
                 >
                   Grounded in BG {m.verseRef}
                 </Link>
@@ -151,8 +151,8 @@ export default function JournalMadhav({ seed, journalContext }: Props) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask Madhav about your day…"
-          className="flex-1 bg-saffron/5 border border-gold/22 rounded-xl px-4 py-2.5 text-moonlight text-sm
-                     placeholder:text-moonlight/38 focus:outline-none focus:border-saffron/60"
+          className="flex-1 bg-saffron/5 border border-gold/22 rounded-xl px-4 py-2.5 text-moonlight text-base
+                     placeholder:text-moonlight/55 focus:outline-none focus:border-saffron/60"
         />
         <button
           type="submit"
@@ -163,7 +163,7 @@ export default function JournalMadhav({ seed, journalContext }: Props) {
         </button>
       </form>
 
-      <p className="border-t border-gold/10 px-6 py-2.5 text-moonlight/32 text-[11px]">
+      <p className="border-t border-gold/10 px-6 py-2.5 text-moonlight/55 text-xs">
         Reflections from the Bhagavad Gita only — not professional, medical, legal, or financial advice.
       </p>
     </section>
@@ -175,14 +175,14 @@ function Bubble({ role, children }: { role: 'user' | 'assistant'; children: Reac
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+        className={`max-w-[85%] rounded-2xl px-4 py-3 text-base leading-relaxed whitespace-pre-wrap ${
           isUser
             ? 'bg-saffron/15 border border-saffron/25 text-moonlight'
             : 'bg-white/[0.05] border border-gold/16 text-moonlight/85'
         }`}
       >
         {!isUser && (
-          <p className="mb-1 text-gold-soft/70 text-[11px] uppercase tracking-[0.15em]">Madhav</p>
+          <p className="mb-1 text-gold-soft/90 text-xs font-semibold uppercase tracking-[0.14em]">Madhav</p>
         )}
         {children}
       </div>
