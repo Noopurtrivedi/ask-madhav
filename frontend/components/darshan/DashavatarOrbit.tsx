@@ -100,7 +100,7 @@ export default function DashavatarOrbit({ arrival, gathered, reduced, onGather, 
         {/* The centre: the one form, or the descent the seeker has touched. */}
         <div className="orbit-centre">
           <div className={`orbit-disc ${active && !gathered ? 'orbit-disc-dim' : ''}`} aria-hidden="true">
-            <Image src={portrait('vishwa')} alt="" fill sizes="(min-width: 768px) 60vh, 80vw" className="object-cover" priority />
+            <Image src={portrait('vishwaroop-viraat')} alt="" fill sizes="(min-width: 768px) 60vh, 80vw" className="object-cover object-[50%_30%]" priority />
           </div>
           {active && !gathered && (
             <div key={active.id} className="orbit-disc orbit-disc-form" aria-hidden="true">

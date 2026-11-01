@@ -8,7 +8,7 @@ stock art, no third-party likeness.
 | Step | Tool | Licence |
 |---|---|---|
 | Image | [ComfyUI](https://github.com/comfyanonymous/ComfyUI) (GPL-3.0, the tool only) running **FLUX.1 [schnell]** fp8 (`Comfy-Org/flux1-schnell`) | Model: **Apache-2.0** — outputs free for commercial use |
-| Dashavatar, cosmic form, Viraat heads, lotus, feather, Three Paths cards | Same setup. `public/art/dash/`, `public/art/viraat/` (cut out with rembg, isnet-general-use), `public/art/path-karma.jpg`, `public/art/card-*.jpg`, `lotus.webp`, `feather.webp` | Model: **Apache-2.0** |
+| Dashavatar, cosmic form, Viraat heads, lotus, feather, Three Paths cards | Same setup. `public/art/dash/`, `public/art/path-karma.jpg`, `public/art/card-*.jpg`, `lotus.webp`, `feather.webp` | Model: **Apache-2.0** |
 | Nebula hero (`krishna-nebula-*`, live) | The Wan loop and still, cut out frame by frame (rembg), graded from the original footage, on a FLUX backdrop (seed 3104) with a light wrap and smoothed mattes. Same 160-frame ping-pong, so the fingertip track is unchanged | Apache-2.0 models |
 | Dawn hero (`krishna-peacock-*`, default) | The original loop and still, ungraded, cut out with filled mattes; one nebula (seed 3104) runs behind him, its clouds recoloured from night into dawn. Same 160-frame ping-pong | Apache-2.0 models |
 | Arjuna loop | Wan 2.2 TI2V 5B, seed 913, 49 frames, ping-pong (`public/art/arjuna.*`) | **Apache-2.0** |
@@ -59,3 +59,7 @@ Image px (1300, 440)–(1386, 496): the index fingertip above the disc's centre
 line, alpha from colour distance to the ivory backdrop. Layered over the
 flat-lying chakra so the finger passes through its hole. **Regenerate it if the
 avatar's background changes** (e.g. the planned dark theme).
+
+## Vishwaroop avatar (`public/art/dash/vishwaroop-avatar.webp`)
+
+The full-screen form: the Lord alone, head to feet, transparent background. Generated in Canva (media id `MAHZpTUSZQ4`) from the approved painting (`MAHZoL3XQ5s`, the ring's `vishwaroop-viraat.jpg`) on pure black, then lifted off the black in `~/ComfyUI/askmadhav-work/final/av.py`. At `full` tier `three/ViraatFigure.tsx` renders it as a real mesh displaced by `vishwaroop-avatar-relief2.webp` (Depth Anything V2 Small, run locally) with `vishwaroop-avatar-hd3.webp` (RealESRGAN 4x source, 1678×2732); the flat `.webp` is the fallback. The abhaya hand was recoloured to his skin with a rose palm (`final/hand.py`). Arjuna's video is cut by `arjuna-matte.webp`, traced from his poster. It stands on the original stage with the animated Arjuna at his feet. Do not put it in a rectangle or a scene: the user rejected anything that reads as a picture. Local FLUX could not paint this layout. Confirm Canva's licence terms cover this use.

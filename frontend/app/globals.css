@@ -1445,7 +1445,8 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
 }
 .orbit-gathered .orbit-medal { opacity: 0; transform: scale(0.3); pointer-events: none; }
 .orbit-gathered .orbit-centre,
-.orbit-gathered .orbit-halo-1 { opacity: 0; }
+.orbit-gathered .orbit-halo-1,
+.orbit-gathered .orbit-halo-2 { opacity: 0; }
 .orbit-bloom {
   position: absolute;
   inset: -6%;
@@ -1457,63 +1458,45 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
 .orbit-gather {
   position: absolute;
   left: 50%;
-  bottom: 5.25rem;
+  top: 1.25rem;
+  z-index: 30;
   transform: translateX(-50%);
   white-space: nowrap;
 }
-/* The one form (ViraatForm.tsx). Heads rise from behind his crown along two
-   arcs, centred on --hx/--hy, one after another. */
-.viraat {
-  --S: min(90vh, 104vw);
+/* The one form (ViraatForm.tsx): the avatar alone, transparent, grows on the
+   stage with its light behind it. There is no picture, so there is no frame. */
+.viraat-3d { position: absolute; inset: 0; pointer-events: none; }
+.viraat-aura {
   position: absolute;
   left: 50%;
-  top: 46%;
-  width: var(--S);
-  height: var(--S);
-  margin: calc(var(--S) / -2) 0 0 calc(var(--S) / -2);
+  top: 33%;
+  width: min(125vh, 165vw);
+  height: min(125vh, 165vw);
+  transform: translate(-50%, -50%);
   pointer-events: none;
-  animation: viraat-in 2.4s ease-out both;
+  background: radial-gradient(circle, rgba(255, 222, 150, 0.5) 0%, rgba(236, 170, 70, 0.2) 36%, rgba(200, 130, 50, 0) 66%);
+  mix-blend-mode: screen;
+  animation: viraat-sky-in 6s ease both, viraat-aura 7s ease-in-out 6s infinite alternate;
+}
+.viraat {
+  --H: min(77svh, 150vw);
+  position: absolute;
+  left: 50%;
+  top: 1svh;
+  width: calc(var(--H) * 0.614);
+  height: var(--H);
+  margin-left: calc(var(--H) * -0.307);
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: viraat-in 18s cubic-bezier(0.3, 0.1, 0.4, 1) both;
 }
 .viraat-grow {
   position: absolute;
   inset: 0;
-  transform-origin: 50% 52%;
+  transform-origin: 50% 42%;
   transition: transform 3.2s cubic-bezier(0.55, 0, 0.3, 1), opacity 1s ease 2.4s;
 }
 .viraat-ending .viraat-grow { transform: scale(3.4); opacity: 0; }
-.viraat-aura {
-  position: absolute;
-  left: 50%;
-  top: 52%;
-  width: 120%;
-  height: 120%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(255, 226, 160, 0.72) 0%, rgba(240, 180, 90, 0.34) 36%, rgba(240, 180, 90, 0) 68%);
-}
-.viraat-head {
-  --r: calc(var(--S) * 0.25);
-  --w: calc(var(--S) * 0.18);
-  position: absolute;
-  left: 50%;
-  top: 47%;
-  width: var(--w);
-  height: var(--w);
-  margin: calc(var(--w) / -2) 0 0 calc(var(--w) / -2);
-  opacity: 0;
-  transform: rotate(var(--deg)) translateY(calc(var(--r) * -0.2)) rotate(calc(var(--deg) * -1)) scale(calc(var(--flip) * 0.35), 0.35);
-  animation: viraat-head 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.viraat-far { --r: calc(var(--S) * 0.39); --w: calc(var(--S) * 0.15); filter: brightness(0.82); }
-.viraat-body {
-  position: absolute;
-  left: 21%;
-  right: 21%;
-  top: 32%;
-  bottom: -8%;
-  /* The render's outermost hands meet its frame; let them fade into the light. */
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
-}
 .vishwa-ending::after {
   content: '';
   position: absolute;
@@ -1526,20 +1509,21 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
 .arjuna-witness {
   position: absolute;
   left: 50%;
-  bottom: 0;
+  bottom: 4.75rem;
   z-index: 5;
-  width: min(50vh, 86vw);
+  width: min(36vh, 62vw);
   transform: translateX(-50%);
   pointer-events: none;
-  -webkit-mask-image: radial-gradient(ellipse 50% 62% at 50% 62%, #000 62%, transparent 100%);
-  mask-image: radial-gradient(ellipse 50% 62% at 50% 62%, #000 62%, transparent 100%);
+  /* His own outline, traced from the video, so his head stays whole over the form. */
+  -webkit-mask: url('/art/arjuna-matte.webp') center / 100% 100% no-repeat;
+  mask: url('/art/arjuna-matte.webp') center / 100% 100% no-repeat;
 }
-@keyframes viraat-in { from { opacity: 0; transform: scale(0.72); } to { opacity: 1; transform: scale(1); } }
-@keyframes viraat-head {
-  to {
-    opacity: 1;
-    transform: rotate(var(--deg)) translateY(calc(var(--r) * -1)) rotate(calc(var(--deg) * -1)) scale(var(--flip), 1);
-  }
+@keyframes viraat-sky-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes viraat-aura { to { opacity: 0.72; transform: translate(-50%, -50%) scale(1.08); } }
+@keyframes viraat-in {
+  0% { opacity: 0; transform: scale(0.5); }
+  12% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
 }
 @keyframes vishwa-light { 0%, 45% { opacity: 0; } 100% { opacity: 1; } }
 @keyframes orbit-spin { to { transform: rotate(360deg); } }
@@ -1548,7 +1532,8 @@ html[data-hero-covers] .cosmic-journey { visibility: hidden; }
 @keyframes orbit-bloom-in { from { opacity: 0; } to { opacity: 0.2; } }
 @media (prefers-reduced-motion: reduce) {
   .orbit-ring, .orbit-counter, .orbit-disc img, .orbit-disc-form, .orbit-bloom { animation: none; }
-  .viraat, .viraat-head { animation-duration: 1ms; animation-delay: 0s !important; }
+  .viraat { animation-duration: 1ms; }
+  .viraat-aura { animation: none; }
   .orbit-stage { transform: none; }
 }
 @media (max-width: 767px) {

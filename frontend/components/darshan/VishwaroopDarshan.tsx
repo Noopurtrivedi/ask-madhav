@@ -39,6 +39,9 @@ const VishwaroopScene = dynamic(() => import('./three/VishwaroopScene'), {
 // The two acts: I (0 → 0.52) the ten descents arrive and can be explored;
 // II (0.52 → 1) they gather and the one form manifests, at the seeker's asking.
 const ACT_II = 0.52
+const GATHER_AFTER_MS = 4000
+// Long enough for every head to emerge and the form to finish growing.
+const FORM_HOLD_MS = 20_000
 
 export default function VishwaroopDarshan() {
   const engine = useDarshanOptional()
@@ -124,6 +127,20 @@ export default function VishwaroopDarshan() {
         closeRef.current()
         return
       }
+      if (!reduced) {
+        // The film plays itself: once the ten have arrived and the seeker has
+        // left them alone a moment, they gather; the form then grows to its
+        // full height and swells into light. Touching a form holds step one.
+        if (!gathered && now - Math.max(idleAt.current, start + dur) > GATHER_AFTER_MS) {
+          setGathered(true)
+          return
+        }
+        if (gathered && now - start > FORM_HOLD_MS) {
+          raf.current = null
+          closeRef.current()
+          return
+        }
+      }
       if (!reduced) setProgress(Math.min(to, from + ((to - from) * (now - start)) / dur))
       raf.current = requestAnimationFrame(tick)
     }
@@ -179,7 +196,7 @@ export default function VishwaroopDarshan() {
           Arjuna asked to see the form that contains all forms. What opened was
           not one figure but the whole descent — fish, tortoise, boar, man-lion,
           dwarf, axe-bearer, archer, cowherd, the awakened one, and the rider yet
-          to come. Enter only if you wish to, touch each form, and return whenever you choose.
+          to come. Enter only if you wish to. Touch any form to pause on it; otherwise the ten gather into the one, and it returns you.
         </p>
 
         <button
@@ -254,7 +271,7 @@ export default function VishwaroopDarshan() {
           </div>
 
           {/* The one form, which is everyone. */}
-          {climax > 0 && <ViraatForm ending={ending} />}
+          {climax > 0 && <ViraatForm ending={ending} use3D={canRender3D} />}
 
           {/* Arjuna, kneeling in the light. Without a human figure in frame,
               "vast" is only "large". */}
