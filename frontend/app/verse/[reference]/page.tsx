@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { findVerse, VERSES } from '@/lib/verseEngine'
+import { cleanMeaning } from '@/lib/chapters'
 import Navbar from '@/components/Navbar'
 import VerseAudio from '@/components/VerseAudio'
 import ShareVerse from '@/components/ShareVerse'
@@ -57,9 +58,9 @@ export default async function VersePage({ params }: Props) {
       <div className="mx-auto max-w-3xl">
         {/* Title */}
         <header className="text-center">
-          <p className="eyebrow mb-5">
+          <Link href={`/gita/${verse.chapter_number}`} className="eyebrow mb-5 transition-colors hover:text-gold-soft">
             Bhagavad Gita · Chapter {verse.chapter_number}
-          </p>
+          </Link>
           <h1 className="section-title">
             Verse <em className="gold-leaf">{verse.reference}</em>
           </h1>
@@ -97,11 +98,11 @@ export default async function VersePage({ params }: Props) {
           <div className="mb-8 grid gap-8 md:grid-cols-2">
             <div>
               <p className="mb-2 text-xs uppercase tracking-wider text-gold-soft/75" lang="hi">हिंदी अर्थ</p>
-              <p className="font-hindi text-[0.95rem] leading-relaxed text-moonlight/80" lang="hi">{verse.hindi_meaning}</p>
+              <p className="font-hindi text-[0.95rem] leading-relaxed text-moonlight/80" lang="hi">{cleanMeaning(verse.hindi_meaning)}</p>
             </div>
             <div>
               <p className="font-sans font-bold mb-2 text-[0.68rem] uppercase tracking-[0.26em] text-gold-soft/80">English meaning</p>
-              <p className="text-[0.95rem] leading-relaxed text-moonlight/80">{verse.english_meaning}</p>
+              <p className="text-[0.95rem] leading-relaxed text-moonlight/80">{cleanMeaning(verse.english_meaning)}</p>
             </div>
           </div>
 

@@ -73,6 +73,13 @@ The live application is everything under `frontend/`. The repo root holds data-g
 ### `frontend/components/`
 | File | Description |
 |---|---|
+| `app/gita/page.tsx` | Chapter library: search, jump to a verse, resume reading. |
+| `app/gita/[chapter]/page.tsx` | Chapter reader, ten verses a page (`?page=`), with numbered pagination. |
+| `app/stories/page.tsx`, `app/stories/[slug]/page.tsx` | Story library and story page: narration, Inspiration, Lesson, Gita anchors, open question. |
+| `app/find/page.tsx` | Find a Verse: choose a feeling, get a verse and a practice, no chat needed. |
+| `components/gita/*` | `GitaLibrary`, `VerseReader`, `ChapterProgress`, `StoryLibrary`, `StoryQuestion`: the client parts of those pages. |
+| `lib/chapters.ts` | Chapter list, pagination size, `FEELINGS`, `cleanMeaning()`; client-safe, no verse text. |
+| `lib/readingProgress.ts` | Read verses and last place in `localStorage`, guarded. |
 | `components/Hero.tsx` | **The Darshan film** (Beyond-style) — pinned three-act scroll hero: dawn first frame, night meeting day (nebula and ivory fallbacks) with the original Krishna avatar and the Sudarshan Chakra on his fingertip (headline, ask bar) → dive into the chakra with the universe visible through the wheel → whiteout → plasma burst → photographic galaxy (Vishwaroop). Scroll → CSS vars; still counterpart under reduced motion. |
 | `components/ThreePaths.tsx` | Karma / Jnana / Bhakti yoga as three tall framed cards, art above text, with a staggered gold-wipe reveal (verse link + hand the path to the chat). Follows the hero. |
 | `lib/darshan/avatarTrack.ts` | Per-frame fingertip offsets for the hero's looping avatar video (match-move), plus `sourceFrame()` to undo the ping-pong. |

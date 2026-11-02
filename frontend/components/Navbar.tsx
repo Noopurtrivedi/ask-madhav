@@ -108,11 +108,11 @@ export default function Navbar({ overlay = false }: Props) {
 
         {/* Desktop nav links */}
         <div className="hidden md:flex items-center gap-7">
+          <Link href="/gita" className={link}>The Gita</Link>
+          <Link href="/find" className={link}>Find a Verse</Link>
+          <Link href="/stories" className={link}>Stories</Link>
           <a href="/#paths" className={link}>Paths</a>
-          <a href="/#daily-verse" className={link}>Daily Wisdom</a>
-          <a href="/#chapters" className={link}>Chapters</a>
-          <a href="/#stories" className={link}>Stories</a>
-          <a href="/journal" className={link}>Journal</a>
+          <Link href="/journal" className={link}>Journal</Link>
           {whatsappEnabled && <a href="/whatsapp" className={link}>WhatsApp</a>}
         </div>
 
@@ -154,10 +154,11 @@ export default function Navbar({ overlay = false }: Props) {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-white/[0.07] bg-cosmos-deep/95 backdrop-blur-md px-6 py-6 flex flex-col gap-5 text-[0.95rem] text-moonlight/80">
+          <Link href="/gita" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">The Gita</Link>
+          <Link href="/find" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">Find a Verse</Link>
           <a href="/#paths" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">Walk a Path</a>
           <a href="/#daily-verse" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">Daily Wisdom</a>
-          <a href="/#chapters" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">18 Chapters</a>
-          <a href="/#stories" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">Stories</a>
+          <Link href="/stories" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">Stories</Link>
           <a href="/journal" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">Journal</a>
           {whatsappEnabled && (
             <a href="/whatsapp" onClick={() => setMenuOpen(false)} className="hover:text-gold-soft transition-colors">WhatsApp</a>

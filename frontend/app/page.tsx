@@ -37,9 +37,10 @@ const FOOTER_COLUMNS = [
     title: 'Explore',
     links: [
       { label: "Today's shloka", href: '/#daily-verse' },
-      { label: 'The 18 chapters', href: '/#chapters' },
+      { label: 'The 18 chapters', href: '/gita' },
+      { label: 'Find a verse', href: '/find' },
       { label: 'Popular verses', href: '/#popular' },
-      { label: 'Mahabharata stories', href: '/#stories' },
+      { label: 'Mahabharata stories', href: '/stories' },
     ],
   },
   {

@@ -211,6 +211,14 @@ export default function StoryCards() {
                       ? '■ Stop narration'
                       : '▶ Hear the story'}
                 </button>
+                {story.slug && (
+                  <Link
+                    href={`/stories/${story.slug}`}
+                    className="rounded-full border border-gold/24 px-3 py-1.5 text-xs text-moonlight/68 hover:border-gold/40 hover:text-gold-soft transition-colors"
+                  >
+                    Read the full page
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => askAboutFairness(story)}

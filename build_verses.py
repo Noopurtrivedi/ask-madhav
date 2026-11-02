@@ -151,10 +151,29 @@ def _strip_zw(t: str) -> str:
     return t.replace("﻿", "").replace("​", "").replace("‌", "").replace("‍", "")
 
 
+# The source lost every "qu" in some translations ("eanimity", "tranil").
+LOST_QU = {
+    "eally": "equally", "ality": "quality", "alities": "qualities", "acisition": "acquisition",
+    "eanimity": "equanimity", "alified": "qualified", "unalified": "unqualified",
+    "eipoised": "equipoised", "acire": "acquire", "acires": "acquires", "acired": "acquired",
+    "aciring": "acquiring", "tranil": "tranquil", "tranillity": "tranquillity",
+    "conseence": "consequence", "conseences": "consequences", "unconered": "unconquered",
+    "estion": "question", "conest": "conquest", "coneror": "conqueror", "ickly": "quickly",
+    "reiring": "requiring", "iniry": "inquiry", "relinish": "relinquish", "eal": "equal", "ite": "quite",
+}
+_LOST_QU_RE = re.compile(r"\b(" + "|".join(sorted(LOST_QU, key=len, reverse=True)) + r")\b", re.I)
+
+
+def _restore_qu(m: re.Match) -> str:
+    word = LOST_QU[m.group(0).lower()]
+    return word.capitalize() if m.group(0)[0].isupper() else word
+
+
 def strip_english(t: str) -> str:
     # "English Translation By Swami Gambirananda 2.47 <text>"
     t = _strip_zw(t)
     t = re.sub(r"^\s*English Translation By .*?\b\d{1,2}\.\d{1,3}\s*", "", t)
+    t = _LOST_QU_RE.sub(_restore_qu, t).replace("d arred", "debarred")
     return re.sub(r"\s+", " ", t).strip()
 
 

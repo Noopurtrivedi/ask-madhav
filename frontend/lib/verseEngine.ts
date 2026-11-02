@@ -32,6 +32,8 @@ export interface Story {
   narration?: string
   lesson?: string
   gita_refs?: { ref: string; line: string }[]
+  slug: string
+  reflection: string
 }
 
 export interface VerseCard {

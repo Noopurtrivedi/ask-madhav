@@ -26,6 +26,8 @@ export interface Story {
   lesson?: string
   /** Gita verses that anchor the story's teaching. */
   gita_refs?: { ref: string; line: string }[]
+  slug?: string
+  reflection?: string
 }
 
 export interface VerseCard {

@@ -1562,3 +1562,128 @@ html[data-hero-covers] .offerings { opacity: 0; }
   filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.5));
 }
 @media (max-width: 767px) { .offering { scale: 0.7; opacity: 0.5 !important; } }
+
+/* The Gita reader (/gita, /gita/[chapter]), stories and Find a Verse (/find). */
+.story-chip {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(232, 195, 90, 0.22);
+  border-radius: 9999px;
+  color: rgba(246, 241, 228, 0.75);
+  font-size: 0.85rem;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.story-chip:hover { border-color: rgba(232, 195, 90, 0.6); }
+.story-chip[aria-pressed='true'] { border-color: rgb(232, 195, 90); background: rgba(232, 195, 90, 0.16); color: rgb(232, 195, 90); }
+.library-resume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(232, 195, 90, 0.35);
+  border-radius: 1rem;
+  background: rgba(232, 195, 90, 0.07);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.library-resume:hover { border-color: rgba(232, 195, 90, 0.7); transform: translateY(-1px); }
+.library-input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(232, 195, 90, 0.2);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgb(246, 241, 228);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.library-input::placeholder { color: rgba(246, 241, 228, 0.42); }
+.library-input:focus { border-color: rgba(232, 195, 90, 0.65); }
+.library-card {
+  display: block;
+  padding: 1.35rem;
+  border: 1px solid rgba(232, 195, 90, 0.15);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.025);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+.library-card:hover { border-color: rgba(232, 195, 90, 0.5); background: rgba(232, 195, 90, 0.05); transform: translateY(-3px); }
+.reader-tools {
+  position: sticky;
+  top: 74px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.6rem;
+  border: 1px solid rgba(232, 195, 90, 0.15);
+  border-radius: 9999px;
+  background: #05070C;
+}
+.reader-segment { display: inline-flex; gap: 0.15rem; }
+.reader-segment button,
+.reader-toggle {
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  color: rgba(246, 241, 228, 0.65);
+  font-size: 0.8rem;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+.reader-segment button:hover,
+.reader-toggle:hover { color: rgb(246, 241, 228); }
+.reader-segment button[aria-pressed='true'],
+.reader-toggle[aria-pressed='true'] { background: rgba(232, 195, 90, 0.16); color: rgb(232, 195, 90); }
+.reader-verse {
+  padding: 1.5rem;
+  border: 1px solid rgba(232, 195, 90, 0.13);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.025);
+  scroll-margin-top: 150px;
+  transition: border-color 0.25s ease, opacity 0.25s ease;
+}
+.reader-verse:target { border-color: rgba(232, 195, 90, 0.6); }
+.reader-verse-read { border-color: rgba(232, 195, 90, 0.3); }
+.reader-practice { margin-top: 1rem; }
+.reader-practice summary { cursor: pointer; color: rgb(232, 195, 90); font-size: 0.85rem; }
+.reader-practice p { margin-top: 0.5rem; padding-left: 1rem; border-left: 2px solid rgba(232, 195, 90, 0.35); color: rgba(246, 241, 228, 0.8); line-height: 1.6; }
+.reader-mark { display: inline-flex; align-items: center; gap: 0.35rem; color: rgba(246, 241, 228, 0.6); transition: color 0.2s ease; }
+.reader-mark:hover,
+.reader-mark[aria-pressed='true'] { color: rgb(232, 195, 90); }
+.reader-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+.reader-page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  color: rgba(246, 241, 228, 0.7);
+  font-size: 0.85rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.reader-page:hover { background: rgba(232, 195, 90, 0.12); color: rgb(246, 241, 228); }
+.reader-page[aria-current='page'] { background: rgb(232, 195, 90); color: #1A1206; font-weight: 700; }
+.feeling-chip {
+  padding: 0.55rem 1.05rem;
+  border: 1px solid rgba(232, 195, 90, 0.25);
+  border-radius: 9999px;
+  color: rgba(246, 241, 228, 0.8);
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.feeling-chip:hover { border-color: rgba(232, 195, 90, 0.65); color: rgb(246, 241, 228); }
+.feeling-chip[aria-current='true'] { border-color: rgb(232, 195, 90); background: rgba(232, 195, 90, 0.16); color: rgb(232, 195, 90); }
+.find-verse { animation: find-verse-in 0.45s ease both; }
+@keyframes find-verse-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .find-verse { animation: none; }
+  .library-card:hover, .library-resume:hover { transform: none; }
+}
