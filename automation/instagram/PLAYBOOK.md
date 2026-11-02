@@ -6,7 +6,7 @@ The daily cloud routine follows this file. It publishes to `@askmadhav_world` th
 
 1. Set up: `git fetch origin claude/ig-media` and read `log.json` from that branch, which records past posts. Run `npm ci` here.
 2. Skip the run if the log shows a post in the last 20 hours. `publish.mjs` refuses this too.
-3. Feedback: `GET /{user_id}/media?fields=caption,like_count,comments_count,permalink,timestamp` on graph.instagram.com, and note what did well. Never reply to comments or send DMs.
+3. Feedback: `GET /17841435472946983/media?fields=caption,like_count,comments_count,permalink,timestamp` on graph.instagram.com or graph.facebook.com, and note what did well. Never reply to comments or send DMs.
 4. Choose today's post (see Mix).
 5. Fact-check it (see Accuracy). Save what you checked and where for the report.
 6. Make a new picture in Canva and export it full size. If Canva isn't available, stop and say so. Never reuse or stock-source a picture.
