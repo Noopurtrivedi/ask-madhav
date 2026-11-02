@@ -174,6 +174,9 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `WHATSAPP_SETUP.md` | WhatsApp Cloud API channel setup (env-var names + Meta dashboard steps; no real values). |
 | `docs/DEFERRED_CHANGES.md` | Notes on a deferred "retrieval confidence" feature archived as a patch, not shipped. |
 | `push_to_github.sh`, `fix_and_push.sh` | One-off git helper scripts. |
+| `automation/instagram/PLAYBOOK.md` | Rules the daily cloud routine follows for `@askmadhav_world`: mix, look, accuracy checks, safety. |
+| `automation/instagram/render.mjs` | Renders theme carousels and panchang event cards to 1080x1350 JPEGs in a headless browser. |
+| `automation/instagram/publish.mjs` | Publishes one post through the Instagram API, with account and one-a-day guards. Token is a cloud network secret, never in the repo. |
 
 ---
 
