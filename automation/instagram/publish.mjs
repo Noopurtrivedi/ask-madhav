@@ -2,7 +2,7 @@
 /**
  * Publishes one Instagram post through the Instagram API with Instagram Login.
  *
- *   node publish.mjs --urls <jpg,jpg,...> --caption-file caption.txt [--dry-run]
+ *   NODE_USE_ENV_PROXY=1 node publish.mjs --urls <jpg,jpg,...> --caption-file caption.txt [--dry-run]
  *
  * One URL makes a single image post; two or more make a carousel. Media must be
  * public JPEG URLs, because Meta fetches them itself.
@@ -17,7 +17,7 @@
 import { readFileSync } from 'node:fs'
 
 // Unified login tokens may belong to either host, so run() finds the one that works.
-const HOSTS = ['https://graph.instagram.com/v23.0', 'https://graph.facebook.com/v23.0']
+const HOSTS = ['https://graph.facebook.com/v23.0', 'https://graph.instagram.com/v23.0']
 const EXPECTED_USERNAME = 'askmadhav_world'
 const IG_ID = '17841435472946983'
 const MIN_GAP_HOURS = 20

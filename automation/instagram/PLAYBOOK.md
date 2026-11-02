@@ -6,13 +6,13 @@ The daily cloud routine follows this file. It publishes to `@askmadhav_world` th
 
 1. Set up: `git fetch origin claude/ig-media` and read `log.json` from that branch, which records past posts. Run `npm ci` here.
 2. Skip the run if the log shows a post in the last 20 hours. `publish.mjs` refuses this too.
-3. Feedback: `GET /17841435472946983/media?fields=caption,like_count,comments_count,permalink,timestamp` on graph.instagram.com or graph.facebook.com, and note what did well. Never reply to comments or send DMs.
+3. Feedback: `GET /17841435472946983/media?fields=caption,like_count,comments_count,permalink,timestamp` on graph.facebook.com, and note what did well. Never reply to comments or send DMs.
 4. Choose today's post (see Mix).
 5. Fact-check it (see Accuracy). Save what you checked and where for the report.
-6. Make a new picture in Canva and export it full size. If Canva isn't available, stop and say so. Never reuse or stock-source a picture.
+6. Make a new picture in Canva: `generate-image`, then `create-design` with that media id and a brief asking for a plain full-bleed image with no added text, then `export-design` as JPG, then download the URL with curl into `art.jpg`. Look at the result: it should be about 1080x1350 and be the same picture, with nothing added. The file `generate-image` returns is only a 161x200 preview, so never use it. If Canva isn't available, stop and say so. Never reuse or stock-source a picture.
 7. Write `spec.json`, run `node render.mjs spec.json out`, then look at every slide.
 8. Commit the JPEGs to `claude/ig-media` under `<date>/`, append to `log.json`, push. Public URL: `https://raw.githubusercontent.com/Noopurtrivedi/ask-madhav/claude/ig-media/<date>/<n>.jpg`
-9. `node publish.mjs --urls <urls> --caption-file caption.txt --dry-run`, then the same without `--dry-run`.
+9. `NODE_USE_ENV_PROXY=1 node publish.mjs --urls <urls> --caption-file caption.txt --dry-run`, then the same without `--dry-run`. Without that variable Node can't reach Meta from a cloud session. Ignore its experimental warning.
 10. Report: what went out with the link, what was checked, what the feedback showed, and anything the owner must do.
 
 ## Mix
@@ -42,6 +42,7 @@ The daily cloud routine follows this file. It publishes to `@askmadhav_world` th
 - Every verse post carries Sanskrit, Hindi and English. Use your own close renderings, faithful to the translators on that page.
 - Quotes attributed to Krishna must be real verses, never invented lines.
 - Check panchang dates on Drik Panchang for both New Delhi (geoname-id 1261481) and Los Angeles (5368361). If they differ, show both.
+- Drik Panchang can block curl from cloud sessions, so read it with WebFetch at `https://www.drikpanchang.com/vrats/ekadashidates.html?geoname-id=<id>`. If you still can't confirm a date on Drik Panchang itself, don't publish that event post. Post a theme carousel with no dates instead and say so in the report.
 
 Panchang honesty:
 
