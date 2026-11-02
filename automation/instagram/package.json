@@ -5,9 +5,11 @@
   "description": "Renders and publishes Ask Madhav Instagram posts. See PLAYBOOK.md.",
   "scripts": {
     "render": "node render.mjs",
-    "publish": "node publish.mjs"
+    "publish": "node publish.mjs",
+    "video": "node video.mjs"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "1.1.0",
     "@fontsource/dm-sans": "5.2.5",
     "@fontsource/noto-serif-devanagari": "5.2.5",
     "@fontsource/playfair-display": "5.2.5",

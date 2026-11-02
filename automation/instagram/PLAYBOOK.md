@@ -10,18 +10,20 @@ The daily cloud routine follows this file. It publishes to `@askmadhav_world` th
 4. Choose today's post (see Mix).
 5. Fact-check it (see Accuracy). Save what you checked and where for the report.
 6. Make a new picture in Canva: `generate-image`, then `create-design` with that media id and a brief asking for a plain full-bleed image with no added text, then `export-design` as JPG, then download the URL with curl into `art.jpg`. Look at the result: it should be about 1080x1350 and be the same picture, with nothing added. The file `generate-image` returns is only a 161x200 preview, so never use it. If Canva isn't available, stop and say so. Never reuse or stock-source a picture.
-7. Write `spec.json`, run `node render.mjs spec.json out`, then look at every slide.
-8. Commit the JPEGs to `claude/ig-media` under `<date>/`, append to `log.json`, push. Public URL: `https://raw.githubusercontent.com/Noopurtrivedi/ask-madhav/claude/ig-media/<date>/<n>.jpg`
-9. `NODE_USE_ENV_PROXY=1 node publish.mjs --urls <urls> --caption-file caption.txt --dry-run`, then the same without `--dry-run`. Without that variable Node can't reach Meta from a cloud session. Ignore its experimental warning.
+7. Write `spec.json`, run `node render.mjs spec.json out` for cards or `node video.mjs spec.json out` for video, then look at every slide or frame.
+8. Commit the JPEGs and MP4s to `claude/ig-media` under `<date>/`, append to `log.json`, push. Public URL: `https://raw.githubusercontent.com/Noopurtrivedi/ask-madhav/claude/ig-media/<date>/<n>.jpg`
+9. Carousel: `NODE_USE_ENV_PROXY=1 node publish.mjs --urls <urls> --caption-file caption.txt --dry-run`, then the same without `--dry-run`. Reel: `--reel <mp4 url> --cover <jpg url> --caption-file caption.txt`. Story: `--story <mp4 url>`. Without that variable Node can't reach Meta from a cloud session. Ignore its experimental warning.
 10. Report: what went out with the link, what was checked, what the feedback showed, and anything the owner must do.
 
 ## Mix
 
-- At most one post a day.
-- Default: a "Krishna Says to Arjun" carousel (`kind: theme`). Three slides: quote, full verse, one try today.
+- Each day: at most one grid item (a carousel or a reel) and one story. Stories never appear on the grid.
+- Grid plan: 3 or 4 carousels and 2 or 3 reels a week, never two reels in a row.
+- Default carousel: "Krishna Says to Arjun" (`kind: theme`). Three slides: quote, full verse, one try today.
+- Reel: 15 seconds, made with `video.mjs`. Four beats: a hook, the turn, the Sanskrit and Hindi, the English with its reference. Always include a `cover`, so the grid tile shows words.
+- Story: 8 to 10 seconds, made with `video.mjs`, `kind: story`. Use it for a panchang reminder with both dates when an event is within 3 days, otherwise one verse line from today's post with its reference. A story gets its own new picture.
 - Panchang events: within 2 days before an Ekadashi, Purnima, Amavasya or major festival, use a vivid Krishna close-up (`kind: event`) instead. Don't run more than a couple of these in a row.
 - Never repeat a verse or a picture subject in `log.json`.
-- Reels and stories aren't automated yet.
 
 ## Look
 
@@ -29,6 +31,8 @@ The daily cloud routine follows this file. It publishes to `@askmadhav_world` th
 - Radiant, varied colour, a different sky every post. No gold-and-navy cards, and no yellow cast across everything.
 - No big blank areas. Words and figures should fill the frame and survive the grid crop.
 - Never copy a reference image.
+- Vertical pictures: ask Canva for `PORTRAIT_9_16`, then `create-design` as an Instagram Reel or Story and export a JPG 1080 wide.
+- Words must never cross a face. Set `textAt` to about 72 for a close-up with the face in the upper half, or about 33 for a low silhouette. Extract frames with ffmpeg and look at them before publishing.
 - Canva prompt must say: no text, no lettering, no disc, no weapons raised. For close-ups: shoulders up, no hands.
 
 ## Krishna imagery

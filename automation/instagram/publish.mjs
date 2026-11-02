@@ -4,8 +4,12 @@
  *
  *   NODE_USE_ENV_PROXY=1 node publish.mjs --urls <jpg,jpg,...> --caption-file caption.txt [--dry-run]
  *
+ *   ... --reel <mp4> --cover <jpg> --caption-file caption.txt
+ *   ... --story <mp4 or jpg>
+ *
  * One URL makes a single image post; two or more make a carousel. Media must be
- * public JPEG URLs, because Meta fetches them itself.
+ * public URLs, because Meta fetches them itself. --container-only runs everything
+ * except the publish step, so it proves Meta can process a file without posting.
  *
  * The token is a network secret on graph.instagram.com and graph.facebook.com, so
  * in a cloud session the proxy adds it and this script never sees it. IG_ACCESS_TOKEN is only for a
@@ -23,14 +27,18 @@ const IG_ID = '17841435472946983'
 const MIN_GAP_HOURS = 20
 const MAX_CAPTION = 2200
 const POLL_MS = 15_000
-const POLL_TRIES = 20 // Meta asks for no more than about 5 minutes of polling.
+const POLL_TRIES = 20 // Meta asks for about 5 minutes of polling at most.
 
 function args(argv) {
   const out = {}
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i]
     if (a === '--dry-run') out.dryRun = true
+    else if (a === '--container-only') out.containerOnly = true
     else if (a === '--urls') out.urls = argv[++i]
+    else if (a === '--reel') out.reel = argv[++i]
+    else if (a === '--cover') out.cover = argv[++i]
+    else if (a === '--story') out.story = argv[++i]
     else if (a === '--caption-file') out.captionFile = argv[++i]
     else throw new Error(`Unknown argument: ${a}`)
   }
@@ -60,94 +68,118 @@ async function call(method, path, params) {
   return body
 }
 
-async function assertPublicJpeg(url) {
+async function assertPublicMedia(url) {
   if (!/^https:\/\//.test(url)) throw new Error(`Not an https URL: ${url}`)
   const res = await fetch(url, { method: 'HEAD' })
   const type = res.headers.get('content-type') ?? ''
-  if (!res.ok || !/image\/jpe?g/.test(type)) {
-    throw new Error(`Meta can't use ${url}: status ${res.status}, type "${type}"`)
-  }
+  // GitHub serves mp4 as application/octet-stream, which Meta accepts by content.
+  const ok = /\.mp4$/.test(new URL(url).pathname)
+    ? /video\/mp4|octet-stream/.test(type)
+    : /image\/jpe?g/.test(type)
+  if (!res.ok || !ok) throw new Error(`Meta can't use ${url}: status ${res.status}, type "${type}"`)
 }
 
 async function waitUntilReady(id) {
   for (let i = 0; i < POLL_TRIES; i++) {
-    const { status_code: status } = await call('GET', `/${id}`, { fields: 'status_code' })
+    const { status_code: status, status: detail } = await call('GET', `/${id}`, { fields: 'status_code,status' })
     if (status === 'FINISHED') return
-    if (status === 'ERROR' || status === 'EXPIRED') throw new Error(`Container ${id} is ${status}`)
+    if (status === 'ERROR' || status === 'EXPIRED') throw new Error(`Container ${id} is ${status}: ${detail ?? 'no detail'}`)
     await new Promise((r) => setTimeout(r, POLL_MS))
   }
   throw new Error(`Container ${id} wasn't ready in time`)
 }
 
-async function main() {
-  const opts = args(process.argv.slice(2))
-  const urls = (opts.urls ?? '').split(',').map((u) => u.trim()).filter(Boolean)
-  if (urls.length < 1 || urls.length > 20) throw new Error('Pass 1 to 20 URLs with --urls')
-  if (!opts.captionFile) throw new Error('Pass --caption-file')
-  const caption = readFileSync(opts.captionFile, 'utf8').trim()
-  if (!caption || caption.length > MAX_CAPTION) throw new Error('Caption is empty or too long')
+async function hoursSinceLatest(edge) {
+  const latest = await call('GET', `/${IG_ID}/${edge}`, { fields: 'timestamp', limit: '1' })
+  const last = latest.data?.[0]?.timestamp
+  return last ? (Date.now() - new Date(last).getTime()) / 3_600_000 : Infinity
+}
 
-  await Promise.all(urls.map(assertPublicJpeg))
-
-  let me
+async function connect() {
   let lastError
   for (const host of HOSTS) {
     api = host
     try {
-      me = await call('GET', `/${IG_ID}`, { fields: 'username' })
-      break
+      const me = await call('GET', `/${IG_ID}`, { fields: 'username' })
+      if (me.username !== EXPECTED_USERNAME) {
+        throw new Error(`Connected to @${me.username}, expected @${EXPECTED_USERNAME}`)
+      }
+      return me
     } catch (err) {
       lastError = err
     }
   }
-  if (!me) throw lastError
-  if (me.username !== EXPECTED_USERNAME) {
-    throw new Error(`Connected to @${me.username}, expected @${EXPECTED_USERNAME}`)
+  throw lastError
+}
+
+/** Builds the container for the requested kind and returns its id. */
+async function createContainer(opts, caption) {
+  const media = (fields) => call('POST', `/${IG_ID}/media`, fields).then((c) => c.id)
+  if (opts.reel) {
+    const fields = { media_type: 'REELS', video_url: opts.reel, caption, share_to_feed: 'true', is_ai_generated: 'true' }
+    if (opts.cover) fields.cover_url = opts.cover
+    return media(fields)
+  }
+  if (opts.story) {
+    const key = /\.mp4$/.test(new URL(opts.story).pathname) ? 'video_url' : 'image_url'
+    return media({ media_type: 'STORIES', [key]: opts.story, is_ai_generated: 'true' })
+  }
+  if (opts.urls.length === 1) {
+    return media({ image_url: opts.urls[0], caption, is_ai_generated: 'true' })
+  }
+  const children = []
+  for (const image_url of opts.urls) {
+    // The AI flag goes on the carousel only; Meta errors if a child has it.
+    const id = await media({ image_url, is_carousel_item: 'true' })
+    await waitUntilReady(id)
+    children.push(id)
+  }
+  return media({ media_type: 'CAROUSEL', children: children.join(','), caption, is_ai_generated: 'true' })
+}
+
+async function main() {
+  const opts = args(process.argv.slice(2))
+  opts.urls = (opts.urls ?? '').split(',').map((u) => u.trim()).filter(Boolean)
+  const kinds = [opts.urls.length > 0, Boolean(opts.reel), Boolean(opts.story)].filter(Boolean).length
+  if (kinds !== 1) throw new Error('Pass exactly one of --urls, --reel or --story')
+  if (opts.urls.length > 20) throw new Error('At most 20 URLs')
+
+  const needsCaption = !opts.story
+  let caption = ''
+  if (needsCaption) {
+    if (!opts.captionFile) throw new Error('Pass --caption-file')
+    caption = readFileSync(opts.captionFile, 'utf8').trim()
+    if (!caption || caption.length > MAX_CAPTION) throw new Error('Caption is empty or too long')
   }
 
-  const latest = await call('GET', `/${IG_ID}/media`, { fields: 'timestamp', limit: '1' })
-  const last = latest.data?.[0]?.timestamp
-  if (last) {
-    const hours = (Date.now() - new Date(last).getTime()) / 3_600_000
-    if (hours < MIN_GAP_HOURS) {
-      throw new Error(`Last post was ${hours.toFixed(1)}h ago, under the ${MIN_GAP_HOURS}h gap`)
-    }
+  const media = [...opts.urls, opts.reel, opts.cover, opts.story].filter(Boolean)
+  await Promise.all(media.map(assertPublicMedia))
+
+  const me = await connect()
+
+  // Stories sit outside the grid, so they have their own one-a-day guard.
+  const hours = await hoursSinceLatest(opts.story ? 'stories' : 'media')
+  if (hours < MIN_GAP_HOURS && !opts.containerOnly) {
+    throw new Error(`Last ${opts.story ? 'story' : 'post'} was ${hours.toFixed(1)}h ago, under the ${MIN_GAP_HOURS}h gap`)
   }
 
   if (opts.dryRun) {
-    console.log(`Dry run OK: @${me.username}, ${urls.length} image(s), caption ${caption.length} chars`)
+    console.log(`Dry run OK: @${me.username}, ${media.length} file(s), caption ${caption.length} chars`)
     return
   }
 
-  let creationId
-  if (urls.length === 1) {
-    const c = await call('POST', `/${IG_ID}/media`, {
-      image_url: urls[0],
-      caption,
-      is_ai_generated: 'true',
-    })
-    creationId = c.id
-  } else {
-    const children = []
-    for (const image_url of urls) {
-      // The AI flag goes on the carousel only; Meta errors if a child has it.
-      const c = await call('POST', `/${IG_ID}/media`, { image_url, is_carousel_item: 'true' })
-      await waitUntilReady(c.id)
-      children.push(c.id)
-    }
-    const c = await call('POST', `/${IG_ID}/media`, {
-      media_type: 'CAROUSEL',
-      children: children.join(','),
-      caption,
-      is_ai_generated: 'true',
-    })
-    creationId = c.id
+  const creationId = await createContainer(opts, caption)
+  await waitUntilReady(creationId)
+
+  // Meta accepted and processed the media, and an unpublished container just expires.
+  if (opts.containerOnly) {
+    console.log(`Container ${creationId} is ready. Nothing was published.`)
+    return
   }
 
-  await waitUntilReady(creationId)
   const { id } = await call('POST', `/${IG_ID}/media_publish`, { creation_id: creationId })
   const { permalink } = await call('GET', `/${id}`, { fields: 'permalink' })
-  console.log(`Published ${id}: ${permalink}`)
+  console.log(`Published ${id}: ${permalink ?? '(stories have no permalink)'}`)
 }
 
 main().catch((err) => {
