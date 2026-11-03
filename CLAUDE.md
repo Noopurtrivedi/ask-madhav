@@ -118,6 +118,7 @@ A FastAPI + Django hybrid (`backend/main.py` is FastAPI; `backend/askmadhav/` + 
 | `NEXT_PUBLIC_SITE_URL` | Absolute share/OG URLs. |
 | `FACTCHECK_SECRET` | Bearer secret for `/api/factcheck`; the same value is a network secret on the Instagram routine's cloud environment for `www.askmadhav.world`. Absent → the gate refuses everything. |
 | `FACTCHECK_MODEL` | Optional override for the fact-check model. Absent → `gemini-3.5-flash-lite`. |
+| `IG_IMAGE_MODEL` | Optional override for `/api/ig-image`, the routine's fallback picture source when Canva fails. Absent → `imagen-4.0-generate-001` ($0.04 per image). |
 
 ## Deploy
 

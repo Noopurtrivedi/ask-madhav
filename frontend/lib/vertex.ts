@@ -52,6 +52,35 @@ function endpoint(model: string): string {
 }
 
 /**
+ * Calls a Vertex `:predict` model such as Imagen. Returns the parsed response,
+ * or null on any failure, matching vertexGenerateContent's fail-soft contract.
+ */
+export async function vertexPredict(model: string, body: unknown, timeoutMs = 60000): Promise<unknown | null> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const token = await getAuth().getAccessToken()
+    if (!token) return null
+    const res = await fetch(endpoint(model).replace(/:generateContent$/, ':predict'), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      console.error('Vertex predict error', res.status, await res.text().catch(() => ''))
+      return null
+    }
+    return await res.json()
+  } catch (err) {
+    console.error('Vertex predict failed', err)
+    return null
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+/**
  * Calls Vertex generateContent with the same request body shape the Gemini API
  * accepts (contents / systemInstruction / generationConfig / safetySettings).
  * Returns the parsed response JSON, or null on any failure/timeout so the

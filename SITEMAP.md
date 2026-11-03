@@ -38,6 +38,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 | `api/verse-insight/route.ts` | "Go deeper" endpoint — per-verse structured deep-dive via `lib/verseInsight.ts`; CDN-cached a day; never hard-fails (template fallback). |
 | `api/factcheck/route.ts` | Autonomous gate for Instagram posts: deterministic checks, then Gemini on Vertex scores credibility and trend; publishes only at 90+ on both. Bearer `FACTCHECK_SECRET`. |
 | `api/factcheck/verify/route.ts` | Confirms a signed verdict still matches the exact caption and media before `publish.mjs` posts. |
+| `api/ig-image/route.ts` | Fallback picture source for the Instagram routine: one Imagen 4 JPEG on Vertex ($0.04 each), bearer `FACTCHECK_SECRET`, rate-limited. |
 | `api/og/route.tsx` | Generates a shareable Wisdom Card PNG via `next/og`. `?ref=` → verse card; `?quote=&q=` → conversation/quote card (Madhav's line + the question). Brand-styled (Playfair/DM Sans/Cinzel TTFs fetched from Google once per instance, falls back to serif). `runtime=nodejs`. |
 | `api/subscribe/route.ts` | Daily Ritual email sign-up (writes subscriber to Supabase). |
 | `api/unsubscribe/route.ts` | Daily Ritual unsubscribe (GET link from email). |
@@ -48,7 +49,7 @@ The live application is everything under `frontend/`. The repo root holds data-g
 |---|---|
 | `lib/verseEngine.ts` | **Keyword/theme retrieval engine** (TS port of the Python original). In-memory index, scoring, template answer, daily/lookup helpers, disclaimer. |
 | `lib/gemini.ts` | Gemini RAG layer — `SYSTEM_INSTRUCTION` (Madhav persona), context builder, `generateGuidance()`. Prefers Vertex (via `lib/vertex.ts`) when configured, else the Gemini API key; returns null when neither is set / on failure. |
-| `lib/vertex.ts` | Vertex AI transport — service-account OAuth (`google-auth-library`) + `vertexGenerateContent()` against the aiplatform endpoint. `isVertexConfigured()` gates it; spends GCP Vertex credits. Returns null on failure so chat falls back. |
+| `lib/vertex.ts` | Vertex AI transport — service-account OAuth (`google-auth-library`) + `vertexGenerateContent()` against the aiplatform endpoint. `isVertexConfigured()` gates it; spends GCP Vertex credits. Returns null on failure so chat falls back. Also `vertexPredict()` for `:predict` models such as Imagen. |
 | `lib/factcheck/rules.ts` | Deterministic post checks: verse text vs `data/verses.json`, Hindi and English present, banned health claims, house style, fasting safety line, media count and host. |
 | `lib/factcheck/sources.ts` | Live checks: Sanskrit against heritage.iitk.ac.in/SBG (each half-verse), festival dates against Drik Panchang. Unreachable source = fail. |
 | `lib/factcheck/judge.ts` | Gemini 3.5 Flash-Lite on Vertex: grounded trend context, then strict-JSON credibility and trend sub-scores (totals summed in code). |
