@@ -40,6 +40,7 @@ The `answerQuestion()` helper in `lib/guidance.ts` is the single, shared embodim
 - `GET/POST /api/whatsapp` — WhatsApp channel webhook (Meta Cloud API). GET = Meta's verification handshake; POST = inbound messages → signature check → message-id dedup → command/greeting handling → `answerQuestion()` → reply + a grounding-verse follow-up. Always returns 200 (so Meta doesn't retry); per-phone rate limited; conversation memory + dedup via Upstash Redis (fail-open → stateless without it). Env-gated by `WHATSAPP_*`. Full setup in [`WHATSAPP_SETUP.md`](./WHATSAPP_SETUP.md). **Memory roadmap:** Upstash Redis now → Supabase Postgres when traffic grows.
 - `GET /api/daily-verse` — day-of-year rotating verse.
 - `GET /api/verse-insight?ref=2.47` — the "Go deeper" study companion for one verse (essence / dialogue context / modern analogy / practice / reflection). AI overlay (Vertex → Gemini) with a deterministic per-verse template fallback (`lib/verseInsight.ts`); AI results cached in-memory and the route is CDN-cached for a day. Never hard-fails.
+- `POST /api/factcheck` (+ `/verify`) — the autonomous gate for Instagram posts made by the daily cloud routine (`automation/instagram/` on branch `ig-autopost`). Code checks hard facts (verse text vs `data/verses.json` and IIT Kanpur, Drik Panchang dates, banned health claims, fasting safety line); Gemini 3.5 Flash-Lite on Vertex scores credibility and trend potential out of 100; the post publishes only when every hard check passes and both scores are 90+. Returns a signed verdict bound to the exact caption and media, which `publish.mjs` must verify before posting. Bearer `FACTCHECK_SECRET`; any error means block, never pass.
 - `GET /api/stories` — Mahabharata stories from `data/stories.json` (each story ships a short description **plus** a full hand-written `narration` sized for one TTS call, a `lesson`, and `gita_refs` verse anchors — StoryCards narrates via `lib/useTTS`: server Gemini voice → browser fallback).
 - `GET /api/og` — shareable Wisdom Card PNG via `next/og`. `?ref=` renders a verse card; `?quote=&q=` renders a conversation card (Madhav's line + the prompting question) — used by the chat's per-answer Share action.
 - `POST /api/subscribe` / `/api/unsubscribe` — Daily Ritual email sign-up (Supabase).
@@ -115,6 +116,8 @@ A FastAPI + Django hybrid (`backend/main.py` is FastAPI; `backend/askmadhav/` + 
 | `WHATSAPP_APP_SECRET` | Verify Meta's `X-Hub-Signature-256` (recommended for production). |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | E.164 digits (no `+`) for the `/whatsapp` QR + `wa.me` link. |
 | `NEXT_PUBLIC_SITE_URL` | Absolute share/OG URLs. |
+| `FACTCHECK_SECRET` | Bearer secret for `/api/factcheck`; the same value is a network secret on the Instagram routine's cloud environment for `www.askmadhav.world`. Absent → the gate refuses everything. |
+| `FACTCHECK_MODEL` | Optional override for the fact-check model. Absent → `gemini-3.5-flash-lite`. |
 
 ## Deploy
 
