@@ -5,15 +5,21 @@ The daily cloud routine follows this file. It publishes to `@askmadhav_world` th
 ## Daily run
 
 1. Set up: `git fetch origin claude/ig-media` and read `log.json` from that branch, which records past posts. Run `npm ci` here.
-2. Skip the run if the log shows a post in the last 20 hours. `publish.mjs` refuses this too.
+2. Skip the grid item if the log shows a grid post in the last 20 hours, and the story if it shows a story. `publish.mjs` refuses these too.
 3. Feedback: `GET /17841435472946983/media?fields=caption,like_count,comments_count,permalink,timestamp` on graph.facebook.com, and note what did well. Never reply to comments or send DMs.
 4. Choose today's post (see Mix).
 5. Fact-check it (see Accuracy). Save what you checked and where for the report.
 6. Make a new picture in Canva: `generate-image`, then `create-design` with that media id and a brief asking for a plain full-bleed image with no added text, then `export-design` as JPG, then download the URL with curl into `art.jpg`. Look at the result: it should be about 1080x1350 and be the same picture, with nothing added. The file `generate-image` returns is only a 161x200 preview, so never use it. If Canva isn't available, stop and say so. Never reuse or stock-source a picture.
 7. Write `spec.json`, run `node render.mjs spec.json out` for cards or `node video.mjs spec.json out` for video, then look at every slide or frame.
 8. Commit the JPEGs and MP4s to `claude/ig-media` under `<date>/`, append to `log.json`, push. Public URL: `https://raw.githubusercontent.com/Noopurtrivedi/ask-madhav/claude/ig-media/<date>/<n>.jpg`
-9. Carousel: `NODE_USE_ENV_PROXY=1 node publish.mjs --urls <urls> --caption-file caption.txt --dry-run`, then the same without `--dry-run`. Reel: `--reel <mp4 url> --cover <jpg url> --caption-file caption.txt`. Story: `--story <mp4 url>`. Without that variable Node can't reach Meta from a cloud session. Ignore its experimental warning.
-10. Report: what went out with the link, what was checked, what the feedback showed, and anything the owner must do.
+9. Fact check (independent, required). Write `draft.json` with the post exactly as it will go out: `kind`, `caption` (empty for a story), `media` (the public URLs in publish order: carousel slides, or the reel then its cover, or the story), `onImageText` (every word on the visuals), `verses` (ref, Sanskrit, Hindi, English as shown), `dates` (each date shown, with the Drik Panchang URL that confirms it, one entry per location), and `history` (your last 10 posts: date, kind, first line, likes, comments, saves, shares). Run `NODE_USE_ENV_PROXY=1 node factcheck.mjs draft.json --attempt 1`.
+   - `publish`: continue. The token is in `verdict.json`.
+   - `revise`: apply every listed fix, re-render if visuals change, re-commit the files, and check again with `--attempt 2`, then `--attempt 3`. Don't argue with the checker or remove facts to dodge a check.
+   - `block`: publish nothing for that item and report the scores and reasons.
+   Log every attempt (decision, scores, hard fails, fixes) to `factcheck-log.json` on `claude/ig-media`.
+10. Publish with the verdict: add `--verdict "$(node -p "require('./verdict.json').verdict")"` to the publish command. publish.mjs refuses without it. Carousel: `NODE_USE_ENV_PROXY=1 node publish.mjs --urls <urls> --caption-file caption.txt --dry-run`, then the same without `--dry-run`. Reel: `--reel <mp4 url> --cover <jpg url> --caption-file caption.txt`. Story: `--story <mp4 url>`. Without that variable Node can't reach Meta from a cloud session. Ignore its experimental warning.
+11. Learning loop: for posts from 2 to 7 days ago, read `GET /{media-id}/insights?metric=reach,saved,shares,likes,comments` and add the numbers next to their scores in `factcheck-log.json`. On Mondays, add a short note to the report: did higher trend scores get more reach and saves? Suggest rubric or threshold changes, but don't change them yourself.
+12. Report: what went out with the link, what was checked, what the feedback showed, and anything the owner must do.
 
 ## Mix
 

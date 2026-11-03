@@ -6,6 +6,7 @@
  *
  *   ... --reel <mp4> --cover <jpg> --caption-file caption.txt
  *   ... --story <mp4 or jpg>
+ *   Every real publish also needs --verdict <token> from factcheck.mjs.
  *
  * One URL makes a single image post; two or more make a carousel. Media must be
  * public URLs, because Meta fetches them itself. --container-only runs everything
@@ -26,6 +27,7 @@ const EXPECTED_USERNAME = 'askmadhav_world'
 const IG_ID = '17841435472946983'
 const MIN_GAP_HOURS = 20
 const MAX_CAPTION = 2200
+const VERIFY_URL = 'https://www.askmadhav.world/api/factcheck/verify'
 const POLL_MS = 15_000
 const POLL_TRIES = 20 // Meta asks for about 5 minutes of polling at most.
 
@@ -39,6 +41,7 @@ function args(argv) {
     else if (a === '--reel') out.reel = argv[++i]
     else if (a === '--cover') out.cover = argv[++i]
     else if (a === '--story') out.story = argv[++i]
+    else if (a === '--verdict') out.verdict = argv[++i]
     else if (a === '--caption-file') out.captionFile = argv[++i]
     else throw new Error(`Unknown argument: ${a}`)
   }
@@ -152,6 +155,7 @@ async function main() {
     if (!caption || caption.length > MAX_CAPTION) throw new Error('Caption is empty or too long')
   }
 
+  // Same order the fact checker hashed: carousel URLs, or reel then cover, or the story.
   const media = [...opts.urls, opts.reel, opts.cover, opts.story].filter(Boolean)
   await Promise.all(media.map(assertPublicMedia))
 
@@ -176,6 +180,15 @@ async function main() {
     console.log(`Container ${creationId} is ready. Nothing was published.`)
     return
   }
+
+  // The independent fact checker must have approved this exact caption and media.
+  if (!opts.verdict) throw new Error('No fact-check verdict. Run factcheck.mjs first; only a "publish" decision can post.')
+  const check = await fetch(VERIFY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(process.env.FACTCHECK_SECRET ? { Authorization: `Bearer ${process.env.FACTCHECK_SECRET}` } : {}) },
+    body: JSON.stringify({ token: opts.verdict, caption, media }),
+  }).then((r) => r.json()).catch(() => ({ ok: false, reason: 'Fact checker unreachable.' }))
+  if (!check.ok) throw new Error(`Fact-check verdict rejected: ${check.reason}`)
 
   const { id } = await call('POST', `/${IG_ID}/media_publish`, { creation_id: creationId })
   const { permalink } = await call('GET', `/${id}`, { fields: 'permalink' })
